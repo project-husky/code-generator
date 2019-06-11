@@ -18,10 +18,6 @@
 
 package org.ehealth_connector.codegenerator.valuesets;
 
-import static com.github.javaparser.JavaParser.parseClassOrInterfaceType;
-import static com.github.javaparser.ast.Modifier.FINAL;
-import static com.github.javaparser.ast.Modifier.PUBLIC;
-import static com.github.javaparser.ast.Modifier.STATIC;
 import static java.util.Arrays.asList;
 import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.DEFAULT_CHARSET;
 import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.VALUE_SET_CONCEPTS_PATH;
@@ -55,7 +51,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Modifier.Keyword;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.EnumConstantDeclaration;
@@ -68,6 +66,7 @@ import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.printer.PrettyPrinterConfiguration;
+import com.github.javaparser.printer.PrettyPrinterConfiguration.IndentType;
 import com.google.common.collect.ImmutableMap;
 import com.jayway.jsonpath.JsonPath;
 
@@ -103,7 +102,7 @@ public class UpdateValueSets {
 	 * write Java code.</div>
 	 */
 	private static final PrettyPrinterConfiguration PRETTY_PRINTER_CONFIGURATION = new PrettyPrinterConfiguration()
-			.setIndent("\t").setMaxEnumConstantsToAlignHorizontally(1);
+			.setIndentType(IndentType.TABS).setMaxEnumConstantsToAlignHorizontally(1);
 
 	/**
 	 * <div class="en">Relative path to the root of the maven project
@@ -114,7 +113,8 @@ public class UpdateValueSets {
 	/**
 	 * <div class="en">Shortcut for the internal type of a string.</div>
 	 */
-	private static final Type STRING_TYPE = parseClassOrInterfaceType("String");
+	private static final Type STRING_TYPE = com.github.javaparser.StaticJavaParser
+			.parseClassOrInterfaceType("String");
 
 	/**
 	 * <div class="en">Relative path where to find the Java template text
@@ -180,7 +180,7 @@ public class UpdateValueSets {
 
 			// the static final code field for each concept
 			enumType.addFieldWithInitializer(STRING_TYPE, enumConstantName + "_CODE",
-					new StringLiteralExpr(code), PUBLIC, STATIC, FINAL)
+					new StringLiteralExpr(code), Keyword.PUBLIC, Keyword.STATIC, Keyword.FINAL)
 					.setJavadocComment(javadocConstant.toString());
 		}
 	}
@@ -230,10 +230,11 @@ public class UpdateValueSets {
 				.replaceAll(TEMPLATE_NAME_TO_REPLACE, className)
 				.replaceAll(TEMPLATE_PACKAGE_NAME_TO_REPLACE, packageName);
 
-		CompilationUnit javaSource = JavaParser.parse(templateString);
+		ParseResult<CompilationUnit> javaSource = new JavaParser().parse(templateString);
 
 		FileUtils.write(getSourceFileName(baseJavaFolder, fullyQualifiedclassName),
-				javaSource.toString(PRETTY_PRINTER_CONFIGURATION), DEFAULT_CHARSET);
+				javaSource.getResult().get().toString(PRETTY_PRINTER_CONFIGURATION),
+				DEFAULT_CHARSET);
 
 	}
 
@@ -408,8 +409,10 @@ public class UpdateValueSets {
 			String className, Map<String, Object> valueSetDefinition)
 			throws IOException, IllegalStateException {
 
-		CompilationUnit javaSource = JavaParser.parse(getSourceFileName(baseJavaFolder, className));
-		TypeDeclaration<?> primaryType = loadPrimaryType(javaSource);
+		JavaParser javaParser = new JavaParser();
+		ParseResult<CompilationUnit> javaSource = javaParser
+				.parse(getSourceFileName(baseJavaFolder, className));
+		TypeDeclaration<?> primaryType = loadPrimaryType(javaSource.getResult().get());
 
 		if (primaryType.isTopLevelType() && primaryType.isEnumDeclaration()) {
 			EnumDeclaration enumType = ((EnumDeclaration) primaryType);
@@ -432,8 +435,8 @@ public class UpdateValueSets {
 			// add all members from template file
 			String templateString = FileUtils.readFileToString(new File(TEMPLATE_FILE_LOCATION))
 					.replaceAll(TEMPLATE_NAME_TO_REPLACE, enumType.getNameAsString());
-			CompilationUnit templateSource = JavaParser.parse(templateString);
-			TypeDeclaration<?> templateType = templateSource.getType(0);
+			ParseResult<CompilationUnit> templateSource = javaParser.parse(templateString);
+			TypeDeclaration<?> templateType = templateSource.getResult().get().getType(0);
 			templateType.getMembers().forEach(enumType::addMember);
 
 			// replace constant values and imports
@@ -441,8 +444,10 @@ public class UpdateValueSets {
 			replaceConstantValue(enumType, "VALUE_SET_NAME", codeSystemName);
 
 			// replace imports with those found in the template
-			new ArrayList<>(javaSource.getImports()).forEach(javaSource::remove);
-			templateSource.getImports().forEach(javaSource::addImport);
+			new ArrayList<>(javaSource.getResult().get().getImports())
+					.forEach(javaSource.getResult().get()::remove);
+			templateSource.getResult().get().getImports()
+					.forEach(javaSource.getResult().get()::addImport);
 
 			// @generated
 			AnnotationExpr generated = templateType.getAnnotationByClass(Generated.class).get();
@@ -459,6 +464,7 @@ public class UpdateValueSets {
 		}
 
 		FileUtils.write(getSourceFileName(baseJavaFolder, className),
-				javaSource.toString(PRETTY_PRINTER_CONFIGURATION), DEFAULT_CHARSET);
+				javaSource.getResult().get().toString(PRETTY_PRINTER_CONFIGURATION),
+				DEFAULT_CHARSET);
 	}
 }
