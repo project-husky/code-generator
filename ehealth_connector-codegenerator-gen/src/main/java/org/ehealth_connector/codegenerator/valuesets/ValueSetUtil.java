@@ -66,11 +66,11 @@ public final class ValueSetUtil {
 	 */
 	public static final String VALUE_SET_BASE_PATH = "$.valueSets[0].valueSet[0]";
 
-	/**
-	 * <div class="en">The JSONPath path to extract the concept definitions from
-	 * a value set object.</div>
-	 */
-	public static final String VALUE_SET_CONCEPTS_PATH = "$.conceptList[*].concept[*]";
+//	/**
+//	 * <div class="en">The JSONPath path to extract the concept definitions from
+//	 * a value set object.</div>
+//	 */
+//	public static final String VALUE_SET_CONCEPTS_PATH = "$.conceptList[*].concept[*]";
 
 	/**
 	 * <div class="en">Builds a Java compatible enum element name from a

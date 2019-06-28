@@ -18,10 +18,11 @@
 
 package org.ehealth_connector.codegenerator.valuesets;
 
+import static com.github.javaparser.ast.Modifier.finalModifier;
+import static com.github.javaparser.ast.Modifier.publicModifier;
+import static com.github.javaparser.ast.Modifier.staticModifier;
 import static java.util.Arrays.asList;
 import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.DEFAULT_CHARSET;
-import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.buildEnumName;
-import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.getDisplayName;
 import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.getSourceFileName;
 import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.loadPrimaryType;
 import static org.ehealth_connector.common.enums.LanguageCode.ENGLISH;
@@ -45,13 +46,13 @@ import org.ehealth_connector.valueset.api.ValueSetPackageManager;
 import org.ehealth_connector.valueset.config.ValueSetConfig;
 import org.ehealth_connector.valueset.config.ValueSetPackageConfig;
 import org.ehealth_connector.valueset.model.ValueSet;
+import org.ehealth_connector.valueset.model.ValueSetEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Modifier.Keyword;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.EnumConstantDeclaration;
@@ -66,7 +67,6 @@ import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.printer.PrettyPrinterConfiguration;
 import com.github.javaparser.printer.PrettyPrinterConfiguration.IndentType;
 import com.google.common.collect.ImmutableMap;
-import com.jayway.jsonpath.JsonPath;
 
 /**
  * <div class="en">This class generates the CH-EPR value sets from the
@@ -145,13 +145,15 @@ public class UpdateValueSets {
 	 * @param concepts
 	 *            The concepts from the value set definition file.
 	 */
-	private static void addEnumElements(EnumDeclaration enumType,
-			List<Map<String, Object>> concepts) {
-		for (Map<String, Object> concept : concepts) {
+	private static void addEnumElements(EnumDeclaration enumType, ValueSet valueSet) {
 
-			String enumConstantName = buildEnumName(getDisplayName(ENGLISH, concept));
-			String code = concept.get("code").toString();
-			String codeSystem = concept.get("codeSystem").toString();
+		for (ValueSetEntry valueSetEntry : valueSet.listValueSetEntries()) {
+
+			String enumConstantName = ValueSetUtil
+					.buildEnumName(valueSetEntry.getCodeBaseType().getDisplayName());
+			String code = valueSetEntry.getCodeBaseType().getCode();
+			String codeSystem = valueSetEntry.getCodeBaseType().getCodeSystem();
+			String displayName = valueSetEntry.getCodeBaseType().getDisplayName();
 
 			NodeList<Expression> values = new NodeList<>();
 			StringBuilder javadocEnum = new StringBuilder();
@@ -159,17 +161,21 @@ public class UpdateValueSets {
 
 			values.add(new StringLiteralExpr(code));
 			values.add(new StringLiteralExpr(codeSystem));
-			values.add(new StringLiteralExpr(concept.get("displayName").toString()));
+			values.add(new StringLiteralExpr(displayName));
 
 			// build comments per language
 			javadocEnum.append("<!-- @formatter:off -->\n");
 			javadocConstant.append("<!-- @formatter:off -->\n");
 			for (LanguageCode language : LANGUAGE_CODES) {
-				values.add(new StringLiteralExpr(getDisplayName(language, concept)));
-				String displayName = getDisplayName(language, concept);
-				javadocEnum.append(buildJavadocComment(language, displayName));
-				javadocConstant.append(buildJavadocComment(language,
-						CODE_JAVADOC_PREFIX.get(language) + displayName));
+				String designation = valueSetEntry.getDesignation(language);
+				if ((designation == null) && (ENGLISH.equals(language)))
+					designation = valueSetEntry.getCodeBaseType().getDisplayName();
+				if (designation != null) {
+					values.add(new StringLiteralExpr(designation));
+					javadocEnum.append(buildJavadocComment(language, designation));
+					javadocConstant.append(buildJavadocComment(language,
+							CODE_JAVADOC_PREFIX.get(language) + designation));
+				}
 			}
 			javadocEnum.append("<!-- @formatter:on -->\n");
 			javadocConstant.append("<!-- @formatter:on -->\n");
@@ -182,8 +188,10 @@ public class UpdateValueSets {
 
 			// the static final code field for each concept
 			enumType.addFieldWithInitializer(STRING_TYPE, enumConstantName + "_CODE",
-					new StringLiteralExpr(code), Keyword.PUBLIC, Keyword.STATIC, Keyword.FINAL)
+					new StringLiteralExpr(code), publicModifier().getKeyword(),
+					staticModifier().getKeyword(), finalModifier().getKeyword())
 					.setJavadocComment(javadocConstant.toString());
+
 		}
 	}
 
@@ -240,27 +248,29 @@ public class UpdateValueSets {
 
 	}
 
-	/**
-	 * <div class="en">Parses the description of a value set from its parsed
-	 * JSON definition.</div>
-	 *
-	 * @param language
-	 *            The language of the description to parse.
-	 * @param descriptions
-	 *            The description JSON object.
-	 * @return The description in the desired language.
-	 * @throws IllegalStateException
-	 *             If no description was found.
-	 */
-	private static String getDescription(LanguageCode language, Object descriptions)
-			throws IllegalStateException {
-		List<Map<String, String>> filteredDescriptions = JsonPath.read(descriptions,
-				"$..[?(@.language =~ /" + language.getCodeValue() + ".*/i)]");
-		if (filteredDescriptions == null || filteredDescriptions.isEmpty()) {
-			return "no designation found for language " + language;
-		} else
-			return filteredDescriptions.get(0).get("content");
-	}
+	// /**
+	// * <div class="en">Parses the description of a value set from its parsed
+	// * JSON definition.</div>
+	// *
+	// * @param language
+	// * The language of the description to parse.
+	// * @param descriptions
+	// * The description JSON object.
+	// * @return The description in the desired language.
+	// * @throws IllegalStateException
+	// * If no description was found.
+	// */
+	// private static String getDescription(LanguageCode language, Object
+	// descriptions)
+	// throws IllegalStateException {
+	// List<Map<String, String>> filteredDescriptions =
+	// JsonPath.read(descriptions,
+	// "$..[?(@.language =~ /" + language.getCodeValue() + ".*/i)]");
+	// if (filteredDescriptions == null || filteredDescriptions.isEmpty()) {
+	// return "no designation found for language " + language;
+	// } else
+	// return filteredDescriptions.get(0).get("content");
+	// }
 
 	/**
 	 * <div class="en">The main entry for the value set generator.</div>
@@ -304,19 +314,16 @@ public class UpdateValueSets {
 			// create the class file
 			createEnumClassFromTemplate(valueSet.getIdentificator().getRoot(), "TODOCodeSystemName",
 					baseJavaFolder, fullyQualifiedclassName);
+
+			updateEnumClass(valueSet.getIdentificator().getRoot(), "TODOCodeSystemName",
+					baseJavaFolder, valueSetConfig.getClassName(), valueSet);
+
 			System.out.print("done.\n");
 
-			// System.out.print(" Project folder: " +
-			// valueSetConfig.getProjectFolder() + "\n");
-			//
-			// System.out.print(" Updating class: " +
-			// valueSetConfig.getClassName() + " ...");
-			//
-			// updateEnumClass(valueSet.getIdentificator().getRoot(),
-			// valueSetConfig.getClassName(),
-			// baseJavaFolder, valueSetConfig.getClassName(), valueSet);
-
 			System.out.print("\n");
+
+			// TODO: Vorerst nur für eine Klasse...
+			break;
 		}
 		System.out.println(
 				"Processed " + valueSetPackageConfig.listValueSetConfigs().size() + " enums.");
@@ -417,17 +424,19 @@ public class UpdateValueSets {
 			// clear content and add all enum elements
 			removeEverything(enumType);
 			enumType.addImplementedType(ValueSetEnumInterface.class);
-			// TODO addEnumElements(enumType, JsonPath.read(valueSetDefinition,
-			// VALUE_SET_CONCEPTS_PATH));
+			enumType.addModifier(publicModifier().getKeyword());
+			addEnumElements(enumType, valueSet);
 
 			// add main javadoc
 			StringBuilder javadoc = new StringBuilder();
 			javadoc.append("<!-- @formatter:off -->\n");
-			// TODO
-			// for (LanguageCode language : LANGUAGE_CODES) {
-			// javadoc.append(buildJavadocComment(language,
-			// getDescription(language, valueSetDefinition.get("desc"))));
-			// }
+			for (LanguageCode language : LANGUAGE_CODES) {
+				if (ENGLISH.equals(language))
+					javadoc.append(buildJavadocComment(language, valueSet.getDescription()));
+				else
+					javadoc.append(buildJavadocComment(language,
+							"TODO NYI in org.ehealth_connector.codegenerator.valuesets.UpdateValueSets.updateEnumClass"));
+			}
 			javadoc.append("<!-- @formatter:on -->\n");
 			enumType.setJavadocComment(javadoc.toString());
 
