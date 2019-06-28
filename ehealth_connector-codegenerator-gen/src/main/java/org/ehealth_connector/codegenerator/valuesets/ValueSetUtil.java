@@ -18,31 +18,20 @@
 
 package org.ehealth_connector.codegenerator.valuesets;
 
-import static java.net.URLEncoder.encode;
 import static org.ehealth_connector.common.enums.LanguageCode.ENGLISH;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InvalidClassException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.Charsets;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.ehealth_connector.codegenerator.ch.valuesets.model.ValueSet;
-import org.ehealth_connector.codegenerator.ch.valuesets.model.ValueSetConfiguration;
 import org.ehealth_connector.common.enums.LanguageCode;
-import org.yaml.snakeyaml.Yaml;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.TypeDeclaration;
-import com.jayway.jsonpath.JsonPath;
 
 /**
  * <div class="en">Contains helper methods and constants that are used to
@@ -53,7 +42,7 @@ public final class ValueSetUtil {
 	/**
 	 * <div class="en">The path to the configuration YAML file.</div>
 	 */
-	private static final String CONFIG_FILE_LOCATION = "src/main/resources/valuesets/valuesets-sources-201704.3-beta.yaml";
+	private static final String CONFIG_FILE_LOCATION = "src/main/resources/valuesets/SwissEprValueSetPackageConfig-201906.0-beta.yaml";
 
 	/**
 	 * <div class="en">The default charset used to encode files.</div>
@@ -110,28 +99,31 @@ public final class ValueSetUtil {
 		return enumName.replaceAll("\\W", "_");
 	}
 
-	/**
-	 * <div class="en">Build the complete URL to retrieve a value set JSON
-	 * configuration.</div>
-	 *
-	 * @param baseUrl
-	 *            The base URL that includes host, path and prefix.
-	 * @param valueSet
-	 *            The parsed value set configuration containing the ID and date
-	 *            to use.
-	 * @return The complete URL to download a value set in JSON format.
-	 * @throws MalformedURLException
-	 *             When the provided baseUrl is invalid.
-	 */
-	public static URL buildValueSetUrl(String baseUrl, ValueSet valueSet)
-			throws MalformedURLException {
-		try {
-			return new URL(baseUrl + "&id=" + encode(valueSet.getId(), DEFAULT_ENCODING)
-					+ "&effectiveDate=" + encode(valueSet.getEffectiveDate(), DEFAULT_ENCODING));
-		} catch (UnsupportedEncodingException unsupportedEncodingException) {
-			throw new MalformedURLException(unsupportedEncodingException.getMessage());
-		}
-	}
+	// /**
+	// * <div class="en">Build the complete URL to retrieve a value set JSON
+	// * configuration.</div>
+	// *
+	// * @param baseUrl
+	// * The base URL that includes host, path and prefix.
+	// * @param valueSet
+	// * The parsed value set configuration containing the ID and date
+	// * to use.
+	// * @return The complete URL to download a value set in JSON format.
+	// * @throws MalformedURLException
+	// * When the provided baseUrl is invalid.
+	// */
+	// public static URL buildValueSetUrl(String baseUrl, ValueSet valueSet)
+	// throws MalformedURLException {
+	// try {
+	// return new URL(baseUrl + "&id=" + encode(valueSet.getId(),
+	// DEFAULT_ENCODING)
+	// + "&effectiveDate=" + encode(valueSet.getEffectiveDate(),
+	// DEFAULT_ENCODING));
+	// } catch (UnsupportedEncodingException unsupportedEncodingException) {
+	// throw new
+	// MalformedURLException(unsupportedEncodingException.getMessage());
+	// }
+	// }
 
 	/**
 	 * <div class="en">Reads the display name from a concept object parsed from
@@ -186,41 +178,27 @@ public final class ValueSetUtil {
 	 */
 	public static File getSourceFileName(String baseJavaFolder, String fullyQualifiedClassName) {
 		return new File(new File(baseJavaFolder, "src/main/java"),
-				fullyQualifiedClassName.replaceAll("\\.", "/") + ".java");
+				fullyQualifiedClassName.replaceAll("\\.", "/") + ".java").getAbsoluteFile();
 	}
 
-	/**
-	 * <div class="en">Returns the JSON value set definition file on the local
-	 * file system.</div>
-	 *
-	 * @param baseDir
-	 *            The base directory to look for the value set definition in.
-	 * @param valueSet
-	 *            The value set configuration of the value set that should be
-	 *            loaded.
-	 * @return The JSON value set definition file.
-	 */
-	public static File getValueSetDefinitionFile(String baseDir, ValueSet valueSet) {
-		File valueSetDefinitionFile = new File(new File(baseDir, RESOURCE_LOCATION),
-				valueSet.getCodeSystemName() + ".json");
-		return valueSetDefinitionFile;
-	}
-
-	/**
-	 * <div class="en">Load the configuration file and parse it into the
-	 * appropriate configuration classes.</div>
-	 *
-	 * @return A fully initialized configuration object containing the values of
-	 *         the config file.
-	 * @throws IOException
-	 *             If the configuration file cannot be found or read.
-	 */
-	public static ValueSetConfiguration loadConfiguration(String basePath) throws IOException {
-		File configFile = new File(basePath, CONFIG_FILE_LOCATION);
-		String valueSetConfiguration = FileUtils.readFileToString(configFile, DEFAULT_CHARSET);
-		Yaml yaml = new Yaml();
-		return yaml.loadAs(valueSetConfiguration, ValueSetConfiguration.class);
-	}
+	// /**
+	// * <div class="en">Returns the JSON value set definition file on the local
+	// * file system.</div>
+	// *
+	// * @param baseDir
+	// * The base directory to look for the value set definition in.
+	// * @param valueSet
+	// * The value set configuration of the value set that should be
+	// * loaded.
+	// * @return The JSON value set definition file.
+	// */
+	// public static File getValueSetDefinitionFile(String baseDir, ValueSet
+	// valueSet) {
+	// File valueSetDefinitionFile = new File(new File(baseDir,
+	// RESOURCE_LOCATION),
+	// valueSet.getCodeSystemName() + ".json");
+	// return valueSetDefinitionFile;
+	// }
 
 	/**
 	 * <div class="en">Retrieves the primary type from a compilation unit.</div>
@@ -242,52 +220,58 @@ public final class ValueSetUtil {
 				"Failed to load primary type from compilation unit"));
 	}
 
-	/**
-	 * <div class="en">Loads the JSON value set definition file. If it's not
-	 * present on the local file system, it can be downloaded from the art-decor
-	 * server.</div>
-	 *
-	 * @param baseDir
-	 *            The base directory to look for the value set definition in.
-	 * @param valueSet
-	 *            The value set configuration of the value set that should be
-	 *            loaded.
-	 * @param downloadIfNotInFileSystem
-	 *            Download the JSON file from the server if not present on the
-	 *            local file system.
-	 * @param baseUrl
-	 *            The base URL to use when downloading the JSON file from the
-	 *            server.
-	 * @return A Map representing the value set definition parsed from the JSON
-	 *         file.
-	 * @throws IOException
-	 *             If the file cannot be loaded or parsed.
-	 * @throws FileNotFoundException
-	 *             If the value set definition file not exists.
-	 *
-	 */
-	public static Map<String, Object> loadValueSetDefinition(String baseDir, ValueSet valueSet,
-			boolean downloadIfNotInFileSystem, String baseUrl)
-			throws IOException, FileNotFoundException {
-
-		String valueSetDefinition;
-		File valueSetDefinitionFile = getValueSetDefinitionFile(baseDir, valueSet);
-
-		// download the latest version of the value set definition from
-		// art-decor.org
-		// if it does not exist locally yet
-		if (!valueSetDefinitionFile.exists() && downloadIfNotInFileSystem) {
-			valueSetDefinition = IOUtils.toString(buildValueSetUrl(baseUrl, valueSet),
-					DEFAULT_ENCODING);
-			FileUtils.write(valueSetDefinitionFile, valueSetDefinition, DEFAULT_ENCODING);
-		} else if (!valueSetDefinitionFile.exists()) {
-			throw new FileNotFoundException(valueSetDefinitionFile.getName());
-		} else {
-			valueSetDefinition = FileUtils.readFileToString(valueSetDefinitionFile,
-					DEFAULT_CHARSET);
-		}
-
-		// get the value set with the defined date
-		return JsonPath.read(valueSetDefinition, VALUE_SET_BASE_PATH);
-	}
+	// /**
+	// * <div class="en">Loads the JSON value set definition file. If it's not
+	// * present on the local file system, it can be downloaded from the
+	// art-decor
+	// * server.</div>
+	// *
+	// * @param baseDir
+	// * The base directory to look for the value set definition in.
+	// * @param valueSet
+	// * The value set configuration of the value set that should be
+	// * loaded.
+	// * @param downloadIfNotInFileSystem
+	// * Download the JSON file from the server if not present on the
+	// * local file system.
+	// * @param baseUrl
+	// * The base URL to use when downloading the JSON file from the
+	// * server.
+	// * @return A Map representing the value set definition parsed from the
+	// JSON
+	// * file.
+	// * @throws IOException
+	// * If the file cannot be loaded or parsed.
+	// * @throws FileNotFoundException
+	// * If the value set definition file not exists.
+	// *
+	// */
+	// public static Map<String, Object> loadValueSetDefinition(String baseDir,
+	// ValueSet valueSet,
+	// boolean downloadIfNotInFileSystem, String baseUrl)
+	// throws IOException, FileNotFoundException {
+	//
+	// String valueSetDefinition;
+	// File valueSetDefinitionFile = getValueSetDefinitionFile(baseDir,
+	// valueSet);
+	//
+	// // download the latest version of the value set definition from
+	// // art-decor.org
+	// // if it does not exist locally yet
+	// if (!valueSetDefinitionFile.exists() && downloadIfNotInFileSystem) {
+	// valueSetDefinition = IOUtils.toString(buildValueSetUrl(baseUrl,
+	// valueSet),
+	// DEFAULT_ENCODING);
+	// FileUtils.write(valueSetDefinitionFile, valueSetDefinition,
+	// DEFAULT_ENCODING);
+	// } else if (!valueSetDefinitionFile.exists()) {
+	// throw new FileNotFoundException(valueSetDefinitionFile.getName());
+	// } else {
+	// valueSetDefinition = FileUtils.readFileToString(valueSetDefinitionFile,
+	// DEFAULT_CHARSET);
+	// }
+	//
+	// // get the value set with the defined date
+	// return JsonPath.read(valueSetDefinition, VALUE_SET_BASE_PATH);
+	// }
 }

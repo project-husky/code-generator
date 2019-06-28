@@ -20,15 +20,10 @@ package org.ehealth_connector.codegenerator.valuesets;
 
 import static java.util.Arrays.asList;
 import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.DEFAULT_CHARSET;
-import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.VALUE_SET_CONCEPTS_PATH;
 import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.buildEnumName;
-import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.buildValueSetUrl;
 import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.getDisplayName;
 import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.getSourceFileName;
-import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.getValueSetDefinitionFile;
-import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.loadConfiguration;
 import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.loadPrimaryType;
-import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.loadValueSetDefinition;
 import static org.ehealth_connector.common.enums.LanguageCode.ENGLISH;
 import static org.ehealth_connector.common.enums.LanguageCode.FRENCH;
 import static org.ehealth_connector.common.enums.LanguageCode.GERMAN;
@@ -43,10 +38,13 @@ import java.util.Map;
 import javax.annotation.Generated;
 
 import org.apache.commons.io.FileUtils;
-import org.ehealth_connector.codegenerator.ch.valuesets.model.ValueSet;
-import org.ehealth_connector.codegenerator.ch.valuesets.model.ValueSetConfiguration;
 import org.ehealth_connector.common.enums.LanguageCode;
 import org.ehealth_connector.common.enums.ValueSetEnumInterface;
+import org.ehealth_connector.valueset.api.ValueSetManager;
+import org.ehealth_connector.valueset.api.ValueSetPackageManager;
+import org.ehealth_connector.valueset.config.ValueSetConfig;
+import org.ehealth_connector.valueset.config.ValueSetPackageConfig;
+import org.ehealth_connector.valueset.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,12 +81,13 @@ public class UpdateValueSets {
 	 */
 	private static final Map<LanguageCode, String> CODE_JAVADOC_PREFIX = ImmutableMap.of(ENGLISH,
 			"Code for ", GERMAN, "Code für ", FRENCH, "Code de ", ITALIAN, "Code per ");
-
 	/**
 	 * <div class="en">Base path where to find the config files for the
 	 * generator (YAML and JSON files).</div>
 	 */
-	private static final String CONFIG_FILE_BASE_PATH = "./";
+	private static final String CONFIG_FILE_BASE_PATH = "./src/main/resources/valuesets/";
+
+	private static final String TARGET_BASE_PATH = "./target/";
 
 	/**
 	 * <div class="en">List of all languages that should be used to generate
@@ -108,7 +107,7 @@ public class UpdateValueSets {
 	 * <div class="en">Relative path to the root of the maven project
 	 * structure.</div>
 	 */
-	private static final String PROJECT_ROOT_RELATIVE_PATH = "../../../";
+	private static final String PROJECT_ROOT_RELATIVE_PATH = "../../";
 
 	/**
 	 * <div class="en">Shortcut for the internal type of a string.</div>
@@ -133,6 +132,9 @@ public class UpdateValueSets {
 	 * the actual generated enum name.</div>
 	 */
 	private static final String TEMPLATE_PACKAGE_NAME_TO_REPLACE = "TemplatePackageNameToReplace";
+
+	private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG = "SwissEprValueSetPackageConfig-201906.0-beta.yaml";
+	private final static String SWISS_EPR_VALUE_SET_PACKAGE = "SwissEprValueSetPackage.yaml";
 
 	/**
 	 * <div class="en">Adds all concepts of the value set definition as enum
@@ -269,60 +271,56 @@ public class UpdateValueSets {
 	 *             When any operation fails.
 	 */
 	public static void main(String[] args) throws Exception {
+
 		log.debug("Update value sets");
 		System.out.print("===== Update value sets =====\n");
 
-		System.out.print("Configuration base path: " + CONFIG_FILE_BASE_PATH + "\n");
-		ValueSetConfiguration configuration = loadConfiguration(CONFIG_FILE_BASE_PATH);
+		System.out.print("Configuration base path: " + CONFIG_FILE_BASE_PATH + " (full path="
+				+ new File(CONFIG_FILE_BASE_PATH).getAbsolutePath() + ")\n");
 
-		System.out.print("Configuration base url: " + configuration.getBaseUrl() + "\n");
-		System.out.print(" \n");
+		String fnPackageConfig = CONFIG_FILE_BASE_PATH + SWISS_EPR_VALUE_SET_PACKAGE_CONFIG;
 
-		int count = 0;
-		for (ValueSet valueSet : configuration.getValueSets()) {
+		ValueSetPackageManager valueSetPackageManager;
+		valueSetPackageManager = new ValueSetPackageManager();
+		ValueSetPackageConfig valueSetPackageConfig = valueSetPackageManager
+				.loadValueSetPackageConfig(fnPackageConfig);
 
-			System.out.print("Processing value set: " + valueSet.getCodeSystemName() + "\n");
+		ValueSetManager valueSetManager = new ValueSetManager();
+		for (ValueSetConfig valueSetConfig : valueSetPackageConfig.listValueSetConfigs()) {
+			System.out.print("Processing enum: " + valueSetConfig.getClassName() + "\n");
 
-			boolean downloadIfNotInFileSystem = false;
-			if (!getValueSetDefinitionFile(CONFIG_FILE_BASE_PATH, valueSet).exists()) {
-				downloadIfNotInFileSystem = true;
-				System.out.print("Download definition: "
-						+ buildValueSetUrl(configuration.getBaseUrl(), valueSet) + "\n");
-			} else {
-				System.out.print("Definition file exists, no download\n");
-			}
+			System.out.print("- downloading ValueSet...");
+			ValueSet valueSet = valueSetManager.downloadValueSet(valueSetConfig);
+			System.out.print("done.\n");
 
-			System.out.print("Read definition file: "
-					+ getValueSetDefinitionFile(CONFIG_FILE_BASE_PATH, valueSet).getName() + "\n");
-
-			Map<String, Object> valueSetDefinition = loadValueSetDefinition(CONFIG_FILE_BASE_PATH,
-					valueSet, downloadIfNotInFileSystem, configuration.getBaseUrl());
-
-			String baseJavaFolder = PROJECT_ROOT_RELATIVE_PATH + "/" + valueSet.getProjectFolder();
-			String fullyQualifiedclassName = valueSet.getClassName();
+			System.out.print("- creating Java Class...");
+			String baseJavaFolder = PROJECT_ROOT_RELATIVE_PATH + "/"
+					+ valueSetConfig.getProjectFolder();
+			String fullyQualifiedclassName = valueSetConfig.getClassName();
 
 			// delete existing class file
 			getSourceFileName(baseJavaFolder, fullyQualifiedclassName).delete();
 
-			if (!getSourceFileName(baseJavaFolder, fullyQualifiedclassName).exists()) {
-				System.out.print("Create class from template: " + fullyQualifiedclassName + "\n");
+			// create the class file
+			createEnumClassFromTemplate(valueSet.getIdentificator().getRoot(), "TODOCodeSystemName",
+					baseJavaFolder, fullyQualifiedclassName);
+			System.out.print("done.\n");
 
-				createEnumClassFromTemplate(valueSet.getId(), valueSet.getCodeSystemName(),
-						baseJavaFolder, fullyQualifiedclassName);
-			}
+			// System.out.print(" Project folder: " +
+			// valueSetConfig.getProjectFolder() + "\n");
+			//
+			// System.out.print(" Updating class: " +
+			// valueSetConfig.getClassName() + " ...");
+			//
+			// updateEnumClass(valueSet.getIdentificator().getRoot(),
+			// valueSetConfig.getClassName(),
+			// baseJavaFolder, valueSetConfig.getClassName(), valueSet);
 
-			System.out.print("Project folder: " + valueSet.getProjectFolder() + "\n");
-
-			System.out.print("Updating class: " + valueSet.getClassName() + " ... ");
-
-			updateEnumClass(valueSet.getId(), valueSet.getCodeSystemName(), baseJavaFolder,
-					valueSet.getClassName(), valueSetDefinition);
-
-			System.out.print("done.\n\n");
-			count++;
+			System.out.print("\n");
 		}
+		System.out.println(
+				"Processed " + valueSetPackageConfig.listValueSetConfigs().size() + " enums.");
 
-		System.out.println("Processed " + count + " value sets.");
 	}
 
 	/**
@@ -406,8 +404,7 @@ public class UpdateValueSets {
 	 *             If the class does not declare an Enum type.
 	 */
 	private static void updateEnumClass(String id, String codeSystemName, String baseJavaFolder,
-			String className, Map<String, Object> valueSetDefinition)
-			throws IOException, IllegalStateException {
+			String className, ValueSet valueSet) throws IOException, IllegalStateException {
 
 		JavaParser javaParser = new JavaParser();
 		ParseResult<CompilationUnit> javaSource = javaParser
@@ -420,15 +417,17 @@ public class UpdateValueSets {
 			// clear content and add all enum elements
 			removeEverything(enumType);
 			enumType.addImplementedType(ValueSetEnumInterface.class);
-			addEnumElements(enumType, JsonPath.read(valueSetDefinition, VALUE_SET_CONCEPTS_PATH));
+			// TODO addEnumElements(enumType, JsonPath.read(valueSetDefinition,
+			// VALUE_SET_CONCEPTS_PATH));
 
 			// add main javadoc
 			StringBuilder javadoc = new StringBuilder();
 			javadoc.append("<!-- @formatter:off -->\n");
-			for (LanguageCode language : LANGUAGE_CODES) {
-				javadoc.append(buildJavadocComment(language,
-						getDescription(language, valueSetDefinition.get("desc"))));
-			}
+			// TODO
+			// for (LanguageCode language : LANGUAGE_CODES) {
+			// javadoc.append(buildJavadocComment(language,
+			// getDescription(language, valueSetDefinition.get("desc"))));
+			// }
 			javadoc.append("<!-- @formatter:on -->\n");
 			enumType.setJavadocComment(javadoc.toString());
 

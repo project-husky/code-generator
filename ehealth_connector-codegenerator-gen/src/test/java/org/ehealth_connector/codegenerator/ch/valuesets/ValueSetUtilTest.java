@@ -19,10 +19,6 @@ package org.ehealth_connector.codegenerator.ch.valuesets;
 
 import static org.junit.Assert.assertEquals;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import org.ehealth_connector.codegenerator.ch.valuesets.model.ValueSet;
 import org.ehealth_connector.codegenerator.valuesets.ValueSetUtil;
 import org.junit.Test;
 
@@ -46,22 +42,6 @@ public class ValueSetUtilTest {
 
 		assertEquals("IMMUNIZATION_CONTENT",
 				ValueSetUtil.buildEnumName("Immunization Content (IC)"));
-
-	}
-
-	@Test
-	public void testBuildValueSetUrl() throws MalformedURLException {
-
-		final String baseUrl = "http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&format=json";
-
-		ValueSet valueSet = new ValueSet();
-		valueSet.setId("2.16.756.5.30.1.127.3.10.1.1.3");
-		valueSet.setEffectiveDate("2018-01-31T14:06:48");
-
-		URL expectedUrl = new URL(baseUrl
-				+ "&id=2.16.756.5.30.1.127.3.10.1.1.3&effectiveDate=2018-01-31T14%3A06%3A48");
-
-		assertEquals(expectedUrl, ValueSetUtil.buildValueSetUrl(baseUrl, valueSet));
 
 	}
 
