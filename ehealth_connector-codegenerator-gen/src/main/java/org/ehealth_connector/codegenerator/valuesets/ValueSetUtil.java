@@ -66,11 +66,13 @@ public final class ValueSetUtil {
 	 */
 	public static final String VALUE_SET_BASE_PATH = "$.valueSets[0].valueSet[0]";
 
-//	/**
-//	 * <div class="en">The JSONPath path to extract the concept definitions from
-//	 * a value set object.</div>
-//	 */
-//	public static final String VALUE_SET_CONCEPTS_PATH = "$.conceptList[*].concept[*]";
+	// /**
+	// * <div class="en">The JSONPath path to extract the concept definitions
+	// from
+	// * a value set object.</div>
+	// */
+	// public static final String VALUE_SET_CONCEPTS_PATH =
+	// "$.conceptList[*].concept[*]";
 
 	/**
 	 * <div class="en">Builds a Java compatible enum element name from a
@@ -96,7 +98,11 @@ public final class ValueSetUtil {
 
 		enumName = enumName.replaceAll("&AMP;", "AND");
 
-		return enumName.replaceAll("\\W", "_");
+		enumName = enumName.replaceAll("\\W", "_");
+
+		// TODO: enumName = enumName.replaceAll("__", "_");
+
+		return enumName;
 	}
 
 	// /**

@@ -33,21 +33,21 @@ public enum TemplateNameToReplace implements ValueSetEnumInterface {
 	;
 
 	/**
-	 * <div class="en">Name of the value set</div>
-	 * <div class="de">Name des Value Sets</div>
-	 */
-	public static final String VALUE_SET_NAME = "dummy-will-be-replaced";
-
-	/**
 	 * <div class="en">Identifier of the value set</div>
 	 * <div class="de">Identifikator für das Value Set</div>
 	 */
 	public static final String VALUE_SET_ID = "dummy-will-be-replaced";
 
 	/**
+	 * <div class="en">Name of the value set</div>
+	 * <div class="de">Name des Value Sets</div>
+	 */
+	public static final String VALUE_SET_NAME = "dummy-will-be-replaced";
+
+	/**
 	 * <div class="en">Gets the Enum with a given code</div>
 	 * <div class="de">Liefert den Enum anhand eines gegebenen codes</div>
-	 *
+	 * 
 	 * @param code
 	 *            <div class="de"> code</div>
 	 * @return <div class="en">the enum</div>
@@ -65,8 +65,7 @@ public enum TemplateNameToReplace implements ValueSetEnumInterface {
 	 * <div class="en">Checks if a given enum is part of this value set.</div>
 	 * <div class="de">Prüft, ob der gegebene enum Teil dieses Value Sets
 	 * ist.</div>
-	 *
-	 *
+	 * 
 	 * @param enumName
 	 *            <div class="de"> enumName</div>
 	 * @return true, if enum is in this value set
@@ -87,7 +86,7 @@ public enum TemplateNameToReplace implements ValueSetEnumInterface {
 	 * <div class="en">Checks if a given code value is in this value set.</div>
 	 * <div class="de">Prüft, ob der gegebene code in diesem Value Set vorhanden
 	 * ist.</div>
-	 *
+	 * 
 	 * @param codeValue
 	 *            <div class="de"> code</div>
 	 * @return true, if is in value set
@@ -100,9 +99,6 @@ public enum TemplateNameToReplace implements ValueSetEnumInterface {
 		}
 		return false;
 	}
-
-	/** The display names per language */
-	private Map<LanguageCode, String> displayNames;
 
 	/**
 	 * <div class="en">Machine interpretable and (inside this class) unique
@@ -118,12 +114,15 @@ public enum TemplateNameToReplace implements ValueSetEnumInterface {
 	 */
 	private String codeSystem;
 
+	/** The display names per language */
+	private Map<LanguageCode, String> displayNames;
+
 	/**
 	 * <div class="en">Instantiates this Enum Object with a given Code and
 	 * Display Name</div>
 	 * <div class="de">Instanziiert dieses Enum Object mittels eines Codes
 	 * und einem Display Name</div>.
-	 *
+	 * 
 	 * @param code
 	 *            code
 	 * @param codeSystem
@@ -154,7 +153,7 @@ public enum TemplateNameToReplace implements ValueSetEnumInterface {
 	/**
 	 * <div class="en">Gets the code system identifier.</div>
 	 * <div class="de">Liefert den Code System Identifikator.</div>
-	 *
+	 * 
 	 * @return <div class="en">the code system identifier</div>
 	 */
 	@Override
@@ -165,7 +164,7 @@ public enum TemplateNameToReplace implements ValueSetEnumInterface {
 	/**
 	 * <div class="en">Gets the code system name.</div> <div class="de">Liefert
 	 * den Code System Namen.</div>
-	 *
+	 * 
 	 * @return <div class="en">the code system identifier</div>
 	 */
 	@Override
@@ -180,7 +179,7 @@ public enum TemplateNameToReplace implements ValueSetEnumInterface {
 	/**
 	 * <div class="en">Gets the actual Code as string</div>
 	 * <div class="de">Liefert den eigentlichen Code als String</div>
-	 *
+	 * 
 	 * @return <div class="en">the code</div>
 	 */
 	@Override
@@ -193,7 +192,7 @@ public enum TemplateNameToReplace implements ValueSetEnumInterface {
 	 * there is no english translation, the default display name is returned.</div>
 	 * <div class="de">Liefert display name gemäss Parameter, falls es keine
 	 * Englische Übersetzung gibt, wird der default-Name zurückgegeben.</div>
-	 *
+	 * 
 	 * @param languageCode
 	 *            the language code to get the display name for
 	 * @return returns the display name in the desired language. if language not
@@ -210,7 +209,7 @@ public enum TemplateNameToReplace implements ValueSetEnumInterface {
 	/**
 	 * <div class="en">Gets the value set identifier.</div> <div class="de">Liefert
 	 * den Value Set Identifikator.</div>
-	 *
+	 * 
 	 * @return <div class="en">the value set identifier</div>
 	 */
 	@Override
@@ -221,7 +220,7 @@ public enum TemplateNameToReplace implements ValueSetEnumInterface {
 	/**
 	 * <div class="en">Gets the value set name.</div> <div class="de">Liefert
 	 * den Value Set Namen.</div>
-	 *
+	 * 
 	 * @return <div class="en">the value set name</div>
 	 */
 	@Override

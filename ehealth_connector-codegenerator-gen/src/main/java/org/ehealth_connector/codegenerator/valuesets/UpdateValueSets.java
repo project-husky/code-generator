@@ -45,6 +45,7 @@ import org.ehealth_connector.valueset.api.ValueSetManager;
 import org.ehealth_connector.valueset.api.ValueSetPackageManager;
 import org.ehealth_connector.valueset.config.ValueSetConfig;
 import org.ehealth_connector.valueset.config.ValueSetPackageConfig;
+import org.ehealth_connector.valueset.enums.DesignationType;
 import org.ehealth_connector.valueset.model.ValueSet;
 import org.ehealth_connector.valueset.model.ValueSetEntry;
 import org.slf4j.Logger;
@@ -101,7 +102,7 @@ public class UpdateValueSets {
 	 * write Java code.</div>
 	 */
 	private static final PrettyPrinterConfiguration PRETTY_PRINTER_CONFIGURATION = new PrettyPrinterConfiguration()
-			.setIndentType(IndentType.TABS).setMaxEnumConstantsToAlignHorizontally(1);
+			.setIndentType(IndentType.TABS).setIndentSize(1);;
 
 	/**
 	 * <div class="en">Relative path to the root of the maven project
@@ -133,7 +134,11 @@ public class UpdateValueSets {
 	 */
 	private static final String TEMPLATE_PACKAGE_NAME_TO_REPLACE = "TemplatePackageNameToReplace";
 
-	private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG = "SwissEprValueSetPackageConfig-201906.0-beta.yaml";
+	private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG = "SwissEprValueSetPackageConfig-201704.0-stable.yaml";
+	// private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG =
+	// "SwissEprValueSetPackageConfig-201704.3-beta.yaml";
+	// private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG =
+	// "SwissEprValueSetPackageConfig-201906.0-beta.yaml";
 	private final static String SWISS_EPR_VALUE_SET_PACKAGE = "SwissEprValueSetPackage.yaml";
 
 	/**
@@ -147,10 +152,15 @@ public class UpdateValueSets {
 	 */
 	private static void addEnumElements(EnumDeclaration enumType, ValueSet valueSet) {
 
-		for (ValueSetEntry valueSetEntry : valueSet.listValueSetEntries()) {
+		for (ValueSetEntry valueSetEntry : valueSet
+				.sortValueSetEntriesByPreferredEnglishDesignation()) {
 
 			String enumConstantName = ValueSetUtil
 					.buildEnumName(valueSetEntry.getCodeBaseType().getDisplayName());
+			String preferredDesignation = valueSetEntry.getDesignation(LanguageCode.ENGLISH,
+					DesignationType.PREFERRED);
+			if (preferredDesignation != null)
+				enumConstantName = ValueSetUtil.buildEnumName(preferredDesignation);
 			String code = valueSetEntry.getCodeBaseType().getCode();
 			String codeSystem = valueSetEntry.getCodeBaseType().getCodeSystem();
 			String displayName = valueSetEntry.getCodeBaseType().getDisplayName();
@@ -167,7 +177,7 @@ public class UpdateValueSets {
 			javadocEnum.append("<!-- @formatter:off -->\n");
 			javadocConstant.append("<!-- @formatter:off -->\n");
 			for (LanguageCode language : LANGUAGE_CODES) {
-				String designation = valueSetEntry.getDesignation(language);
+				String designation = valueSetEntry.getDesignation(language, null);
 				if ((designation == null) && (ENGLISH.equals(language)))
 					designation = valueSetEntry.getCodeBaseType().getDisplayName();
 				if (designation != null) {
@@ -206,7 +216,7 @@ public class UpdateValueSets {
 	 * @return The HTML snippet of the comment.
 	 */
 	private static String buildJavadocComment(LanguageCode language, String comment) {
-		return " <div class=\"" + language.getCodeValue().substring(0, 2) + "\">" + comment
+		return "<div class=\"" + language.getCodeValue().substring(0, 2) + "\">" + comment
 				+ "</div>\n";
 	}
 
