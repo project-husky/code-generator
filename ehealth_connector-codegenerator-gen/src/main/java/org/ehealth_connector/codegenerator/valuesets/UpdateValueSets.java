@@ -223,10 +223,6 @@ public class UpdateValueSets {
 	/**
 	 * <div class="en">Creates an enum definition class.</div>
 	 *
-	 * @param id
-	 *            The unique code id that identifies the enum.
-	 * @param codeSystemName
-	 *            The code system name of the enum.
 	 * @param baseJavaFolder
 	 *            The base Java source folder (relative to the root of the
 	 *            project hierarchy) where the Java package structure begins.
@@ -237,8 +233,8 @@ public class UpdateValueSets {
 	 * @throws IOException
 	 *             When reading or writing the Java source file fails.
 	 */
-	private static void createEnumClassFromTemplate(String id, String codeSystemName,
-			String baseJavaFolder, String fullyQualifiedclassName) throws IOException {
+	private static void createEnumClassFromTemplate(String baseJavaFolder,
+			String fullyQualifiedclassName) throws IOException {
 
 		String className = fullyQualifiedclassName
 				.substring(fullyQualifiedclassName.lastIndexOf('.') + 1);
@@ -318,22 +314,25 @@ public class UpdateValueSets {
 					+ valueSetConfig.getProjectFolder();
 			String fullyQualifiedclassName = valueSetConfig.getClassName();
 
+			// This is for debug purposes, only:
+			// valueSetManager.saveValueSet(valueSet, "/temp/" +
+			// valueSet.getName() + ".yaml");
+
 			// delete existing class file
 			getSourceFileName(baseJavaFolder, fullyQualifiedclassName).delete();
 
 			// create the class file
-			createEnumClassFromTemplate(valueSet.getIdentificator().getRoot(), "TODOCodeSystemName",
-					baseJavaFolder, fullyQualifiedclassName);
+			createEnumClassFromTemplate(baseJavaFolder, fullyQualifiedclassName);
 
-			updateEnumClass(valueSet.getIdentificator().getRoot(), "TODOCodeSystemName",
+			updateEnumClass(valueSet.getIdentificator().getRoot(), valueSet.getName(),
 					baseJavaFolder, valueSetConfig.getClassName(), valueSet);
 
 			System.out.print("done.\n");
 
 			System.out.print("\n");
 
-			// TODO: Vorerst nur für eine Klasse...
-			break;
+			// his is for debug purposes, only (do one class, only):
+			// break;
 		}
 		System.out.println(
 				"Processed " + valueSetPackageConfig.listValueSetConfigs().size() + " enums.");
@@ -406,8 +405,8 @@ public class UpdateValueSets {
 	 *
 	 * @param id
 	 *            The unique code id that identifies the enum.
-	 * @param codeSystemName
-	 *            The code system name of the enum.
+	 * @param valueSetName
+	 *            The value set name of the enum.
 	 * @param baseJavaFolder
 	 *            The base Java source folder (relative to the root of the
 	 *            project hierarchy) where the Java package structure begins.
@@ -420,7 +419,7 @@ public class UpdateValueSets {
 	 * @throws IllegalStateException
 	 *             If the class does not declare an Enum type.
 	 */
-	private static void updateEnumClass(String id, String codeSystemName, String baseJavaFolder,
+	private static void updateEnumClass(String id, String valueSetName, String baseJavaFolder,
 			String className, ValueSet valueSet) throws IOException, IllegalStateException {
 
 		JavaParser javaParser = new JavaParser();
@@ -455,7 +454,7 @@ public class UpdateValueSets {
 
 			// replace constant values and imports
 			replaceConstantValue(enumType, "VALUE_SET_ID", id);
-			replaceConstantValue(enumType, "VALUE_SET_NAME", codeSystemName);
+			replaceConstantValue(enumType, "VALUE_SET_NAME", valueSetName);
 
 			// replace imports with those found in the template
 			new ArrayList<>(javaSource.getResult().get().getImports())
