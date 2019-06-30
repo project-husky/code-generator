@@ -152,15 +152,14 @@ public class UpdateValueSets {
 	 */
 	private static void addEnumElements(EnumDeclaration enumType, ValueSet valueSet) {
 
-		for (ValueSetEntry valueSetEntry : valueSet
-				.sortValueSetEntriesByPreferredEnglishDesignation()) {
+		for (ValueSetEntry valueSetEntry : valueSet.sortValueSetEntriesByEnumName()) {
 
-			String enumConstantName = ValueSetUtil
+			String enumConstantName = ValueSet
 					.buildEnumName(valueSetEntry.getCodeBaseType().getDisplayName());
 			String preferredDesignation = valueSetEntry.getDesignation(LanguageCode.ENGLISH,
 					DesignationType.PREFERRED);
 			if (preferredDesignation != null)
-				enumConstantName = ValueSetUtil.buildEnumName(preferredDesignation);
+				enumConstantName = ValueSet.buildEnumName(preferredDesignation);
 			String code = valueSetEntry.getCodeBaseType().getCode();
 			String codeSystem = valueSetEntry.getCodeBaseType().getCodeSystem();
 			String displayName = valueSetEntry.getCodeBaseType().getDisplayName();
@@ -305,6 +304,11 @@ public class UpdateValueSets {
 		for (ValueSetConfig valueSetConfig : valueSetPackageConfig.listValueSetConfigs()) {
 			System.out.print("Processing enum: " + valueSetConfig.getClassName() + "\n");
 
+			// This is for debug purposes, only:
+			// if ("org.ehealth_connector.security.ch.epr.enums.PurposeOfUse"
+			// .equals(valueSetConfig.getClassName()))
+			// System.out.print("---> Let me break, here\n");
+
 			System.out.print("- downloading ValueSet...");
 			ValueSet valueSet = valueSetManager.downloadValueSet(valueSetConfig);
 			System.out.print("done.\n");
@@ -331,7 +335,7 @@ public class UpdateValueSets {
 
 			System.out.print("\n");
 
-			// his is for debug purposes, only (do one class, only):
+			// This is for debug purposes, only (do one class, only):
 			// break;
 		}
 		System.out.println(
@@ -440,7 +444,10 @@ public class UpdateValueSets {
 			StringBuilder javadoc = new StringBuilder();
 			javadoc.append("<!-- @formatter:off -->\n");
 			for (LanguageCode language : LANGUAGE_CODES) {
-				javadoc.append(buildJavadocComment(language, valueSet.getDescription(language)));
+				String desc = valueSet.getDescription(language);
+				if (desc == null)
+					desc = "no designation found for language " + language;
+				javadoc.append(buildJavadocComment(language, desc));
 			}
 			javadoc.append("<!-- @formatter:on -->\n");
 			enumType.setJavadocComment(javadoc.toString());

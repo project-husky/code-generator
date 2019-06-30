@@ -19,7 +19,7 @@ package org.ehealth_connector.codegenerator.ch.valuesets;
 
 import static org.junit.Assert.assertEquals;
 
-import org.ehealth_connector.codegenerator.valuesets.ValueSetUtil;
+import org.ehealth_connector.valueset.model.ValueSet;
 import org.junit.Test;
 
 public class ValueSetUtilTest {
@@ -27,21 +27,22 @@ public class ValueSetUtilTest {
 	@Test
 	public void testBuildEnumName() {
 
-		assertEquals("HOSPITAL", ValueSetUtil.buildEnumName("Hospital"));
+		assertEquals("HOSPITAL", ValueSet.buildEnumName("Hospital"));
 
-		assertEquals("LABORATORY_SERVICE", ValueSetUtil.buildEnumName("Laboratory service"));
+		assertEquals("LABORATORY_SERVICE", ValueSet.buildEnumName("Laboratory service"));
 
-		assertEquals("ANY_TEXT_AND_ANY_TEXT",
-				ValueSetUtil.buildEnumName("Any text &amp; any text"));
+		assertEquals("ANY_TEXT_AND_ANY_TEXT", ValueSet.buildEnumName("Any text &amp; any text"));
 
-		assertEquals("ACCIDENT_AND_EMERGENCY",
-				ValueSetUtil.buildEnumName("Accident &amp; emergency"));
+		assertEquals("ACCIDENT_AND_EMERGENCY", ValueSet.buildEnumName("Accident &amp; emergency"));
 
 		assertEquals("CLIENT_OR_PATIENT_HOME",
-				ValueSetUtil.buildEnumName("Client's or patient's home"));
+				ValueSet.buildEnumName("Client's or patient's home"));
 
-		assertEquals("IMMUNIZATION_CONTENT",
-				ValueSetUtil.buildEnumName("Immunization Content (IC)"));
+		assertEquals("IMMUNIZATION_CONTENT", ValueSet.buildEnumName("Immunization Content (IC)"));
+
+		assertEquals("IMMUNIZATION_CONTENT", ValueSet.buildEnumName("IMMUNIZATION__CONTENT"));
+
+		assertEquals("IMMUNIZATION_CONTENT", ValueSet.buildEnumName("IMMUNIZATION___CONTENT"));
 
 	}
 

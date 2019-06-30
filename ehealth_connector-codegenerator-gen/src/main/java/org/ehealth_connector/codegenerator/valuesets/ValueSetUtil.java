@@ -40,96 +40,15 @@ import com.github.javaparser.ast.body.TypeDeclaration;
 public final class ValueSetUtil {
 
 	/**
-	 * <div class="en">The path to the configuration YAML file.</div>
-	 */
-	private static final String CONFIG_FILE_LOCATION = "src/main/resources/valuesets/SwissEprValueSetPackageConfig-201906.0-beta.yaml";
-
-	/**
 	 * <div class="en">The default charset used to encode files.</div>
 	 */
 	public static final Charset DEFAULT_CHARSET = Charsets.UTF_8;
-
-	/**
-	 * <div class="en">The default encoding used to encode URL parameter.</div>
-	 */
-	private static final String DEFAULT_ENCODING = "UTF-8";
-
-	/**
-	 * <div class="en">The path where the resources needed for the generation
-	 * are stored, relative to the project root directory.</div>
-	 */
-	private static final String RESOURCE_LOCATION = "target";
 
 	/**
 	 * <div class="en">The JSONPath path to extract a value set from the JSON
 	 * definition file</div>
 	 */
 	public static final String VALUE_SET_BASE_PATH = "$.valueSets[0].valueSet[0]";
-
-	// /**
-	// * <div class="en">The JSONPath path to extract the concept definitions
-	// from
-	// * a value set object.</div>
-	// */
-	// public static final String VALUE_SET_CONCEPTS_PATH =
-	// "$.conceptList[*].concept[*]";
-
-	/**
-	 * <div class="en">Builds a Java compatible enum element name from a
-	 * string.</div>
-	 *
-	 * @param displayName
-	 *            The string to build the enum name from.
-	 * @return An all upper case string with every non-word character replaced
-	 *         with an underscore.
-	 * @throws IllegalArgumentException
-	 *             When the provided displayName is null or empty.
-	 */
-	public static String buildEnumName(String displayName) throws IllegalArgumentException {
-		if (displayName == null || displayName.trim().isEmpty()) {
-			throw new IllegalArgumentException("displayName cannot be null or empty");
-		}
-
-		String enumName = displayName.trim().toUpperCase();
-
-		enumName = enumName.replaceAll("CLIENT'S", "CLIENT");
-		enumName = enumName.replaceAll("PATIENT'S", "PATIENT");
-		enumName = enumName.replaceAll(" \\(IC\\)", "");
-
-		enumName = enumName.replaceAll("&AMP;", "AND");
-
-		enumName = enumName.replaceAll("\\W", "_");
-
-		// TODO: enumName = enumName.replaceAll("__", "_");
-
-		return enumName;
-	}
-
-	// /**
-	// * <div class="en">Build the complete URL to retrieve a value set JSON
-	// * configuration.</div>
-	// *
-	// * @param baseUrl
-	// * The base URL that includes host, path and prefix.
-	// * @param valueSet
-	// * The parsed value set configuration containing the ID and date
-	// * to use.
-	// * @return The complete URL to download a value set in JSON format.
-	// * @throws MalformedURLException
-	// * When the provided baseUrl is invalid.
-	// */
-	// public static URL buildValueSetUrl(String baseUrl, ValueSet valueSet)
-	// throws MalformedURLException {
-	// try {
-	// return new URL(baseUrl + "&id=" + encode(valueSet.getId(),
-	// DEFAULT_ENCODING)
-	// + "&effectiveDate=" + encode(valueSet.getEffectiveDate(),
-	// DEFAULT_ENCODING));
-	// } catch (UnsupportedEncodingException unsupportedEncodingException) {
-	// throw new
-	// MalformedURLException(unsupportedEncodingException.getMessage());
-	// }
-	// }
 
 	/**
 	 * <div class="en">Reads the display name from a concept object parsed from
@@ -187,25 +106,6 @@ public final class ValueSetUtil {
 				fullyQualifiedClassName.replaceAll("\\.", "/") + ".java").getAbsoluteFile();
 	}
 
-	// /**
-	// * <div class="en">Returns the JSON value set definition file on the local
-	// * file system.</div>
-	// *
-	// * @param baseDir
-	// * The base directory to look for the value set definition in.
-	// * @param valueSet
-	// * The value set configuration of the value set that should be
-	// * loaded.
-	// * @return The JSON value set definition file.
-	// */
-	// public static File getValueSetDefinitionFile(String baseDir, ValueSet
-	// valueSet) {
-	// File valueSetDefinitionFile = new File(new File(baseDir,
-	// RESOURCE_LOCATION),
-	// valueSet.getCodeSystemName() + ".json");
-	// return valueSetDefinitionFile;
-	// }
-
 	/**
 	 * <div class="en">Retrieves the primary type from a compilation unit.</div>
 	 *
@@ -226,58 +126,4 @@ public final class ValueSetUtil {
 				"Failed to load primary type from compilation unit"));
 	}
 
-	// /**
-	// * <div class="en">Loads the JSON value set definition file. If it's not
-	// * present on the local file system, it can be downloaded from the
-	// art-decor
-	// * server.</div>
-	// *
-	// * @param baseDir
-	// * The base directory to look for the value set definition in.
-	// * @param valueSet
-	// * The value set configuration of the value set that should be
-	// * loaded.
-	// * @param downloadIfNotInFileSystem
-	// * Download the JSON file from the server if not present on the
-	// * local file system.
-	// * @param baseUrl
-	// * The base URL to use when downloading the JSON file from the
-	// * server.
-	// * @return A Map representing the value set definition parsed from the
-	// JSON
-	// * file.
-	// * @throws IOException
-	// * If the file cannot be loaded or parsed.
-	// * @throws FileNotFoundException
-	// * If the value set definition file not exists.
-	// *
-	// */
-	// public static Map<String, Object> loadValueSetDefinition(String baseDir,
-	// ValueSet valueSet,
-	// boolean downloadIfNotInFileSystem, String baseUrl)
-	// throws IOException, FileNotFoundException {
-	//
-	// String valueSetDefinition;
-	// File valueSetDefinitionFile = getValueSetDefinitionFile(baseDir,
-	// valueSet);
-	//
-	// // download the latest version of the value set definition from
-	// // art-decor.org
-	// // if it does not exist locally yet
-	// if (!valueSetDefinitionFile.exists() && downloadIfNotInFileSystem) {
-	// valueSetDefinition = IOUtils.toString(buildValueSetUrl(baseUrl,
-	// valueSet),
-	// DEFAULT_ENCODING);
-	// FileUtils.write(valueSetDefinitionFile, valueSetDefinition,
-	// DEFAULT_ENCODING);
-	// } else if (!valueSetDefinitionFile.exists()) {
-	// throw new FileNotFoundException(valueSetDefinitionFile.getName());
-	// } else {
-	// valueSetDefinition = FileUtils.readFileToString(valueSetDefinitionFile,
-	// DEFAULT_CHARSET);
-	// }
-	//
-	// // get the value set with the defined date
-	// return JsonPath.read(valueSetDefinition, VALUE_SET_BASE_PATH);
-	// }
 }
