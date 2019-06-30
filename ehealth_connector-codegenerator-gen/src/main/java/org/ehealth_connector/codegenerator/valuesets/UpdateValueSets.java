@@ -136,9 +136,9 @@ public class UpdateValueSets {
 
 	// private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG =
 	// "SwissEprValueSetPackageConfig-201704.0-stable.yaml";
-	private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG = "SwissEprValueSetPackageConfig-201704.3-beta.yaml";
 	// private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG =
-	// "SwissEprValueSetPackageConfig-201906.0-beta.yaml";
+	// "SwissEprValueSetPackageConfig-201704.3-beta.yaml";
+	private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG = "SwissEprValueSetPackageConfig-201906.0-beta.yaml";
 	private final static String SWISS_EPR_VALUE_SET_PACKAGE = "SwissEprValueSetPackage.yaml";
 
 	/**
