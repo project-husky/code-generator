@@ -154,6 +154,10 @@ public class UpdateValueSets {
 
 		for (ValueSetEntry valueSetEntry : valueSet.sortValueSetEntriesByEnumName()) {
 
+			// Nested enums are not currently suppnorted
+			if (valueSetEntry.getLevel() > 0)
+				break;
+
 			String enumConstantName = ValueSet
 					.buildEnumName(valueSetEntry.getCodeBaseType().getDisplayName());
 			String preferredDesignation = valueSetEntry.getDesignation(LanguageCode.ENGLISH,
@@ -176,7 +180,10 @@ public class UpdateValueSets {
 			javadocEnum.append("<!-- @formatter:off -->\n");
 			javadocConstant.append("<!-- @formatter:off -->\n");
 			for (LanguageCode language : LANGUAGE_CODES) {
-				String designation = valueSetEntry.getDesignation(language, null);
+				String designation = valueSetEntry.getDesignation(language,
+						DesignationType.PREFERRED);
+				if (designation == null)
+					designation = valueSetEntry.getDesignation(language, DesignationType.PREFERRED);
 				if ((designation == null) && (ENGLISH.equals(language)))
 					designation = valueSetEntry.getCodeBaseType().getDisplayName();
 				if (designation != null) {
@@ -184,7 +191,9 @@ public class UpdateValueSets {
 					javadocEnum.append(buildJavadocComment(language, designation));
 					javadocConstant.append(buildJavadocComment(language,
 							CODE_JAVADOC_PREFIX.get(language) + designation));
-				}
+				} else
+					values.add(new StringLiteralExpr("TOTRANSLATE"));
+
 			}
 			javadocEnum.append("<!-- @formatter:on -->\n");
 			javadocConstant.append("<!-- @formatter:on -->\n");
