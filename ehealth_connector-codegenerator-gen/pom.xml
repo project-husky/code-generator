@@ -52,7 +52,7 @@
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.6.0</version>
 				<configuration>
-					<mainClass>org.ehealth_connector.codegenerator.ch.valuesets.UpdateValueSets</mainClass>
+					<mainClass>org.ehealth_connector.codegenerator.valuesets.UpdateValueSets</mainClass>
 					<executable>java</executable>
 					<workingDirectory>.</workingDirectory>
 					<arguments>
