@@ -88,8 +88,6 @@ public class UpdateValueSets {
 	 */
 	private static final String CONFIG_FILE_BASE_PATH = "./src/main/resources/valuesets/";
 
-	private static final String TARGET_BASE_PATH = "./target/";
-
 	/**
 	 * <div class="en">List of all languages that should be used to generate
 	 * javadoc comments.</div>
@@ -139,7 +137,6 @@ public class UpdateValueSets {
 	// private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG =
 	// "SwissEprValueSetPackageConfig-201704.3-beta.yaml";
 	private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG = "SwissEprValueSetPackageConfig-201906.0-beta.yaml";
-	private final static String SWISS_EPR_VALUE_SET_PACKAGE = "SwissEprValueSetPackage.yaml";
 
 	/**
 	 * <div class="en">Adds all concepts of the value set definition as enum
@@ -154,9 +151,11 @@ public class UpdateValueSets {
 
 		for (ValueSetEntry valueSetEntry : valueSet.sortValueSetEntriesByEnumName()) {
 
-			// Nested enums are not currently suppnorted
-			if (valueSetEntry.getLevel() > 0)
+			if (valueSetEntry.getLevel() > 0) {
+				System.out.print("***WARNING: Nested enums are not currently supported (valueSet: "
+						+ valueSet.getDisplayName() + "\n");
 				break;
+			}
 
 			String enumConstantName = ValueSet
 					.buildEnumName(valueSetEntry.getCodeBaseType().getDisplayName());
