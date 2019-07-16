@@ -41,6 +41,8 @@ import javax.annotation.Generated;
 import org.apache.commons.io.FileUtils;
 import org.ehealth_connector.common.enums.LanguageCode;
 import org.ehealth_connector.common.enums.ValueSetEnumInterface;
+import org.ehealth_connector.common.utils.FileUtil;
+import org.ehealth_connector.common.utils.Util;
 import org.ehealth_connector.valueset.api.ValueSetManager;
 import org.ehealth_connector.valueset.api.ValueSetPackageManager;
 import org.ehealth_connector.valueset.config.ValueSetConfig;
@@ -76,31 +78,40 @@ import com.google.common.collect.ImmutableMap;
 public class UpdateValueSets {
 
 	private static Logger log = LoggerFactory.getLogger(UpdateValueSets.class);
-
 	/**
 	 * <div class="en">Javadoc comment prefix for the code fields.</div>
 	 */
 	private static final Map<LanguageCode, String> CODE_JAVADOC_PREFIX = ImmutableMap.of(ENGLISH,
 			"Code for ", GERMAN, "Code für ", FRENCH, "Code de ", ITALIAN, "Code per ");
+
 	/**
 	 * <div class="en">Base path where to find the config files for the
 	 * generator (YAML and JSON files).</div>
 	 */
-	private static final String CONFIG_FILE_BASE_PATH = "./src/main/resources/valuesets/";
+	private static final String CONFIG_FILE_BASE_PATH = System.getProperty("user.dir")
+			+ "/src/main/resources/valuesets/";
 
+	/**
+	 * <div class="en">Settings for the Java Code Formatter application. It
+	 * contains the same settings as the formatter XML, just in another file
+	 * format. Best way is to export the formatter from eclipse preferences,
+	 * remove the XML stuff and put it in the prefs file.</div>
+	 */
+	private static final String FORMATTER_PREFS = System.getProperty("user.dir")
+			+ "/src/main/resources/format/org.eclipse.jdt.core.prefs";
 	/**
 	 * <div class="en">List of all languages that should be used to generate
 	 * javadoc comments.</div>
 	 */
 	private static final List<LanguageCode> LANGUAGE_CODES = asList(ENGLISH, GERMAN, FRENCH,
-			ITALIAN);
+			ITALIAN);;
 
 	/**
 	 * <div class="en">Java code formatter/pretty printer configuration used to
 	 * write Java code.</div>
 	 */
 	private static final PrettyPrinterConfiguration PRETTY_PRINTER_CONFIGURATION = new PrettyPrinterConfiguration()
-			.setIndentType(IndentType.TABS).setIndentSize(1);;
+			.setIndentType(IndentType.TABS).setIndentSize(1);
 
 	/**
 	 * <div class="en">Relative path to the root of the maven project
@@ -227,6 +238,30 @@ public class UpdateValueSets {
 				+ "</div>\n";
 	}
 
+	// /**
+	// * <div class="en">Parses the description of a value set from its parsed
+	// * JSON definition.</div>
+	// *
+	// * @param language
+	// * The language of the description to parse.
+	// * @param descriptions
+	// * The description JSON object.
+	// * @return The description in the desired language.
+	// * @throws IllegalStateException
+	// * If no description was found.
+	// */
+	// private static String getDescription(LanguageCode language, Object
+	// descriptions)
+	// throws IllegalStateException {
+	// List<Map<String, String>> filteredDescriptions =
+	// JsonPath.read(descriptions,
+	// "$..[?(@.language =~ /" + language.getCodeValue() + ".*/i)]");
+	// if (filteredDescriptions == null || filteredDescriptions.isEmpty()) {
+	// return "no designation found for language " + language;
+	// } else
+	// return filteredDescriptions.get(0).get("content");
+	// }
+
 	/**
 	 * <div class="en">Creates an enum definition class.</div>
 	 *
@@ -261,35 +296,12 @@ public class UpdateValueSets {
 
 	}
 
-	// /**
-	// * <div class="en">Parses the description of a value set from its parsed
-	// * JSON definition.</div>
-	// *
-	// * @param language
-	// * The language of the description to parse.
-	// * @param descriptions
-	// * The description JSON object.
-	// * @return The description in the desired language.
-	// * @throws IllegalStateException
-	// * If no description was found.
-	// */
-	// private static String getDescription(LanguageCode language, Object
-	// descriptions)
-	// throws IllegalStateException {
-	// List<Map<String, String>> filteredDescriptions =
-	// JsonPath.read(descriptions,
-	// "$..[?(@.language =~ /" + language.getCodeValue() + ".*/i)]");
-	// if (filteredDescriptions == null || filteredDescriptions.isEmpty()) {
-	// return "no designation found for language " + language;
-	// } else
-	// return filteredDescriptions.get(0).get("content");
-	// }
-
 	/**
 	 * <div class="en">The main entry for the value set generator.</div>
 	 *
 	 * @param args
-	 *            command line arguments (none used)
+	 *            command line arguments: 1. Full path and filename to eclipse;
+	 *            2. Full path to the workspace application
 	 * @throws Exception
 	 *             When any operation fails.
 	 */
@@ -298,8 +310,78 @@ public class UpdateValueSets {
 		log.debug("Update value sets");
 		System.out.print("===== Update value sets =====\n");
 
-		System.out.print("Configuration base path: " + CONFIG_FILE_BASE_PATH + " (full path="
-				+ new File(CONFIG_FILE_BASE_PATH).getAbsolutePath() + ")\n");
+		File eclipseApp = null;
+		File orgWorkspacePath = null;
+		boolean argsOk = false;
+
+		if (args.clone().length >= 2) {
+			argsOk = true;
+			final String eclipseApplicationPath = args[0].toString();
+			if (eclipseApplicationPath != null) {
+				eclipseApp = new File(eclipseApplicationPath);
+				if (!eclipseApp.exists()) {
+					System.out.println("ERROR: Eclipse application does not exist ("
+							+ eclipseApplicationPath + ")");
+					argsOk = false;
+				} else {
+					if (!eclipseApp.isFile()) {
+						System.out.println("ERROR: Eclipse application is not a file ("
+								+ eclipseApplicationPath + ")");
+						argsOk = false;
+					}
+				}
+			}
+
+			final String orgWorkspacePathString = args[1].toString();
+			if (orgWorkspacePathString != null) {
+				orgWorkspacePath = new File(orgWorkspacePathString);
+				if (!orgWorkspacePath.exists()) {
+					System.out.println(
+							"ERROR: Workspace does not exist (" + orgWorkspacePathString + ")");
+					argsOk = false;
+				} else {
+					if (!orgWorkspacePath.isDirectory()) {
+						System.out.println("ERROR: Workspace is not a directory ("
+								+ orgWorkspacePathString + ")");
+						argsOk = false;
+					}
+				}
+			}
+		} else {
+			System.out.println("Usage:");
+			System.out.println("");
+			System.out.println("UpdateValueSets <eclipse> <workspace>");
+			System.out.println("");
+			System.out.println(
+					"  eclipse:   First parameter must be the full path and filename of your eclipse application");
+			System.out.println(
+					"             (e.g. C:\\JavaProgramme\\eclipse\\rcp-2019-06\\eclipse\\eclipse.exe");
+			System.out.println("");
+			System.out.println(
+					"  workspace: Second parameter must be the full path to your current workspace directory");
+			System.out.println(
+					"             Note: It will be copied into a temp folder, as the current one is in use by Eclipse IDE");
+			argsOk = false;
+		}
+
+		if (!argsOk) {
+			System.out.println("");
+			System.out.println("***");
+			System.out.println("Try again :-)");
+			return;
+		}
+
+		final String tempWorkspacePathString = Util.getTempDirectory()
+				+ FileUtil.getPlatformSpecificPathSeparator() + "tmpWS_"
+				+ orgWorkspacePath.getName();
+		final File tempWorkspacePath = new File(tempWorkspacePathString);
+
+		FileUtils.deleteDirectory(tempWorkspacePath);
+		FileUtils.copyDirectoryToDirectory(orgWorkspacePath, tempWorkspacePath);
+
+		System.out.println("Config base dir: " + new File(CONFIG_FILE_BASE_PATH).getAbsolutePath());
+		System.out.println("Eclipse runtime: " + eclipseApp.getAbsolutePath());
+		System.out.println("Temp. workspace: " + tempWorkspacePath.getAbsolutePath());
 
 		String fnPackageConfig = CONFIG_FILE_BASE_PATH + SWISS_EPR_VALUE_SET_PACKAGE_CONFIG;
 
@@ -336,16 +418,26 @@ public class UpdateValueSets {
 			// create the class file
 			createEnumClassFromTemplate(baseJavaFolder, fullyQualifiedclassName);
 
-			updateEnumClass(valueSet.getIdentificator().getRoot(), valueSet.getName(),
-					baseJavaFolder, valueSetConfig.getClassName(), valueSet);
+			File classFile = updateEnumClass(valueSet.getIdentificator().getRoot(),
+					valueSet.getName(), baseJavaFolder, valueSetConfig.getClassName(), valueSet);
 
-			System.out.print("done.\n");
-
+			// Apply formatter
+			try {
+				Util.runExternalCommand(
+						eclipseApp + " -application org.eclipse.jdt.core.JavaCodeFormatter -data "
+								+ tempWorkspacePath + " -config " + FORMATTER_PREFS + " "
+								+ classFile.getAbsolutePath());
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			System.out.print("\n");
 
 			// This is for debug purposes, only (do one class, only):
 			// break;
 		}
+
+		FileUtils.deleteDirectory(tempWorkspacePath);
+
 		System.out.println(
 				"Processed " + valueSetPackageConfig.listValueSetConfigs().size() + " enums.");
 
@@ -424,14 +516,15 @@ public class UpdateValueSets {
 	 *            project hierarchy) where the Java package structure begins.
 	 * @param className
 	 *            The fully qualified Java class name of the enum to update.
-	 * @param valueSetDefinition
-	 *            The parsed value set definition file.
+	 * @param valueSet
+	 *            the value set
+	 * @return the Java class file
 	 * @throws IOException
 	 *             When reading or writing the Java source file fails.
 	 * @throws IllegalStateException
 	 *             If the class does not declare an Enum type.
 	 */
-	private static void updateEnumClass(String id, String valueSetName, String baseJavaFolder,
+	private static File updateEnumClass(String id, String valueSetName, String baseJavaFolder,
 			String className, ValueSet valueSet) throws IOException, IllegalStateException {
 
 		JavaParser javaParser = new JavaParser();
@@ -491,8 +584,16 @@ public class UpdateValueSets {
 					"Class with name " + className + " does not declare an Enum type.");
 		}
 
-		FileUtils.write(getSourceFileName(baseJavaFolder, className),
-				javaSource.getResult().get().toString(PRETTY_PRINTER_CONFIGURATION),
-				DEFAULT_CHARSET);
+		File destFile = getSourceFileName(baseJavaFolder, className);
+		String classFileContent = javaSource.getResult().get()
+				.toString(PRETTY_PRINTER_CONFIGURATION);
+		classFileContent = classFileContent.replace("import java.util.Map;",
+				"import java.util.Map;\n");
+		classFileContent = classFileContent.replace("import javax.annotation.Generated;",
+				"import javax.annotation.Generated;\n");
+		FileUtils.write(destFile, classFileContent, DEFAULT_CHARSET);
+
+		return destFile.getAbsoluteFile();
 	}
+
 }
