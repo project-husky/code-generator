@@ -25,10 +25,10 @@ import static java.util.Arrays.asList;
 import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.DEFAULT_CHARSET;
 import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.getSourceFileName;
 import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.loadPrimaryType;
-import static org.ehealth_connector.common.enums.LanguageCode.ENGLISH;
-import static org.ehealth_connector.common.enums.LanguageCode.FRENCH;
-import static org.ehealth_connector.common.enums.LanguageCode.GERMAN;
-import static org.ehealth_connector.common.enums.LanguageCode.ITALIAN;
+import static org.ehealth_connector.common.mdht.enums.LanguageCode.ENGLISH;
+import static org.ehealth_connector.common.mdht.enums.LanguageCode.FRENCH;
+import static org.ehealth_connector.common.mdht.enums.LanguageCode.GERMAN;
+import static org.ehealth_connector.common.mdht.enums.LanguageCode.ITALIAN;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,8 +39,8 @@ import java.util.Map;
 import javax.annotation.Generated;
 
 import org.apache.commons.io.FileUtils;
-import org.ehealth_connector.common.enums.LanguageCode;
-import org.ehealth_connector.common.enums.ValueSetEnumInterface;
+import org.ehealth_connector.common.mdht.enums.LanguageCode;
+import org.ehealth_connector.common.mdht.enums.ValueSetEnumInterface;
 import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.Util;
 import org.ehealth_connector.valueset.api.ValueSetManager;
