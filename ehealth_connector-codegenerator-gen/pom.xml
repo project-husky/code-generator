@@ -32,6 +32,10 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-text</artifactId>
+		</dependency>
 
 		<!-- stuff used by code generator, only (do not move this in the main api pom) -->
 		<dependency>
