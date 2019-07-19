@@ -14,7 +14,7 @@
  * This line is intended for UTF-8 encoding checks, do not modify/delete: äöüéè
  *
  */
-package org.ehealth_connector.codegenerator.cda.java;
+package org.ehealth_connector.codegenerator.cda;
 
 import static org.junit.Assert.assertTrue;
 
