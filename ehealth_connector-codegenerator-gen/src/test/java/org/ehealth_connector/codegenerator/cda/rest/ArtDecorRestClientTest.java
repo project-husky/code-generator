@@ -33,10 +33,21 @@ import org.junit.Test;
 
 public class ArtDecorRestClientTest {
 
+	@Test
+	public void projectIndexTest() throws ClientProtocolException, IOException {
+
+		String content = "";
+		InputStream is = ArtDecorRestClient
+				.getArtDecorProjectIndex("https://art-decor.org/decor/services/", "cdachlrep-");
+		content = IOUtils.toString(is, Charsets.UTF_8);
+
+		assertTrue(content.startsWith("<return prefix=\"cdachlrep-\""));
+	}
+
 	// This is for debugging purposes, only. Do not commit this test with the
 	// test annotation enabled!
 	// @Test
-	public static void templateTestRecursiveCdaChEmed() throws Exception {
+	public void templateTestRecursiveCdaChEmed() throws Exception {
 
 		String dir = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
 				+ FileUtil.getPlatformSpecificPathSeparator();
@@ -44,32 +55,75 @@ public class ArtDecorRestClientTest {
 				"https://art-decor.org/decor/services/", dir);
 
 		artDecorRestClient.addArtDecorProject("cdachemed-");
-		artDecorRestClient.addArtDecorProject("hl7chcda-");
+		artDecorRestClient.addArtDecorProject("ad1bbr-");
+		artDecorRestClient.addArtDecorProject("ad2bbr-");
 		artDecorRestClient.addArtDecorProject("ch-epr-");
-		artDecorRestClient.addArtDecorProject("ch-palm-");
-		artDecorRestClient.addArtDecorProject("ch-pcc-");
 		artDecorRestClient.addArtDecorProject("ch-pharm-");
+		artDecorRestClient.addArtDecorProject("hl7chcda-");
 
-		// TODO
-		artDecorRestClient.downloadTemplateRecursive("cdachemed-", "TODO", "dynamic");
-		artDecorRestClient.downloadTemplateRecursive("cdachemed-", "TODO", "dynamic");
-		artDecorRestClient.downloadTemplateRecursive("cdachemed-", "TODO", "dynamic");
-		artDecorRestClient.downloadTemplateRecursive("cdachemed-", "TODO", "dynamic");
-		artDecorRestClient.downloadTemplateRecursive("cdachemed-", "TODO", "dynamic");
-		artDecorRestClient.downloadTemplateRecursive("cdachemed-", "TODO", "dynamic");
+		File dest;
 
-		File dest = new File(dir);
-		assertTrue(dest.listFiles().length == 1);
-		dest = new File(
-				dir + FileUtil.getPlatformSpecificPathSeparator() + "2.16.756.5.30.1.1.10.1.10"
-						+ FileUtil.getPlatformSpecificPathSeparator() + "kit");
+		// MedicationCardDocument
+		String templateId;
+		templateId = "2.16.756.5.30.1.1.10.1.3";
+		artDecorRestClient.downloadTemplateRecursive("cdachemed-", templateId, "dynamic");
+		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId);
+		assertTrue(dest.listFiles().length == 2);
+		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId
+				+ FileUtil.getPlatformSpecificPathSeparator() + "kit");
 		assertTrue(dest.listFiles().length > 1);
+
+		// MedicationDispenseDocument
+		templateId = "2.16.756.5.30.1.1.10.1.5";
+		artDecorRestClient.downloadTemplateRecursive("cdachemed-", templateId, "dynamic");
+		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId);
+		assertTrue(dest.listFiles().length == 2);
+		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId
+				+ FileUtil.getPlatformSpecificPathSeparator() + "kit");
+		assertTrue(dest.listFiles().length > 1);
+
+		// MedicationListDocument
+		templateId = "2.16.756.5.30.1.1.10.1.13";
+		artDecorRestClient.downloadTemplateRecursive("cdachemed-", templateId, "dynamic");
+		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId);
+		assertTrue(dest.listFiles().length == 2);
+		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId
+				+ FileUtil.getPlatformSpecificPathSeparator() + "kit");
+		assertTrue(dest.listFiles().length > 1);
+
+		// MedicationPrescriptionDocument
+		templateId = "2.16.756.5.30.1.1.10.1.4";
+		artDecorRestClient.downloadTemplateRecursive("cdachemed-", templateId, "dynamic");
+		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId);
+		assertTrue(dest.listFiles().length == 2);
+		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId
+				+ FileUtil.getPlatformSpecificPathSeparator() + "kit");
+		assertTrue(dest.listFiles().length > 1);
+
+		// MedicationTreatmentPlanDocument
+		templateId = "2.16.756.5.30.1.1.10.1.7";
+		artDecorRestClient.downloadTemplateRecursive("cdachemed-", templateId, "dynamic");
+		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId);
+		assertTrue(dest.listFiles().length == 2);
+		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId
+				+ FileUtil.getPlatformSpecificPathSeparator() + "kit");
+		assertTrue(dest.listFiles().length > 1);
+
+		// PharmaceuticalAdviceDocument
+		templateId = "2.16.756.5.30.1.1.10.1.6";
+		artDecorRestClient.downloadTemplateRecursive("cdachemed-", templateId, "dynamic");
+		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId);
+		assertTrue(dest.listFiles().length == 2);
+		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId
+				+ FileUtil.getPlatformSpecificPathSeparator() + "kit");
+		assertTrue(dest.listFiles().length > 1);
+
 	}
 
 	// This is for debugging purposes, only. Do not commit this test with the
 	// test annotation enabled!
 	// @Test
-	public static void templateTestRecursiveCdaChLrep() throws Exception {
+	public void templateTestRecursiveCdaChLrep() throws Exception {
 
 		String dir = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
 				+ FileUtil.getPlatformSpecificPathSeparator();
@@ -95,17 +149,6 @@ public class ArtDecorRestClientTest {
 				dir + FileUtil.getPlatformSpecificPathSeparator() + "2.16.756.5.30.1.1.10.1.10"
 						+ FileUtil.getPlatformSpecificPathSeparator() + "kit");
 		assertTrue(dest.listFiles().length > 1);
-	}
-
-	@Test
-	public void projectIndexTest() throws ClientProtocolException, IOException {
-
-		String content = "";
-		InputStream is = ArtDecorRestClient
-				.getArtDecorProjectIndex("https://art-decor.org/decor/services/", "cdachlrep-");
-		content = IOUtils.toString(is, Charsets.UTF_8);
-
-		assertTrue(content.startsWith("<return prefix=\"cdachlrep-\""));
 	}
 
 	@Test

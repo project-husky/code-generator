@@ -35,7 +35,7 @@ public class Hl7Its2EhcTransformerTest {
 
 	// This is for debugging purposes, only. Do not commit this test with the
 	// test annotation enabled!
-	// @Test
+	@Test
 	public void transformationTestLrep() throws Exception {
 
 		String dir = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
@@ -47,11 +47,15 @@ public class Hl7Its2EhcTransformerTest {
 		File folder = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + "kit");
 
 		// Prepare test environment
-		if (!srcFile.exists() || !folder.exists()) {
-			ArtDecorRestClientTest.templateTestRecursiveCdaChLrep();
-		}
-		if (folder.listFiles().length == 0) {
-			ArtDecorRestClientTest.templateTestRecursiveCdaChLrep();
+		boolean prepare = false;
+		if (folder.exists())
+			prepare = (folder.listFiles().length == 0);
+		else
+			prepare = !srcFile.exists();
+
+		if (prepare) {
+			ArtDecorRestClientTest test = new ArtDecorRestClientTest();
+			test.templateTestRecursiveCdaChLrep();
 		}
 
 		Hl7Its2EhcTransformer.transform(srcFile, dstFile);

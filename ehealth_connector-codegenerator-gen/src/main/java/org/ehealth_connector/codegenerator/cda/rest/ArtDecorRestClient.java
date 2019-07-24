@@ -27,9 +27,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -51,25 +49,9 @@ import org.w3c.dom.NodeList;
  */
 public class ArtDecorRestClient {
 
-	/**
-	 * This is for debugging puropses without internet connection, only. Do not
-	 * forget to switch this parameter back to false, before commit!
-	 */
-	private static boolean doLoadFromLocalFiles = false;
-
 	public static InputStream getArtDecorProjectIndex(String baseUrl, String prefix)
 			throws ClientProtocolException, IOException {
-		if (!doLoadFromLocalFiles) {
-			return getArtDecorXml(baseUrl + "ProjectIndex?prefix=" + prefix + "&format=xml");
-		} else {
-			String fn = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator()
-					+ "ProjectIndex-" + prefix + ".xml";
-			File localFile = new File(fn);
-			System.out.println(
-					"Getting the Project Index from local file: " + localFile.getAbsolutePath());
-			return IOUtils.toInputStream(FileUtils.readFileToString(localFile, Charsets.UTF_8));
-		}
-
+		return getArtDecorXml(baseUrl + "ProjectIndex?prefix=" + prefix + "&format=xml");
 	}
 
 	public static InputStream getArtDecorTemplate(String baseUrl, String prefix, String templateId,
@@ -80,25 +62,8 @@ public class ArtDecorRestClient {
 	public static InputStream getArtDecorTemplate(String baseUrl, String prefix,
 			String documentTemplateId, String templateId, String effectiveDate)
 			throws ClientProtocolException, IOException {
-		if (!doLoadFromLocalFiles) {
-			return getArtDecorXml(baseUrl + "RetrieveTemplate?prefix=" + prefix + "&id="
-					+ templateId + "&effectiveDate=" + effectiveDate + "&format=xmlnowrapper");
-		} else {
-			String fn = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator()
-					+ documentTemplateId + FileUtil.getPlatformSpecificPathSeparator() + templateId
-					+ ".xml";
-			File localFile = new File(fn);
-			if (!localFile.exists()) {
-				fn = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator()
-						+ documentTemplateId + FileUtil.getPlatformSpecificPathSeparator()
-						+ "includes" + FileUtil.getPlatformSpecificPathSeparator() + templateId
-						+ ".xml";
-				localFile = new File(fn);
-			}
-			System.out.println(
-					"Getting the Template from local file: " + localFile.getAbsolutePath());
-			return IOUtils.toInputStream(FileUtils.readFileToString(localFile, Charsets.UTF_8));
-		}
+		return getArtDecorXml(baseUrl + "RetrieveTemplate?prefix=" + prefix + "&id=" + templateId
+				+ "&effectiveDate=" + effectiveDate + "&format=xmlnowrapper");
 	}
 
 	public static InputStream getArtDecorXml(String url)
