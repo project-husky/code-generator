@@ -23,7 +23,7 @@ import org.ehealth_connector.codegenerator.cda.java.JavaCodeGenerator;
 /**
  * This is a sample Class
  */
-public class MyCamelCaser {
+public class MyCamelCaser extends Blah {
 
 	/**
 	 * This is a sample constant.

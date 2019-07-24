@@ -167,7 +167,7 @@ public class CdaMember {
 				setHl7SchemaType("org.ehealth_connector.cda.schema.ST");
 				setSimpleType("String");
 			} else {
-				setHl7SchemaType("TODO-setHl7Type-Default");
+				// setHl7SchemaType("TODO-setHl7Type-Default");
 				setSimpleType(hl7Type);
 			}
 			break;

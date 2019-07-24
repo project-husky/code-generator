@@ -16,6 +16,9 @@
  */
 package org.ehealth_connector.codegenerator.cda;
 
+import static com.github.javaparser.ast.Modifier.privateModifier;
+import static com.github.javaparser.ast.Modifier.publicModifier;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -28,6 +31,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.apache.commons.lang3.NotImplementedException;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsLexer;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.ContainsAttrContext;
@@ -41,14 +45,100 @@ import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParserBaseListener;
 import org.ehealth_connector.codegenerator.cda.xslt.Hl7Its2EhcTransformer;
 import org.ehealth_connector.codegenerator.java.JavaCodeGenerator;
 import org.ehealth_connector.common.utils.FileUtil;
+import org.ehealth_connector.common.utils.Util;
+
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 
 import net.sf.saxon.s9api.SaxonApiException;
 
 public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
+	private static void createField(ClassOrInterfaceDeclaration myClass, CdaMember cdaMember) {
+
+		if (cdaMember.getHl7SchemaType() == null)
+			throw new NotImplementedException("Type undefined for " + cdaMember.getElementName());
+
+		FieldDeclaration field = myClass.addField(cdaMember.getHl7SchemaType(),
+				JavaCodeGenerator.toCamelCase(cdaMember.getElementName()),
+				privateModifier().getKeyword());
+
+		String desc = cdaMember.getDesc();
+		if (desc != null)
+			field.setJavadocComment(desc);
+
+		createGetter(myClass, cdaMember);
+		createSetter(myClass, cdaMember);
+
+		// TODO components
+		// jcg.addMember(cdaMember);
+		// List<CdaMember> components = cdaMember.listComponents();
+		// if (components != null) {
+		// System.out.println("components:");
+		// for (CdaMember component : components) {
+		// System.out.println(" - " + component.getName() + " ("
+		// + component.getHl7XmlType() + ")");
+		// jcg.addComponent(component);
+		// }
+		// }
+	}
+
+	private static void createGetter(ClassOrInterfaceDeclaration myClass, CdaMember cdaMember) {
+
+		if (cdaMember.getHl7SchemaType() == null)
+			throw new NotImplementedException("Type undefined for " + cdaMember.getElementName());
+
+		MethodDeclaration method;
+
+		method = myClass.addMethod(
+				"get" + JavaCodeGenerator.toPascalCase(cdaMember.getElementName()),
+				publicModifier().getKeyword());
+		method.setType(cdaMember.getHl7SchemaType());
+
+		String comment = "Gets the " + cdaMember.getElementName();
+		String desc = cdaMember.getDesc();
+		if (desc != null)
+			comment += "\r\n" + desc;
+
+		method.setJavadocComment(comment);
+
+		method.createBody().addStatement(
+				"return " + JavaCodeGenerator.toCamelCase(cdaMember.getElementName()) + ";");
+
+	}
+
+	private static void createSetter(ClassOrInterfaceDeclaration myClass, CdaMember cdaMember) {
+
+		if (cdaMember.getHl7SchemaType() == null)
+			throw new NotImplementedException("Type undefined for " + cdaMember.getElementName());
+
+		MethodDeclaration method;
+
+		method = myClass.addMethod(
+				"set" + JavaCodeGenerator.toPascalCase(cdaMember.getElementName()),
+				publicModifier().getKeyword());
+
+		String comment = "Sets the " + cdaMember.getElementName();
+		String desc = cdaMember.getDesc();
+		if (desc != null)
+			comment += "\r\n" + desc;
+
+		method.setJavadocComment(comment);
+
+		method.addAndGetParameter(cdaMember.getHl7SchemaType(), "value");
+
+		method.createBody().addStatement(
+				JavaCodeGenerator.toCamelCase(cdaMember.getElementName()) + " = value;");
+
+	}
+
 	public static String doOneTemplate(List<CdaMember> baseCda, String path, String templateId,
-			HashMap<String, String> templateIndex, String hl7ElementName, String fileHeader)
-			throws SaxonApiException {
+			HashMap<String, String> templateIndex, String hl7ElementName, String packageName,
+			String fileHeader) throws SaxonApiException {
 
 		if (!path.endsWith(FileUtil.getPlatformSpecificPathSeparator()))
 			path += FileUtil.getPlatformSpecificPathSeparator();
@@ -57,6 +147,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		if (templateIndex == null)
 			templateIndex = new HashMap<String, String>();
 
+		// TODO naming
 		String fn = path + templateId + "_transformed.xml";
 		File transformed = new File(fn);
 
@@ -74,12 +165,14 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			Hl7ItsParser parser = new Hl7ItsParser(tokens);
 			ParseTreeWalker walker = new ParseTreeWalker();
 			ArtDecor2JavaGenerator listener = new ArtDecor2JavaGenerator(baseCda, templateIndex,
-					fileHeader);
+					packageName, fileHeader);
 
 			walker.walk(listener, parser.template());
 
-			System.out.println("Template Name = " + listener.getTemplateName() + " --> "
-					+ listener.getTemplateNameCamelCase());
+			String className = JavaCodeGenerator.toPascalCase(listener.getTemplateName());
+
+			System.out
+					.println("Template Name = " + listener.getTemplateName() + " --> " + className);
 
 			listener.hl7ElementName = hl7ElementName;
 
@@ -87,11 +180,26 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			if (!"".equals(hl7ElementName))
 				baseClassName = getBaseClassName(hl7ElementName);
 
+			CompilationUnit compilationUnit = new CompilationUnit();
+
+			compilationUnit.setPackageDeclaration(packageName);
+
+			ClassOrInterfaceDeclaration myClass = compilationUnit.addClass(className)
+					.setPublic(true);
+			myClass.setJavadocComment(listener.getTemplateDesc());
+			myClass.setExtendedTypes(new NodeList<ClassOrInterfaceType>(
+					new ClassOrInterfaceType(null, baseClassName)));
+
+			for (CdaMember cdaMember : listener.getCda()) {
+				System.out.println(cdaMember.getName() + " (" + cdaMember.getHl7XmlType() + ")");
+				createField(myClass, cdaMember);
+			}
+
 			// JavaClassGenerator jcg = new JavaClassGenerator(baseClassName,
 			// listener.getTemplateNameCamelCase(),
 			// "org.ehealth_connector.cda.ch.poc",
 			// "C:\\src\\ehcincubator\\art-decor-cda-2-java\\ehealthconnector\\ehealth_connector-cda\\ehealth_connector-cda-ch\\src\\main\\java\\org\\ehealth_connector\\cda\\ch\\poc",
-			// listener.getTemplateDesc(), codeFormatter, fileHeader);
+			// // listener.getTemplateDesc(), codeFormatter, fileHeader);
 			// for (CdaMember cdaMember : listener.getCda()) {
 			// System.out.println(cdaMember.getName() + " (" +
 			// cdaMember.getHl7XmlType() + ")");
@@ -115,6 +223,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			// // TODO Auto-generated catch block
 			// e.printStackTrace();
 			// }
+			File outFile = new File(Util.getTempDirectory()
+					+ FileUtil.getPlatformSpecificPathSeparator() + className + ".java");
+			JavaCodeGenerator.completeAndSave(compilationUnit, outFile);
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -147,38 +258,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		return retVal;
 	}
 
-	public final static void main(String[] args) throws SaxonApiException {
-
-		doOneTemplate(new ArrayList<CdaMember>(), "C:\\temp\\test\\2.16.756.5.30.1.1.10.1.10\\",
-				"2.16.756.5.30.1.1.10.1.10", null, "ClinicalDocument",
-				JavaCodeGenerator.getFileHeader());
-	}
-
-	public static String toCamelCase(String s) {
-		String temp = s.replace("-", " ");
-		String[] parts = temp.split(" ");
-		String camelCaseString = "";
-		for (String part : parts) {
-			if (part != null && part.trim().length() > 0)
-				camelCaseString = camelCaseString + toProperCase(part);
-			else
-				camelCaseString = camelCaseString + part + " ";
-		}
-		return camelCaseString.replace(" ", "");
-	}
-
-	public static String toProperCase(String s) {
-		String temp = s.trim();
-		String spaces = "";
-		if (temp.length() != s.length()) {
-			int startCharIndex = s.charAt(temp.indexOf(0));
-			spaces = s.substring(0, startCharIndex);
-		}
-		temp = temp.substring(0, 1).toUpperCase() + spaces + temp.substring(1).toLowerCase() + " ";
-		return temp;
-
-	}
-
 	private String hl7ElementName = "notset";
 
 	private HashMap<String, String> templateIndex = null;
@@ -188,17 +267,18 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	private String templateName = null;
 	private String templateDesc = null;
-	private String templateNameCamelCase = null;
 	private CdaMember currentCdaMember = null;
 	private boolean isAddingComponent = false;
 	private String fileHeader;
+	private String packageName;
 
 	public ArtDecor2JavaGenerator(List<CdaMember> baseCda, HashMap<String, String> templateIndex,
-			String fileHeader) {
+			String packageName, String fileHeader) {
 		if (templateIndex == null)
 			this.templateIndex = new HashMap<String, String>();
 		else
 			this.templateIndex = templateIndex;
+		this.packageName = packageName;
 		this.fileHeader = fileHeader;
 		this.baseCda = baseCda;
 	}
@@ -289,7 +369,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 					try {
 						dataType = doOneTemplate(new ArrayList<CdaMember>(),
 								"C:\\temp\\test\\2.16.756.5.30.1.1.10.1.10\\kit\\", contains,
-								templateIndex, elementName, fileHeader);
+								templateIndex, elementName, packageName, fileHeader);
 					} catch (SaxonApiException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -351,7 +431,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 					try {
 						dataType = doOneTemplate(baseCda,
 								"C:\\temp\\test\\2.16.756.5.30.1.1.10.1.10\\kit\\", ref,
-								templateIndex, null, fileHeader);
+								templateIndex, null, packageName, fileHeader);
 					} catch (SaxonApiException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -378,7 +458,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		if (tnctx != null) {
 			if (tnctx.AttrValue() != null) {
 				templateName = tnctx.AttrValue().getText().replace("\"", "");
-				templateNameCamelCase = toCamelCase(templateName);
+				// templateNameCamelCase = toCamelCase(templateName);
 			}
 		}
 	}
@@ -411,9 +491,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		return templateName;
 	}
 
-	public String getTemplateNameCamelCase() {
-		return templateNameCamelCase;
-	}
+	// public String getTemplateNameCamelCase() {
+	// return templateNameCamelCase;
+	// }
 
 	public void setCda(List<CdaMember> cda) {
 		this.cda = cda;
@@ -431,8 +511,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		this.templateName = templateName;
 	}
 
-	public void setTemplateNameCamelCase(String templateNameCamelCase) {
-		this.templateNameCamelCase = templateNameCamelCase;
-	}
+	// public void setTemplateNameCamelCase(String templateNameCamelCase) {
+	// this.templateNameCamelCase = templateNameCamelCase;
+	// }
 
 }

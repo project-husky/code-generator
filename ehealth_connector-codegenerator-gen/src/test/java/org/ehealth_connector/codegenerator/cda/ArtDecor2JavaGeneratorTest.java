@@ -38,7 +38,8 @@ public class ArtDecor2JavaGeneratorTest {
 		ArtDecor2JavaGenerator.doOneTemplate(new ArrayList<CdaMember>(),
 				Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
 						+ FileUtil.getPlatformSpecificPathSeparator() + templateId,
-				templateId, null, "ClinicalDocument", JavaCodeGenerator.getFileHeader());
+				templateId, null, "ClinicalDocument", "org.ehealth_connector.codegenerator.cda",
+				JavaCodeGenerator.getFileHeader());
 
 	}
 

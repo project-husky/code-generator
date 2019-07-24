@@ -39,6 +39,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.printer.PrettyPrinterConfiguration;
 import com.github.javaparser.printer.PrettyPrinterConfiguration.IndentType;
 
@@ -97,7 +98,8 @@ public class JavaCodeGeneratorTest {
 		ClassOrInterfaceDeclaration myClass = compilationUnit
 				.addClass(JavaCodeGenerator.toPascalCase("my camel caser")).setPublic(true);
 		myClass.setJavadocComment("This is a sample Class");
-
+		myClass.setExtendedTypes(
+				new NodeList<ClassOrInterfaceType>(new ClassOrInterfaceType(null, "Blah")));
 		method = myClass.addMethod(JavaCodeGenerator.toCamelCase("My method"),
 				publicModifier().getKeyword());
 		method.setType(boolean.class);
@@ -156,7 +158,7 @@ public class JavaCodeGeneratorTest {
 		String generatedClassFileContent = JavaCodeGenerator.getFileHeader() + "\r\n"
 				+ javaSource.getResult().get().toString(ppc);
 		// This is for debugging purposes, only:
-		// System.out.println(generatedClassFileContent);
+		System.out.println(generatedClassFileContent);
 
 		File expectedFile = new File(
 				System.getProperty("user.dir") + "/src/test/resources/MyCamelCaser.java");

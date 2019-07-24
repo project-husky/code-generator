@@ -25,6 +25,15 @@ import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.text.CaseUtils;
 
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.ParseResult;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.printer.PrettyPrinterConfiguration;
+import com.github.javaparser.printer.PrettyPrinterConfiguration.IndentType;
+
 /**
  * <div class="en">This is the main class of the ART-DECOR to Java code
  * generator. It orchestrates the individual modules (such as REST Client to
@@ -54,6 +63,42 @@ public class JavaCodeGenerator {
 	 * casing.
 	 */
 	private final static char[] DELIMITERS = new char[] { '-', '_', ' ' };
+
+	public static void completeAndSave(CompilationUnit compilationUnit, File outFile)
+			throws IOException {
+
+		// Sort all
+		NodeList<ImportDeclaration> imports = compilationUnit.getImports();
+		imports.sort(new ImportComparator());
+
+		for (ClassOrInterfaceDeclaration cl : compilationUnit
+				.findAll(ClassOrInterfaceDeclaration.class)) {
+			cl.getMembers().sort(new BodyDeclarationsComparator());
+		}
+		PrettyPrinterConfiguration ppc = new PrettyPrinterConfiguration()
+				.setIndentType(IndentType.TABS).setIndentSize(1);
+		ParseResult<CompilationUnit> javaSource = new JavaParser()
+				.parse(compilationUnit.toString());
+
+		String fileHeader = JavaCodeGenerator.getFileHeader();
+
+		String generatedClassFileContent = javaSource.getResult().get().toString(ppc);
+
+		if (!generatedClassFileContent.startsWith(fileHeader))
+			generatedClassFileContent = JavaCodeGenerator.getFileHeader() + "\r\n"
+					+ generatedClassFileContent;
+
+		// This is for debugging purposes, only:
+		// System.out.println(generatedClassFileContent);
+
+		FileUtils.writeStringToFile(outFile, generatedClassFileContent, Charsets.UTF_8);
+
+	}
+
+	public static void completeAndSave(CompilationUnit compilationUnit, String fileName)
+			throws IOException {
+		completeAndSave(compilationUnit, new File(fileName));
+	}
 
 	public static String getFileHeader() {
 		File fileHeaderFile = new File(
@@ -184,4 +229,5 @@ public class JavaCodeGenerator {
 	public JavaCodeGenerator() {
 
 	}
+
 }
