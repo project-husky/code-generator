@@ -23,11 +23,9 @@ import static org.ehealth_connector.common.mdht.enums.LanguageCode.ENGLISH;
 import java.io.File;
 import java.io.IOException;
 import java.io.InvalidClassException;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.Charsets;
 import org.ehealth_connector.common.mdht.enums.LanguageCode;
 
 import com.github.javaparser.ast.CompilationUnit;
@@ -38,11 +36,6 @@ import com.github.javaparser.ast.body.TypeDeclaration;
  * dynamically generate the value sets.</div>
  */
 public final class ValueSetUtil {
-
-	/**
-	 * <div class="en">The default charset used to encode files.</div>
-	 */
-	public static final Charset DEFAULT_CHARSET = Charsets.UTF_8;
 
 	/**
 	 * <div class="en">The JSONPath path to extract a value set from the JSON

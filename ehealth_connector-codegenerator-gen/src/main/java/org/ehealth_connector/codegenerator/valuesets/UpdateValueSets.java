@@ -22,7 +22,6 @@ import static com.github.javaparser.ast.Modifier.finalModifier;
 import static com.github.javaparser.ast.Modifier.publicModifier;
 import static com.github.javaparser.ast.Modifier.staticModifier;
 import static java.util.Arrays.asList;
-import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.DEFAULT_CHARSET;
 import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.getSourceFileName;
 import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.loadPrimaryType;
 import static org.ehealth_connector.common.mdht.enums.LanguageCode.ENGLISH;
@@ -38,6 +37,7 @@ import java.util.Map;
 
 import javax.annotation.Generated;
 
+import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.ehealth_connector.common.mdht.enums.LanguageCode;
 import org.ehealth_connector.common.mdht.enums.ValueSetEnumInterface;
@@ -284,7 +284,7 @@ public class UpdateValueSets {
 				fullyQualifiedclassName.lastIndexOf('.'));
 
 		String templateString = FileUtils
-				.readFileToString(new File(TEMPLATE_FILE_LOCATION), DEFAULT_CHARSET)
+				.readFileToString(new File(TEMPLATE_FILE_LOCATION), Charsets.UTF_8)
 				.replaceAll(TEMPLATE_NAME_TO_REPLACE, className)
 				.replaceAll(TEMPLATE_PACKAGE_NAME_TO_REPLACE, packageName);
 
@@ -292,7 +292,7 @@ public class UpdateValueSets {
 
 		FileUtils.write(getSourceFileName(baseJavaFolder, fullyQualifiedclassName),
 				javaSource.getResult().get().toString(PRETTY_PRINTER_CONFIGURATION),
-				DEFAULT_CHARSET);
+				Charsets.UTF_8);
 
 	}
 
@@ -591,7 +591,7 @@ public class UpdateValueSets {
 				"import java.util.Map;\n");
 		classFileContent = classFileContent.replace("import javax.annotation.Generated;",
 				"import javax.annotation.Generated;\n");
-		FileUtils.write(destFile, classFileContent, DEFAULT_CHARSET);
+		FileUtils.write(destFile, classFileContent, Charsets.UTF_8);
 
 		return destFile.getAbsoluteFile();
 	}
