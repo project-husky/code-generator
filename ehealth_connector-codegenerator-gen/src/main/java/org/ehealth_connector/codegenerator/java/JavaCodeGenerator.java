@@ -14,11 +14,15 @@
  * This line is intended for UTF-8 encoding checks, do not modify/delete: äöüéè
  *
  */
-package org.ehealth_connector.codegenerator.cda;
+package org.ehealth_connector.codegenerator.java;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.Charsets;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.text.CaseUtils;
 
 /**
@@ -50,6 +54,19 @@ public class JavaCodeGenerator {
 	 * casing.
 	 */
 	private final static char[] DELIMITERS = new char[] { '-', '_', ' ' };
+
+	public static String getFileHeader() {
+		File fileHeaderFile = new File(
+				System.getProperty("user.dir") + "/src/main/resources/format/JavaFileHeader.txt");
+		String fileHeaderContent = "";
+
+		try {
+			fileHeaderContent = FileUtils.readFileToString(fileHeaderFile, Charsets.UTF_8);
+		} catch (IOException e1) {
+			// Do nothing
+		}
+		return fileHeaderContent;
+	}
 
 	/**
 	 * <div class="en">Converts the given String to camelCase notation.</div>

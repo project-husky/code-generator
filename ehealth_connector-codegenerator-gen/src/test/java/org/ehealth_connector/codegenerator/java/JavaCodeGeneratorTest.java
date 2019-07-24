@@ -14,7 +14,7 @@
  * This line is intended for UTF-8 encoding checks, do not modify/delete: äöüéè
  *
  */
-package org.ehealth_connector.codegenerator.cda;
+package org.ehealth_connector.codegenerator.java;
 
 import static com.github.javaparser.ast.Modifier.privateModifier;
 import static com.github.javaparser.ast.Modifier.publicModifier;
@@ -28,8 +28,6 @@ import java.io.IOException;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.ehealth_connector.codegenerator.cda.config.ContentProfileConfig;
-import org.ehealth_connector.codegenerator.java.BodyDeclarationsComparator;
-import org.ehealth_connector.codegenerator.java.ImportComparator;
 import org.junit.Test;
 
 import com.github.javaparser.JavaParser;
@@ -83,16 +81,6 @@ public class JavaCodeGeneratorTest {
 	 */
 	@Test
 	public void javaClassFileTest() {
-
-		File fileHeaderFile = new File(
-				System.getProperty("user.dir") + "/src/main/resources/format/JavaFileHeader.txt");
-		String fileHeaderContent = "";
-
-		try {
-			fileHeaderContent = FileUtils.readFileToString(fileHeaderFile, Charsets.UTF_8);
-		} catch (IOException e1) {
-			// Do nothing
-		}
 
 		CompilationUnit compilationUnit = new CompilationUnit();
 
@@ -165,7 +153,7 @@ public class JavaCodeGeneratorTest {
 		ParseResult<CompilationUnit> javaSource = new JavaParser()
 				.parse(compilationUnit.toString());
 
-		String generatedClassFileContent = fileHeaderContent + "\r\n"
+		String generatedClassFileContent = JavaCodeGenerator.getFileHeader() + "\r\n"
 				+ javaSource.getResult().get().toString(ppc);
 		// This is for debugging purposes, only:
 		// System.out.println(generatedClassFileContent);
