@@ -1,0 +1,137 @@
+<template xmlns:cda="urn:hl7-org:v3" xmlns:hl7="urn:hl7-org:v3" xmlns:lab="urn:oid:1.3.6.1.4.1.19376.1.3.2" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="2.16.756.5.30.1.1.10.1.10" name="CDA-CH-LREP-GR-V1" displayName="General Laboratory Report" statusCode="pending" isClosed="false" versionLabel="2018" effectiveDate="2018-04-19T00:00:00" ident="cdachlrep-" cda:dummy-1="urn:hl7-org:v3" hl7:dummy-2="urn:hl7-org:v3" lab:dummy-3="urn:oid:1.3.6.1.4.1.19376.1.3.2" xhtml:dummy-5="http://www.w3.org/1999/xhtml" xsi:dummy-4="http://www.w3.org/2001/XMLSchema-instance">
+    <desc language="en-US">
+      <p>Swiss Laboratory Report - General Report</p>
+    </desc>
+    <classification type="cdadocumentlevel"></classification>
+    <relationship type="SPEC" template="2.16.756.5.30.1.1.10.1.14"></relationship>
+    <relationship type="SPEC" template="2.16.756.5.30.1.1.10.1.9"></relationship>
+    <relationship type="SPEC" template="2.16.840.1.113883.10.12.2" flexibility="2005-09-07T00:00:00"></relationship>
+    <context path="/"></context>
+    <example>
+      <!-- See https://svn.code.sf.net/p/hl7ch/code/trunk/projects/eHealthSuisse/eLaborbefund/v1.0/ for examples -->
+    </example>
+    <element name="hl7:ClinicalDocument" minimumMultiplicity="1" maximumMultiplicity="1" conformance="R" isMandatory="true" id="2.16.840.1.113883.3.1937.777.1.9.18">
+      <desc language="en-US">
+        <p>Swiss Laboratory Report - General Report</p>
+        <p>Conformity rules that are not further modelled in ART-DECOR:</p>
+        <ul>
+          <li>
+            <p>
+              <b>XML encoding</b>
+              <br />
+              UTF-8 encoding is required. All CDA-CH V2 documents MUST start with this line:<br /> 
+              &lt;?xml version="1.0" encoding="UTF-8"?&gt;
+            </p>
+          </li>
+          <li>
+            <p>
+              <b>Phone numbers</b>
+              <br />
+              Phone numbers MUST be declared in the international format.<br /> 
+              Dots (.) MUST be used as separators for grouping of number blocks.<br /> 
+              The minus sign (-) MUST be used as a separator between public and internal telephone numbers. Purpose: Some telephone exchanges - especially in the US, allow direct dial-up of an internal telephone number after the actual connection has been established over the public telephone network.<br /> 
+              Examples:<br /> &lt;telecom value="tel:+41.33.123.45.67"/&gt;<br /> 
+              &lt;telecom value="tel:+1.987.654.3210-999"/&gt;
+            </p>
+          </li>
+        </ul>
+      </desc>
+      <include ref="2.16.756.5.30.1.1.10.2.25" minimumMultiplicity="1" maximumMultiplicity="1" conformance="R" isMandatory="true"></include>
+      <element name="hl7:typeId" datatype="II" minimumMultiplicity="1" maximumMultiplicity="1" conformance="R" isMandatory="true" id="2.16.840.1.113883.3.1937.777.1.9.22">
+        <attribute name="root" value="2.16.840.1.113883.1.3" datatype="uid" id="2.16.840.1.113883.3.1937.777.1.9.23"></attribute>
+        <attribute name="extension" value="POCD_HD000040" datatype="st" id="2.16.840.1.113883.3.1937.777.1.9.24"></attribute>
+      </element>
+      <include ref="2.16.756.5.30.1.1.10.2.18"></include>
+      <include ref="2.16.756.5.30.1.1.10.2.55"></include>
+      <element name="hl7:templateId" datatype="II" minimumMultiplicity="1" maximumMultiplicity="1" conformance="R" isMandatory="true" id="2.16.756.5.30.1.1.1.1.3.9.77.1.9.26">
+        <desc language="en-US">CDA-CH-LREP / Laboratory Reports V1 ART-DECOR model for General Report.</desc>
+        <attribute name="root" value="2.16.756.5.30.1.1.10.1.10" datatype="uid" id="2.16.756.5.30.1.1.1.1.3.9.77.1.9.27"></attribute>
+      </element>
+      <include ref="2.16.756.5.30.1.1.10.2.23" minimumMultiplicity="1" maximumMultiplicity="1" conformance="R" isMandatory="true"></include>
+      <include ref="2.16.756.5.30.1.1.10.2.56" minimumMultiplicity="1" maximumMultiplicity="1" conformance="R" isMandatory="true"></include>
+      <include ref="2.16.756.5.30.1.1.10.2.62" minimumMultiplicity="1" maximumMultiplicity="1" conformance="R" isMandatory="true"></include>
+      <element name="hl7:effectiveTime" datatype="TS.CH.TZ" minimumMultiplicity="1" maximumMultiplicity="1" conformance="R" isMandatory="true" id="2.16.840.1.113883.3.1937.777.1.9.30">
+        <desc language="en-US">ClinicalDocument/effectiveTime MUST exist. It contains the creation date and time of the laboratory report. If this document replaces a previous version (linked via parentDocument), this is the date and time of the new version.</desc>
+      </element>
+      <include ref="2.16.756.5.30.1.1.10.2.19" minimumMultiplicity="1" maximumMultiplicity="1" conformance="R" isMandatory="true"></include>
+      <include ref="2.16.756.5.30.1.1.10.2.22" minimumMultiplicity="1" maximumMultiplicity="1" conformance="R" isMandatory="true"></include>
+      <include ref="2.16.756.5.30.1.1.10.2.20" minimumMultiplicity="1" maximumMultiplicity="1" conformance="R" isMandatory="true"></include>
+      <choice minimumMultiplicity="1" maximumMultiplicity="1">
+        <desc language="en-US"> recordTarget MUST be present in one of the following characteristics: <ul>
+          <li>Human Patient: The laboratory report contain test results from samples taken exclusively from a human patient.</li>
+          <li>Non-Human Subject: The laboratory report contains test results from samples taken from a non-human material (e.g., water, milk, etc.) or a living being (e.g., animal), but not related to a human patient.</li>
+          <li>Human Patient with Non-Human Subject: The laboratory report contains test results from samples taken from a non-human material that is related to a human patient (e.g., food eaten by the patient or animal that has bitten the patient).</li>
+          </ul>
+        </desc>
+        <include ref="2.16.756.5.30.1.1.10.2.58" minimumMultiplicity="0" maximumMultiplicity="1">
+          <desc language="en-US"> Human Patient: The laboratory results contain test results from samples taken exclusively from a human patient. All persons (including patients) and organizations, MUST according to XD-LAB contain name, addr and telecom. </desc>
+        </include>
+        <include ref="2.16.756.5.30.1.1.10.2.26" minimumMultiplicity="0" maximumMultiplicity="1">
+          <desc language="en-US">Non-Human Subject: The laboratory report contains test results from samples taken from a non-human material (e.g., water, milk, etc.) or a living being (e.g., animal), but not related to a human patient.</desc>
+        </include>
+        <include ref="2.16.756.5.30.1.1.10.2.27" minimumMultiplicity="0" maximumMultiplicity="1">
+          <desc language="en-US">Human Patient with Non-Human Subject: The laboratory report contains test results from samples taken from a non-human material that is related to a human patient (e.g., food eaten by the patient or animal that has bitten the patient).</desc>
+        </include>
+      </choice>
+      <include ref="2.16.756.5.30.1.1.10.2.59" minimumMultiplicity="1" maximumMultiplicity="*" conformance="R" isMandatory="true"></include>
+      <include ref="2.16.756.5.30.1.1.10.2.7" minimumMultiplicity="0" maximumMultiplicity="1"></include>
+      <include ref="2.16.756.5.30.1.1.10.2.60" minimumMultiplicity="1" maximumMultiplicity="1" conformance="R" isMandatory="true"></include>
+      <include ref="2.16.756.5.30.1.1.10.2.57" minimumMultiplicity="1" maximumMultiplicity="*" conformance="R" isMandatory="true"></include>
+      <include ref="2.16.756.5.30.1.1.10.2.61" minimumMultiplicity="0" maximumMultiplicity="1"></include>
+      <element name="hl7:authenticator" contains="2.16.756.5.30.1.1.10.4.8" minimumMultiplicity="0" maximumMultiplicity="*" id="1.3.6.1.4.1.19376.1.3.9.164"></element>
+      <include ref="2.16.756.5.30.1.1.10.2.16" minimumMultiplicity="0" maximumMultiplicity="1"></include>
+      <include ref="2.16.756.5.30.1.1.10.2.46" minimumMultiplicity="0" maximumMultiplicity="1"></include>
+      <include ref="2.16.756.5.30.1.1.10.2.28" minimumMultiplicity="0" maximumMultiplicity="*"></include>
+      <include ref="2.16.756.5.30.1.1.10.2.14" minimumMultiplicity="0" maximumMultiplicity="*"></include>
+      <include ref="2.16.756.5.30.1.1.10.2.15" minimumMultiplicity="0" maximumMultiplicity="*"></include>
+      <include ref="2.16.756.5.30.1.1.10.2.13" minimumMultiplicity="0" maximumMultiplicity="*"></include>
+      <element name="hl7:component" minimumMultiplicity="1" maximumMultiplicity="1" conformance="R" id="2.16.840.1.113883.3.1937.777.1.9.35">
+        <element name="hl7:structuredBody" minimumMultiplicity="1" maximumMultiplicity="1" conformance="R" id="2.16.840.1.113883.3.1937.777.1.9.38">
+          <element name="hl7:component" contains="2.16.756.5.30.1.1.10.3.3" minimumMultiplicity="1" maximumMultiplicity="*" conformance="R" isMandatory="true" id="2.16.840.1.113883.3.1937.777.1.9.43">
+            <desc language="en-US">
+              <p>
+                <b>Main section for laboratory reports</b>
+              </p>
+              <p>A laboratory report MUST contain at least one main chapter in the structured body element, which MAY contain one or more sub-chapters. No further nesting is allowed. Each main section (Laboratory Specialty Section) contains laboratory tests of a particular discipline (e.g., microbiology or serology) and MUST contain either text and entry elements or sub-chapter (Laboratory Report Item Section). In the first case, the human-readable text in the text element MUST be generated automatically from the entry and its sub-elements, and sub-chapters ARE
+                NOT ALLOWED. In the second case, all subsections (Laboratory Report Item Sections) must contain the examination results.</p>
+            </desc>
+          </element>
+          <element name="hl7:component" contains="2.16.756.5.30.1.1.10.3.4" minimumMultiplicity="0" maximumMultiplicity="1" id="2.16.756.5.30.1.1.1.1.3.9.77.1.9.20">
+            <desc language="en-US">
+              <p>
+                <b>Main section for vital signs</b>
+              </p>
+              <p>A laboratory report MAY include a main section in the structuredBody element that contains vital signs of the patient (e.g., body temperature, body height and weight), if this is of particular interest to the interpretation of the laboratory results.</p>
+            </desc>
+          </element>
+          <element name="hl7:component" contains="2.16.756.5.30.1.1.10.3.46" minimumMultiplicity="0" maximumMultiplicity="1" id="2.16.756.5.30.1.1.1.1.3.9.77.1.9.68">
+            <desc language="en-US">
+              <p>
+                <b>Main section for coded results</b>
+              </p>
+              <p>A laboratory report MAY include a main section in the structuredBody element that contains coded results of the patient (e.g., gestational age of the patient), if this is of particular interest to the interpretation of the laboratory results.</p>
+            </desc>
+          </element>
+          <element name="hl7:component" contains="2.16.756.5.30.1.1.10.3.53" minimumMultiplicity="0" maximumMultiplicity="1" id="2.16.756.5.30.1.1.1.1.3.9.77.1.9.21">
+            <desc language="en-US">
+              <p>
+                <b>Main section for a current pregnancy</b>
+              </p>
+              <p>A laboratory report MAY include a main section in the structuredBody element that contains information about a current pregnancy of the patient (e.g., estimated delivery date), if this is of particular interest to the interpretation of the laboratory results.</p>
+            </desc>
+          </element>
+          <element name="hl7:component" contains="2.16.756.5.30.1.1.10.3.45" minimumMultiplicity="0" maximumMultiplicity="1" id="2.16.756.5.30.1.1.1.1.3.9.77.1.9.28">
+            <desc language="en-US">
+              <p>
+                <b>Main section for original representation</b>
+              </p>
+              <p>This section MAY be used to provide the original representation of the current CDA document as it has been seen by the legal authenticator while signing.</p>
+            </desc>
+          </element>
+        </element>
+      </element>
+      <assert role="warning" test="not(//hl7:id[@root='2.16.756.5.30.1.127.3.10.3'])">This CDA-CH-LREP document contains a Swiss EPR-SPID. Please make sure, that this fits the legal base.</assert>
+      <report role="warning" test="//hl7:id[@root=('2.16.756.5.31', '2.16.756.5.32')]/parent::hl7:patientRole">This CDA-CH-LREP document contains a Swiss Social Security number as patient identifier. Please make sure, that this fits the legal base.</report>
+      <assert role="error" test="not(//hl7:id[@root=('2.16.756.5.30.1.127.3.10.3', '2.16.756.5.31', '2.16.756.5.32')]/../..[not(hl7:patientRole)])">Swiss EPR-SPID and Social Security numbers are not allowed in CDA-CH-LREP documents for other objects than the patient.</assert>
+    </element>
+  </template>

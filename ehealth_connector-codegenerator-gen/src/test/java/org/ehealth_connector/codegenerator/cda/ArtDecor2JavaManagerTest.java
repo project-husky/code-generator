@@ -20,10 +20,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.ehealth_connector.codegenerator.cda.config.ConfigurationException;
+import org.ehealth_connector.codegenerator.cda.config.ContentProfileConfig;
+import org.ehealth_connector.codegenerator.cda.config.ContentProfilePackageConfig;
 import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.Util;
 import org.junit.Test;
@@ -33,8 +37,8 @@ public class ArtDecor2JavaManagerTest {
 	@Test
 	public void saveLoadTestPackage() {
 		ArtDecor2JavaManager artDecor2JavaManager = new ArtDecor2JavaManager();
-		String configFileName = Util.getTempDirectory()
-				+ FileUtil.getPlatformSpecificPathSeparator() + "ContentProfilePackageConfig.yml";
+		File configFile = new File(Util.getTempDirectory()
+				+ FileUtil.getPlatformSpecificPathSeparator() + "ContentProfilePackageConfig.yml");
 
 		// Create a content profile package config
 		ContentProfilePackageConfig contentProfilePackageConfig = ContentProfilePackageConfig
@@ -120,10 +124,13 @@ public class ArtDecor2JavaManagerTest {
 
 		contentProfilePackageConfig.addContentProfileConfig(contentProfileConfig);
 
+		// Prepare cleanup
+		configFile.deleteOnExit();
+
 		// Save a content profile config
 		try {
 			artDecor2JavaManager.saveContentProfilePackageConfig(contentProfilePackageConfig,
-					configFileName);
+					configFile);
 		} catch (IOException e) {
 			fail("saveLoadTestPackage: IOException");
 		}
@@ -132,7 +139,7 @@ public class ArtDecor2JavaManagerTest {
 		ArtDecor2JavaManager artDecor2JavaManager2 = new ArtDecor2JavaManager();
 		try {
 			ContentProfilePackageConfig contentProfilePackageConfig2 = artDecor2JavaManager2
-					.loadContentProfilePackageConfig(configFileName);
+					.loadContentProfilePackageConfig(configFile);
 
 			int count = 6;
 			assertEquals(count, contentProfilePackageConfig.listContentProfileConfigs().size());
@@ -159,8 +166,8 @@ public class ArtDecor2JavaManagerTest {
 	@Test
 	public void saveLoadTestSingle() {
 		ArtDecor2JavaManager artDecor2JavaManager = new ArtDecor2JavaManager();
-		String configFileName = Util.getTempDirectory()
-				+ FileUtil.getPlatformSpecificPathSeparator() + "ContentProfileConfig.yml";
+		File configFile = new File(Util.getTempDirectory()
+				+ FileUtil.getPlatformSpecificPathSeparator() + "ContentProfileConfig.yml");
 
 		// Create a content profile config
 		ArrayList<ContentProfileConfig> contentProfileConfigList = new ArrayList<ContentProfileConfig>();
@@ -178,9 +185,12 @@ public class ArtDecor2JavaManagerTest {
 				.withArtDecorDocTemplateId(artDecorDocTemplateId).withArtDecorPrefix(artDecorPrefix)
 				.withTargetDir(targetDir).withTargetNamespace(targetNamespace).build();
 
+		// Prepare cleanup
+		configFile.deleteOnExit();
+
 		// Save a content profile config
 		try {
-			artDecor2JavaManager.saveContentProfileConfig(contentProfileConfig, configFileName);
+			artDecor2JavaManager.saveContentProfileConfig(contentProfileConfig, configFile);
 		} catch (IOException e) {
 			fail("saveLoadTestSingle: IOException");
 		}
@@ -189,7 +199,7 @@ public class ArtDecor2JavaManagerTest {
 		ArtDecor2JavaManager artDecor2JavaManager2 = new ArtDecor2JavaManager();
 		try {
 			ContentProfileConfig contentProfileConfig2 = artDecor2JavaManager2
-					.loadContentProfileConfig(configFileName);
+					.loadContentProfileConfig(configFile);
 
 			assertTrue(artDecorBaseUrl.equals(contentProfileConfig2.getArtDecorBaseUrl()));
 			assertTrue(artDecorPrefix.equals(contentProfileConfig2.getArtDecorPrefix()));

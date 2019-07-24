@@ -14,10 +14,11 @@
  * This line is intended for UTF-8 encoding checks, do not modify/delete: äöüéè
  *
  */
-package org.ehealth_connector.codegenerator.cda;
+package org.ehealth_connector.codegenerator.cda.config;
 
 import static org.junit.Assert.assertTrue;
 
+import org.ehealth_connector.codegenerator.cda.config.ContentProfileConfig;
 import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.Util;
 import org.junit.Test;

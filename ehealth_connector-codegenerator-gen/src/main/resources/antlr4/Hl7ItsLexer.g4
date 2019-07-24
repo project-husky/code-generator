@@ -1,9 +1,27 @@
-/** HL7 ITS lexer derived from ANTLR v4 ref guide book example XML lexer */
-lexer grammar ITSLexer;
+/** 
+ * ******************************************************************************
+ * HL7 ITS lexer derived from ANTLR v4 ref guide book example XML parser.
+ * 
+ * Parameters:
+ * none
+ * 
+ * History:
+ * 2019.04.16: Tony Schaller, medshare GmbH: First draft for PoC
+ * 2019.07.23: Tony Schaller, medshare GmbH: Implementation of the ANTLR4 module for ART-DECOR to Java code generator.
+ * 
+ * ******************************************************************************
+ */
+ 
+lexer grammar Hl7ItsLexer;
+
+@lexer::header {
+package org.ehealth_connector.codegenerator.cda.antlr;
+}
 
 // Default "mode": Everything OUTSIDE of a tag
 COMMENT     :   '<!--' .*? '-->' ;
 CDATA       :   '<![CDATA[' .*? ']]>' ;
+
 /** Scarf all DTD stuff, Entity Declarations like <!ENTITY ...>,
  *  and Notation Declarations <!NOTATION ...>
  */
@@ -23,28 +41,28 @@ TEXT        :   ~[<&]+ ;        // match any 16 bit char other than < and &
 // ----------------- Everything INSIDE of a tag ---------------------
 mode INSIDE;
 
-TEMPLATE    :   'template';
-INCLUDE    :   'include';
-CHOICE    :   'choice';
-LET    :   'let';
-ASSERT    :   'assert';
-REPORT    :   'report';
-DESC    :   'desc';
-ELEMENT    :   'element';
-ATTRIBUTE    :   'attribute';
-REFATTR    :   'ref=';
-NAMEATTR    :   'name=';
+// handled keywords 
+TEMPLATE : 'template';
+INCLUDE : 'include';
+CHOICE : 'choice';
+LET : 'let';
+ASSERT : 'assert';
+REPORT : 'report';
+DESC : 'desc';
+ELEMENT : 'element';
+ATTRIBUTE : 'attribute';
+REFATTR : 'ref=';
+NAMEATTR : 'name=';
 TYPEATTR : 'datatype=';
-MINOCCURSATTR    :   'minimumMultiplicity=';
-MAXOCCURSATTR    :   'maximumMultiplicity=';
-CONFATTR    :   'conformance=';
-MANDATTR    :   'isMandatory=';
-OPTATTR    :   'isOptional=';
+MINOCCURSATTR : 'minimumMultiplicity=';
+MAXOCCURSATTR : 'maximumMultiplicity=';
+CONFATTR : 'conformance=';
+MANDATTR : 'isMandatory=';
+OPTATTR : 'isOptional=';
 PROHIBITED : 'prohibited=';
-IDATTR    :   'id=';
-VALUEATTR    :   'value=';
-CONTAINSATTR    :   'contains=';
-
+IDATTR : 'id=';
+VALUEATTR : 'value=';
+CONTAINSATTR : 'contains=';
 
 CLOSE       :   '>'                     -> popMode ;
 SPECIAL_CLOSE:  '?>'                    -> popMode ; // close <?xml...?>

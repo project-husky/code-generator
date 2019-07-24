@@ -14,3 +14,32 @@
  * This line is intended for UTF-8 encoding checks, do not modify/delete: äöüéè
  *
  */
+package org.ehealth_connector.codegenerator.java;
+
+import java.util.Comparator;
+
+import com.github.javaparser.ast.ImportDeclaration;
+
+public class ImportComparator implements Comparator<ImportDeclaration> {
+
+	/**
+	 *
+	 * Compares two members on their name.
+	 *
+	 * {@inheritDoc}
+	 *
+	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public int compare(ImportDeclaration a, ImportDeclaration b) {
+		if ((a == null) && (b == null))
+			return 0;
+		else if ((a == null) && (b != null))
+			return -1;
+		else if ((a != null) && (b == null))
+			return 1;
+		else {
+			return a.getNameAsString().compareTo(b.getNameAsString());
+		}
+	}
+}

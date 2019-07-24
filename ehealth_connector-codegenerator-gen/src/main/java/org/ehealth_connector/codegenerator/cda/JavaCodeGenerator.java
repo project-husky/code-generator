@@ -16,17 +16,10 @@
  */
 package org.ehealth_connector.codegenerator.cda;
 
-import static com.github.javaparser.ast.Modifier.privateModifier;
-import static com.github.javaparser.ast.Modifier.publicModifier;
-import static com.github.javaparser.ast.Modifier.staticModifier;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.text.CaseUtils;
-
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 
 /**
  * <div class="en">This is the main class of the ART-DECOR to Java code
@@ -172,39 +165,6 @@ public class JavaCodeGenerator {
 	 * Instantiates a new java code generator. Default constructor.
 	 */
 	public JavaCodeGenerator() {
-
-	}
-
-	/**
-	 * Demo. This is for development and debug purposes, only.
-	 */
-	protected void demo() {
-		CompilationUnit compilationUnit = new CompilationUnit();
-
-		compilationUnit.addImport("org.ehealth_connector.codegenerator.cda.java.JavaCodeGenerator");
-
-		ClassOrInterfaceDeclaration myClass1 = compilationUnit.addClass("MyClass").setPublic(true);
-		myClass1.setJavadocComment("This is a sample Class");
-		myClass1.addField(int.class, "A_CONSTANT", publicModifier().getKeyword(),
-				staticModifier().getKeyword());
-		myClass1.addField(String.class, "name", privateModifier().getKeyword());
-		// System.out.println(myClass1);
-		// System.out.println();
-
-		ClassOrInterfaceDeclaration myClass2 = compilationUnit.addClass("X").setPublic(true);
-		myClass2.setJavadocComment("This is another sample Class");
-		myClass2.addField(String.class, "abc", publicModifier().getKeyword());
-		// System.out.println(myClass2);
-		// System.out.println();
-
-		ClassOrInterfaceDeclaration myClass3 = compilationUnit
-				.addClass(toPascalCase("my camel caser")).setPublic(true);
-		myClass3.setJavadocComment("Camel Case sample Class");
-		myClass3.addField(String.class, toCamelCase("My method"), publicModifier().getKeyword());
-		// System.out.println(myClass3);
-		// System.out.println();
-
-		System.out.println(compilationUnit);
 
 	}
 }

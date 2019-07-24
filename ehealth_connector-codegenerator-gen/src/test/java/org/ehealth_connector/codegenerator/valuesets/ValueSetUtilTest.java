@@ -15,7 +15,7 @@
  * This line is intended for UTF-8 encoding checks, do not modify/delete: äöüéè
  *
  */
-package org.ehealth_connector.codegenerator.ch.valuesets;
+package org.ehealth_connector.codegenerator.valuesets;
 
 import static org.junit.Assert.assertEquals;
 

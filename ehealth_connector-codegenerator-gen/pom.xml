@@ -36,6 +36,14 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-text</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpmime</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.saxon</groupId>
+			<artifactId>Saxon-HE</artifactId>
+		</dependency>
 
 		<!-- stuff used by code generator, only (do not move this in the main api pom) -->
 		<dependency>
@@ -103,8 +111,25 @@
 					</arguments>
 				</configuration>
 			</plugin>
-		</plugins>
 
+			<plugin>
+				<groupId>org.antlr</groupId>
+				<artifactId>antlr4-maven-plugin</artifactId>
+				<version>4.7.1</version>
+				<configuration>
+					<outputDirectory>${basedir}/src/main/java/org/ehealth_connector/codegenerator/cda/antlr</outputDirectory>
+					<sourceDirectory>${basedir}/src/main/resources/antlr4</sourceDirectory>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>antlr4</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
 	</build>
 
 </project>

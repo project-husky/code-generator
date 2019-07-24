@@ -25,6 +25,9 @@ import java.io.InputStreamReader;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
+import org.ehealth_connector.codegenerator.cda.config.ConfigurationException;
+import org.ehealth_connector.codegenerator.cda.config.ContentProfileConfig;
+import org.ehealth_connector.codegenerator.cda.config.ContentProfilePackageConfig;
 import org.ehealth_connector.common.utils.CustomizedYaml;
 
 /**
@@ -66,7 +69,14 @@ public class ArtDecor2JavaManager {
 	 */
 	public ContentProfileConfig loadContentProfileConfig(File config)
 			throws FileNotFoundException, ConfigurationException {
-		return loadContentProfileConfig(new FileInputStream(config));
+		FileInputStream is = new FileInputStream(config);
+		ContentProfileConfig retVal = loadContentProfileConfig(is);
+		try {
+			is.close();
+		} catch (IOException e) {
+			// Do nothing
+		}
+		return retVal;
 	}
 
 	/**
@@ -156,7 +166,14 @@ public class ArtDecor2JavaManager {
 	 */
 	public ContentProfilePackageConfig loadContentProfilePackageConfig(File config)
 			throws FileNotFoundException, ConfigurationException {
-		return loadContentProfilePackageConfig(new FileInputStream(config));
+		FileInputStream is = new FileInputStream(config);
+		ContentProfilePackageConfig retVal = loadContentProfilePackageConfig(is);
+		try {
+			is.close();
+		} catch (IOException e) {
+			// Do nothing
+		}
+		return retVal;
 	}
 
 	/**
