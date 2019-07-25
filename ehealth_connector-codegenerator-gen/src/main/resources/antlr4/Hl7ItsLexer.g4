@@ -8,6 +8,7 @@
  * History:
  * 2019.04.16: Tony Schaller, medshare GmbH: First draft for PoC
  * 2019.07.23: Tony Schaller, medshare GmbH: Implementation of the ANTLR4 module for ART-DECOR to Java code generator.
+ * 2019.07.25: Tony Schaller, medshare GmbH: Adding strength attribute to element
  * 
  * ******************************************************************************
  */
@@ -41,28 +42,29 @@ TEXT        :   ~[<&]+ ;        // match any 16 bit char other than < and &
 // ----------------- Everything INSIDE of a tag ---------------------
 mode INSIDE;
 
-// handled keywords 
-TEMPLATE : 'template';
-INCLUDE : 'include';
-CHOICE : 'choice';
-LET : 'let';
+// handled keywords for HL7 ITS
 ASSERT : 'assert';
-REPORT : 'report';
+ATTRIBUTE : 'attribute';
+CHOICE : 'choice';
+CONFATTR : 'conformance=';
+CONTAINSATTR : 'contains=';
 DESC : 'desc';
 ELEMENT : 'element';
-ATTRIBUTE : 'attribute';
-REFATTR : 'ref=';
-NAMEATTR : 'name=';
-TYPEATTR : 'datatype=';
-MINOCCURSATTR : 'minimumMultiplicity=';
-MAXOCCURSATTR : 'maximumMultiplicity=';
-CONFATTR : 'conformance=';
+IDATTR : 'id=';
+INCLUDE : 'include';
+LET : 'let';
 MANDATTR : 'isMandatory=';
+MAXOCCURSATTR : 'maximumMultiplicity=';
+MINOCCURSATTR : 'minimumMultiplicity=';
+NAMEATTR : 'name=';
 OPTATTR : 'isOptional=';
 PROHIBITED : 'prohibited=';
-IDATTR : 'id=';
+REFATTR : 'ref=';
+REPORT : 'report';
+STRENGTHATTR : 'strength=';
+TEMPLATE : 'template';
+TYPEATTR : 'datatype=';
 VALUEATTR : 'value=';
-CONTAINSATTR : 'contains=';
 
 CLOSE       :   '>'                     -> popMode ;
 SPECIAL_CLOSE:  '?>'                    -> popMode ; // close <?xml...?>

@@ -16,7 +16,9 @@
  */
 package org.ehealth_connector.codegenerator.cda;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.ehealth_connector.codegenerator.java.JavaCodeGenerator;
 import org.ehealth_connector.common.utils.FileUtil;
@@ -30,16 +32,26 @@ public class ArtDecor2JavaGeneratorTest {
 	 * Do all tests.
 	 *
 	 * @throws SaxonApiException
+	 * @throws IOException
 	 */
 	@Test
-	public void doAllTests() throws SaxonApiException {
+	public void doAllTests() throws SaxonApiException, IOException {
 
 		String templateId = "2.16.756.5.30.1.1.10.1.10";
-		ArtDecor2JavaGenerator.doOneTemplate(new ArrayList<CdaMember>(),
-				Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
-						+ FileUtil.getPlatformSpecificPathSeparator() + templateId,
-				templateId, null, "ClinicalDocument", "org.ehealth_connector.codegenerator.cda",
-				JavaCodeGenerator.getFileHeader());
+
+		ArrayList<CdaElement> cdaMemberList = new ArrayList<CdaElement>();
+		HashMap<String, String> templateIndex = new HashMap<String, String>();
+		String srcFilePath = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator()
+				+ "test" + FileUtil.getPlatformSpecificPathSeparator() + templateId
+				+ FileUtil.getPlatformSpecificPathSeparator();
+		String dstFilePath = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator();
+		String fileHeader = JavaCodeGenerator.getFileHeader();
+
+		ArtDecor2JavaGenerator artDecor2JavaGenerator = new ArtDecor2JavaGenerator(null,
+				templateIndex, srcFilePath, dstFilePath, "org.ehealth_connector.codegenerator.cda",
+				fileHeader);
+
+		artDecor2JavaGenerator.doOneTemplate(templateId);
 
 	}
 

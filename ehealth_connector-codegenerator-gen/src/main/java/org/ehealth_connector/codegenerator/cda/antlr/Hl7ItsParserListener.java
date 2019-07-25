@@ -150,15 +150,25 @@ public interface Hl7ItsParserListener extends ParseTreeListener {
 	 */
 	void exitAttr(Hl7ItsParser.AttrContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link Hl7ItsParser#nameAttr}.
+	 * Enter a parse tree produced by {@link Hl7ItsParser#conformanceAttr}.
 	 * @param ctx the parse tree
 	 */
-	void enterNameAttr(Hl7ItsParser.NameAttrContext ctx);
+	void enterConformanceAttr(Hl7ItsParser.ConformanceAttrContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link Hl7ItsParser#nameAttr}.
+	 * Exit a parse tree produced by {@link Hl7ItsParser#conformanceAttr}.
 	 * @param ctx the parse tree
 	 */
-	void exitNameAttr(Hl7ItsParser.NameAttrContext ctx);
+	void exitConformanceAttr(Hl7ItsParser.ConformanceAttrContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Hl7ItsParser#containsAttr}.
+	 * @param ctx the parse tree
+	 */
+	void enterContainsAttr(Hl7ItsParser.ContainsAttrContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Hl7ItsParser#containsAttr}.
+	 * @param ctx the parse tree
+	 */
+	void exitContainsAttr(Hl7ItsParser.ContainsAttrContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link Hl7ItsParser#dataTypeAttr}.
 	 * @param ctx the parse tree
@@ -170,35 +180,15 @@ public interface Hl7ItsParserListener extends ParseTreeListener {
 	 */
 	void exitDataTypeAttr(Hl7ItsParser.DataTypeAttrContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link Hl7ItsParser#minOccursAttr}.
+	 * Enter a parse tree produced by {@link Hl7ItsParser#idAttr}.
 	 * @param ctx the parse tree
 	 */
-	void enterMinOccursAttr(Hl7ItsParser.MinOccursAttrContext ctx);
+	void enterIdAttr(Hl7ItsParser.IdAttrContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link Hl7ItsParser#minOccursAttr}.
+	 * Exit a parse tree produced by {@link Hl7ItsParser#idAttr}.
 	 * @param ctx the parse tree
 	 */
-	void exitMinOccursAttr(Hl7ItsParser.MinOccursAttrContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link Hl7ItsParser#maxOccursAttr}.
-	 * @param ctx the parse tree
-	 */
-	void enterMaxOccursAttr(Hl7ItsParser.MaxOccursAttrContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link Hl7ItsParser#maxOccursAttr}.
-	 * @param ctx the parse tree
-	 */
-	void exitMaxOccursAttr(Hl7ItsParser.MaxOccursAttrContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link Hl7ItsParser#conformanceAttr}.
-	 * @param ctx the parse tree
-	 */
-	void enterConformanceAttr(Hl7ItsParser.ConformanceAttrContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link Hl7ItsParser#conformanceAttr}.
-	 * @param ctx the parse tree
-	 */
-	void exitConformanceAttr(Hl7ItsParser.ConformanceAttrContext ctx);
+	void exitIdAttr(Hl7ItsParser.IdAttrContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link Hl7ItsParser#isMandatoryAttr}.
 	 * @param ctx the parse tree
@@ -220,6 +210,36 @@ public interface Hl7ItsParserListener extends ParseTreeListener {
 	 */
 	void exitIsOptionalAttr(Hl7ItsParser.IsOptionalAttrContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link Hl7ItsParser#maxOccursAttr}.
+	 * @param ctx the parse tree
+	 */
+	void enterMaxOccursAttr(Hl7ItsParser.MaxOccursAttrContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Hl7ItsParser#maxOccursAttr}.
+	 * @param ctx the parse tree
+	 */
+	void exitMaxOccursAttr(Hl7ItsParser.MaxOccursAttrContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Hl7ItsParser#minOccursAttr}.
+	 * @param ctx the parse tree
+	 */
+	void enterMinOccursAttr(Hl7ItsParser.MinOccursAttrContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Hl7ItsParser#minOccursAttr}.
+	 * @param ctx the parse tree
+	 */
+	void exitMinOccursAttr(Hl7ItsParser.MinOccursAttrContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Hl7ItsParser#nameAttr}.
+	 * @param ctx the parse tree
+	 */
+	void enterNameAttr(Hl7ItsParser.NameAttrContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Hl7ItsParser#nameAttr}.
+	 * @param ctx the parse tree
+	 */
+	void exitNameAttr(Hl7ItsParser.NameAttrContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link Hl7ItsParser#prohibitedAttr}.
 	 * @param ctx the parse tree
 	 */
@@ -230,15 +250,25 @@ public interface Hl7ItsParserListener extends ParseTreeListener {
 	 */
 	void exitProhibitedAttr(Hl7ItsParser.ProhibitedAttrContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link Hl7ItsParser#idAttr}.
+	 * Enter a parse tree produced by {@link Hl7ItsParser#refAttr}.
 	 * @param ctx the parse tree
 	 */
-	void enterIdAttr(Hl7ItsParser.IdAttrContext ctx);
+	void enterRefAttr(Hl7ItsParser.RefAttrContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link Hl7ItsParser#idAttr}.
+	 * Exit a parse tree produced by {@link Hl7ItsParser#refAttr}.
 	 * @param ctx the parse tree
 	 */
-	void exitIdAttr(Hl7ItsParser.IdAttrContext ctx);
+	void exitRefAttr(Hl7ItsParser.RefAttrContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Hl7ItsParser#strengthAttr}.
+	 * @param ctx the parse tree
+	 */
+	void enterStrengthAttr(Hl7ItsParser.StrengthAttrContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Hl7ItsParser#strengthAttr}.
+	 * @param ctx the parse tree
+	 */
+	void exitStrengthAttr(Hl7ItsParser.StrengthAttrContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link Hl7ItsParser#valueAttr}.
 	 * @param ctx the parse tree
@@ -249,26 +279,6 @@ public interface Hl7ItsParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitValueAttr(Hl7ItsParser.ValueAttrContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link Hl7ItsParser#containsAttr}.
-	 * @param ctx the parse tree
-	 */
-	void enterContainsAttr(Hl7ItsParser.ContainsAttrContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link Hl7ItsParser#containsAttr}.
-	 * @param ctx the parse tree
-	 */
-	void exitContainsAttr(Hl7ItsParser.ContainsAttrContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link Hl7ItsParser#refAttr}.
-	 * @param ctx the parse tree
-	 */
-	void enterRefAttr(Hl7ItsParser.RefAttrContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link Hl7ItsParser#refAttr}.
-	 * @param ctx the parse tree
-	 */
-	void exitRefAttr(Hl7ItsParser.RefAttrContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link Hl7ItsParser#chardata}.
 	 * @param ctx the parse tree

@@ -8,6 +8,7 @@
  * History:
  * 2019.04.16: Tony Schaller, medshare GmbH: First draft for PoC
  * 2019.07.23: Tony Schaller, medshare GmbH: Implementation of the ANTLR4 module for ART-DECOR to Java code generator.
+ * 2019.07.25: Tony Schaller, medshare GmbH: Adding strength attribute to element
  * 
  * ******************************************************************************
  */
@@ -26,8 +27,8 @@ template : prolog? '<' TEMPLATE attr* idAttr? attr* nameAttr? attr* '>' content 
 
 desc : '<' DESC attr* '>' content '<' '/' DESC '>' ;
 
-element : '<' ELEMENT attr* conformanceAttr? containsAttr? dataTypeAttr? idAttr? isMandatoryAttr? maxOccursAttr? minOccursAttr? nameAttr? valueAttr? '/>' |
-          '<' ELEMENT attr* conformanceAttr? containsAttr? dataTypeAttr? idAttr? isMandatoryAttr? maxOccursAttr? minOccursAttr? nameAttr? valueAttr? '>' content '<' '/' ELEMENT '>' ;
+element : '<' ELEMENT attr* conformanceAttr? containsAttr? dataTypeAttr? idAttr? isMandatoryAttr? maxOccursAttr? minOccursAttr? nameAttr? valueAttr? strengthAttr? '/>' |
+          '<' ELEMENT attr* conformanceAttr? containsAttr? dataTypeAttr? idAttr? isMandatoryAttr? maxOccursAttr? minOccursAttr? nameAttr? valueAttr? strengthAttr? '>' content '<' '/' ELEMENT '>' ;
 
 attribute : '<' ATTRIBUTE attr* conformanceAttr? dataTypeAttr? idAttr? isMandatoryAttr? isOptionalAttr? maxOccursAttr? minOccursAttr? nameAttr? prohibitedAttr? valueAttr? '/>' |
             '<' ATTRIBUTE attr* conformanceAttr? dataTypeAttr? idAttr? isMandatoryAttr? isOptionalAttr? maxOccursAttr? minOccursAttr? nameAttr? prohibitedAttr? valueAttr? '>' content '<' '/' ATTRIBUTE '>' ;
@@ -56,20 +57,21 @@ xmlelement : '<' Name '>' content '<' '/' Name '>' |
 
 reference : EntityRef | CharRef ;
 
-// handled attributes 
+// handled attributes for HL7 ITS
 attr : Name '=' AttrValue ;
-nameAttr : NAMEATTR AttrValue ;
-dataTypeAttr : TYPEATTR AttrValue ;
-minOccursAttr : MINOCCURSATTR AttrValue ;
-maxOccursAttr : MAXOCCURSATTR AttrValue ;
 conformanceAttr : CONFATTR AttrValue ;
+containsAttr : CONTAINSATTR AttrValue ;
+dataTypeAttr : TYPEATTR AttrValue ;
+idAttr : IDATTR AttrValue ;
 isMandatoryAttr : MANDATTR AttrValue ;
 isOptionalAttr : OPTATTR AttrValue ;
+maxOccursAttr : MAXOCCURSATTR AttrValue ;
+minOccursAttr : MINOCCURSATTR AttrValue ;
+nameAttr : NAMEATTR AttrValue ;
 prohibitedAttr : PROHIBITED AttrValue ;
-idAttr : IDATTR AttrValue ;
-valueAttr : VALUEATTR AttrValue ;
-containsAttr : CONTAINSATTR AttrValue ;
 refAttr : REFATTR AttrValue;
+strengthAttr : STRENGTHATTR AttrValue;
+valueAttr : VALUEATTR AttrValue ;
 
 
 /** 
