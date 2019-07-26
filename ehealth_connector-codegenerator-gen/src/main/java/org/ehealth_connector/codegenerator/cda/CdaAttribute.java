@@ -16,61 +16,46 @@
  */
 package org.ehealth_connector.codegenerator.cda;
 
-import java.util.ArrayList;
+public class CdaAttribute {
 
-public class CdaTemplate {
-
-	private CdaElement cdaElement;
+	private String dataType;
 
 	private String description;
 
-	private String id;
-
 	private String name;
 
-	private ArrayList<CdaAttribute> cdaAttributeList = new ArrayList<CdaAttribute>();
+	private String value;
 
-	public void addAttribute(CdaAttribute cdaAttribute) {
-		cdaAttributeList.add(cdaAttribute);
-	}
-
-	public ArrayList<CdaAttribute> getCdaAttributeList() {
-		return cdaAttributeList;
-	}
-
-	public CdaElement getCdaElement() {
-		return cdaElement;
+	public String getDataType() {
+		return dataType;
 	}
 
 	public String getDescription() {
 		return description;
 	}
 
-	public String getId() {
-		return id;
-	}
-
 	public String getName() {
 		return name;
 	}
 
-	public void setCdaAttributeList(ArrayList<CdaAttribute> cdaAttributeList) {
-		this.cdaAttributeList = cdaAttributeList;
-	}
-
-	public void setCdaElement(CdaElement cdaElement) {
-		this.cdaElement = cdaElement;
+	public void setDataType(String dataType) {
+		this.dataType = dataType;
 	}
 
 	public void setDescription(String description) {
 		this.description = description;
 	}
 
-	public void setId(String id) {
-		this.id = id;
-	}
-
 	public void setName(String name) {
 		this.name = name;
 	}
+
+	public String getValue() {
+		return value;
+	}
+
+	public void setValue(String value) {
+		this.value = value;
+	}
+
 }

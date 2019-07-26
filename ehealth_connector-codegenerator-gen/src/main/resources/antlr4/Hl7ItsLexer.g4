@@ -9,6 +9,7 @@
  * 2019.04.16: Tony Schaller, medshare GmbH: First draft for PoC
  * 2019.07.23: Tony Schaller, medshare GmbH: Implementation of the ANTLR4 module for ART-DECOR to Java code generator.
  * 2019.07.25: Tony Schaller, medshare GmbH: Adding strength attribute to element
+ * 2019.07.26: Tony Schaller, medshare GmbH: Adding flexibility attribute to element and new vocabulary element
  * 
  * ******************************************************************************
  */
@@ -47,6 +48,7 @@ ASSERT : 'assert';
 ATTRIBUTE : 'attribute';
 CHOICE : 'choice';
 CONFATTR : 'conformance=';
+FLEXIBILITYATTR : 'flexibility=';
 CONTAINSATTR : 'contains=';
 DESC : 'desc';
 ELEMENT : 'element';
@@ -65,6 +67,8 @@ STRENGTHATTR : 'strength=';
 TEMPLATE : 'template';
 TYPEATTR : 'datatype=';
 VALUEATTR : 'value=';
+VALUESETATTR: 'valueSet=';
+VOCAB : 'vocabulary';
 
 CLOSE       :   '>'                     -> popMode ;
 SPECIAL_CLOSE:  '?>'                    -> popMode ; // close <?xml...?>

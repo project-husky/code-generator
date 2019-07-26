@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.antlr.v4.runtime.CharStreams;
@@ -32,6 +33,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.lang3.NotImplementedException;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsLexer;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser;
+import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.ContainsAttrContext;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.DataTypeAttrContext;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.IdAttrContext;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.NameAttrContext;
@@ -115,13 +117,25 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	}
 
-	private static void printElement(String intend, CdaElement cdaElement) {
-		System.out.println(intend + "- CdaElement Name = " + cdaElement.getName() + " (dataType: "
-				+ cdaElement.getDataType() + ")");
-		for (CdaElement item : cdaElement.getChildrenCdaElementList()) {
-			printElement(intend + "  ", item);
+	private static void printCdaAttributes(String intend, ArrayList<CdaAttribute> attrList) {
+		for (CdaAttribute attr : attrList) {
+			System.out.println(intend + "  " + attr.getName() + " = " + attr.getValue()
+					+ " (dataType: " + attr.getDataType() + ")");
 		}
 	}
+
+	private static void printCdaElementRecursive(String intend, CdaElement cdaElement) {
+		System.out.println(intend + "- CdaElement Name = " + cdaElement.getName() + " (dataType: "
+				+ cdaElement.getDataType() + ")");
+		printCdaAttributes(intend, cdaElement.getCdaAttributeList());
+		for (CdaElement item : cdaElement.getChildrenCdaElementList()) {
+			printCdaElementRecursive(intend + "  ", item);
+		}
+	}
+
+	private boolean printParsingDebugInformation = false;
+
+	private boolean printAssembledDebugInformation = true;
 
 	private int processingTemplate = 0;
 
@@ -134,6 +148,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	private CdaElement currentCdaElement = null;
 
 	private CdaTemplate currentCdaTemplate = null;
+
+	private CdaAttribute currentCdaAttribute = null;
 
 	private String srcFilePath = null;
 
@@ -171,128 +187,137 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	public String doOneTemplate(String templateId) throws SaxonApiException, IOException {
 
-		boolean initialRun = (parentCdaElement == null);
 		String retVal = "FAILURE";
 
-		// TODO naming
-		String kitSrcFilePath = srcFilePath;
-		if (!kitSrcFilePath.endsWith("kit" + FileUtil.getPlatformSpecificPathSeparator()))
-			kitSrcFilePath += "kit" + FileUtil.getPlatformSpecificPathSeparator();
+		// TODO: This is a quick fix for CDA-CH-EMED
+		if (templateId.startsWith("1.3.6.1.4.1.19376.")
+				|| "2.16.756.5.30.1.1.10.4.2".contentEquals(templateId))
+			return retVal;
 
-		String orgFn = srcFilePath + templateId + ".xml";
-		String trnFn = srcFilePath + templateId + "_transformed.xml";
-		File orgFile = new File(orgFn);
-		File trnFile = new File(trnFn);
-
-		if (!orgFile.exists()) {
-			orgFn = kitSrcFilePath + templateId + ".xml";
-			trnFn = kitSrcFilePath + templateId + "_transformed.xml";
+		if (templateIndex.containsKey(templateId)) {
+			if (printParsingDebugInformation)
+				System.out.println(
+						templateId + " is already known as " + templateIndex.get(templateId));
+			retVal = templateIndex.get(templateId);
 		}
 
-		if (!trnFile.exists())
+		if ("FAILURE".equals(retVal)) {
+			boolean initialRun = (parentCdaElement == null);
+			if (initialRun)
+				System.out.println("Processing: " + templateId);
+
+			templateIndex.put(templateId, "running");
+
+			// TODO naming
+			String kitSrcFilePath = srcFilePath;
+			if (!kitSrcFilePath.endsWith("kit" + FileUtil.getPlatformSpecificPathSeparator()))
+				kitSrcFilePath += "kit" + FileUtil.getPlatformSpecificPathSeparator();
+
+			String orgFn = srcFilePath + templateId + ".xml";
+			String trnFn = srcFilePath + templateId + "_transformed.xml";
+			File orgFile = new File(orgFn);
+			File trnFile = new File(trnFn);
+
+			if (!orgFile.exists()) {
+				orgFn = kitSrcFilePath + templateId + ".xml";
+				trnFn = kitSrcFilePath + templateId + "_transformed.xml";
+				orgFile = new File(orgFn);
+				trnFile = new File(trnFn);
+			}
+
+			// if (!trnFile.exists())
 			Hl7Its2EhcTransformer.transform(orgFn, trnFn);
 
-		String content;
+			String content;
 
-		content = new String(Files.readAllBytes(Paths.get(trnFn)));
+			content = new String(Files.readAllBytes(Paths.get(trnFn)));
 
-		// instantiate the lexer, the parser, and the walker
-		Hl7ItsLexer lexer = new Hl7ItsLexer(CharStreams.fromString(content));
+			// instantiate the lexer, the parser, and the walker
+			Hl7ItsLexer lexer = new Hl7ItsLexer(CharStreams.fromString(content));
+			CommonTokenStream tokens = new CommonTokenStream(lexer);
+			Hl7ItsParser parser = new Hl7ItsParser(tokens);
+			ParseTreeWalker walker = new ParseTreeWalker();
 
-		CommonTokenStream tokens = new CommonTokenStream(lexer);
+			// Parse the template
+			if (printParsingDebugInformation)
+				System.out.println("Parsing started");
 
-		Hl7ItsParser parser = new Hl7ItsParser(tokens);
-		ParseTreeWalker walker = new ParseTreeWalker();
+			walker.walk(this, parser.template());
+			retVal = currentCdaTemplate.getName();
+			templateIndex.remove(templateId, "running");
+			templateIndex.put(templateId, retVal);
 
-		// Parse the template
-		System.out.println("Parsing started");
-		walker.walk(this, parser.template());
-		System.out.println("Parsing completed");
-		System.out.println("-----------------------------------------------------------");
-		System.out.println("");
+			if (printParsingDebugInformation) {
+				System.out.println("Parsing completed");
+				System.out.println("-----------------------------------------------------------");
+				System.out.println("");
+			}
 
-		// Show the content (this is for debugging purposes, only)
-		if (initialRun) {
-			System.out.println("Assembled contents:");
-			printElement("", currentCdaTemplate.getCdaElement());
-			// System.out.println("CdaTemplate Name = " +
-			// currentCdaTemplate.getName() + " (id: "
-			// + currentCdaTemplate.getId() + ")");
-			// System.out.println("CdaElement Name = " +
-			// currentCdaTemplate.getCdaElement().getName()
-			// + " (dataType: " +
-			// currentCdaTemplate.getCdaElement().getDataType() + ")");
-			// for (CdaElement cdaElement : currentCdaTemplate.getCdaElement()
-			// .getChildrenCdaElementList()) {
-			// System.out.println(" - CdaElement Name = " + cdaElement.getName()
-			// + " (dataType: "
-			// + cdaElement.getDataType() + ")");
-			// for (CdaElement cdaElement1 :
-			// cdaElement.getChildrenCdaElementList()) {
-			// System.out.println(" - CdaElement Name = " +
-			// cdaElement1.getName()
-			// + " (dataType: " + cdaElement1.getDataType() + ")");
-			// for (CdaElement cdaElement2 :
-			// cdaElement1.getChildrenCdaElementList()) {
-			// System.out.println(" - CdaElement Name = " +
-			// cdaElement2.getName()
-			// + " (dataType: " + cdaElement2.getDataType() + ")");
-			// if (cdaElement2.getChildrenCdaElementList().size() > 0)
-			// System.out.println("THERE ARE MORE CHILDREN");
-			// for (CdaElement cdaElement3 :
-			// cdaElement2.getChildrenCdaElementList()) {
-			// System.out.println(" - CdaElement Name = " +
-			// cdaElement3.getName()
-			// + " (dataType: " + cdaElement3.getDataType() + ")");
-			// if (cdaElement3.getChildrenCdaElementList().size() > 0)
-			// System.out.println("THERE ARE MORE CHILDREN");
+			// Show the content (this is for debugging purposes, only)
+			if (printAssembledDebugInformation && initialRun) {
+				System.out.println("Assembled content for template " + currentCdaTemplate.getName()
+						+ " (id: " + currentCdaTemplate.getId() + ")");
+				printCdaAttributes(" ", currentCdaTemplate.getCdaAttributeList());
+
+				printCdaElementRecursive("", currentCdaTemplate.getCdaElement());
+			}
+
+			// Create the Java Class
+			// CompilationUnit compilationUnit = new CompilationUnit();
+			// compilationUnit.setPackageDeclaration(packageName);
+			//
+			// String className =
+			// JavaCodeGenerator.toPascalCase(currentCdaTemplate.getName());
+			// ClassOrInterfaceDeclaration myClass =
+			// compilationUnit.addClass(className).setPublic(true);
+			// myClass.setJavadocComment(currentCdaElement.getDescription());
+			// String inheritenceOf = currentCdaElement.getDataType();
+			// if (inheritenceOf == null)
+			// inheritenceOf = "TODO";
+			// myClass.setExtendedTypes(
+			// new NodeList<ClassOrInterfaceType>(new ClassOrInterfaceType(null,
+			// inheritenceOf)));
+			//
+			// for (CdaElement cdaElement :
+			// currentCdaElement.getChildrenCdaElementList()) {
+			// createField(myClass, cdaElement);
 			// }
-			// }
-			// }
-			// }
+			//
+			// File outFile = new File(dstFilePath + className + ".java");
+			// JavaCodeGenerator.completeAndSave(compilationUnit, outFile);
 		}
 
-		// Create the Java Class
-		// CompilationUnit compilationUnit = new CompilationUnit();
-		// compilationUnit.setPackageDeclaration(packageName);
-		//
-		// String className =
-		// JavaCodeGenerator.toPascalCase(currentCdaTemplate.getName());
-		// ClassOrInterfaceDeclaration myClass =
-		// compilationUnit.addClass(className).setPublic(true);
-		// myClass.setJavadocComment(currentCdaElement.getDescription());
-		// String inheritenceOf = currentCdaElement.getDataType();
-		// if (inheritenceOf == null)
-		// inheritenceOf = "TODO";
-		// myClass.setExtendedTypes(
-		// new NodeList<ClassOrInterfaceType>(new ClassOrInterfaceType(null,
-		// inheritenceOf)));
-		//
-		// for (CdaElement cdaElement :
-		// currentCdaElement.getChildrenCdaElementList()) {
-		// createField(myClass, cdaElement);
-		// }
-		//
-		// File outFile = new File(dstFilePath + className + ".java");
-		// JavaCodeGenerator.completeAndSave(compilationUnit, outFile);
-
 		return retVal;
+
 	}
 
 	@Override
 	public void enterAttribute(Hl7ItsParser.AttributeContext ctx) {
 		processingAttribute++;
-		NameAttrContext nameAttrCtx = ctx.nameAttr();
-		String attrName = "";
-		if (nameAttrCtx != null)
-			attrName = nameAttrCtx.AttrValue().getText().replace("\"", "");
+		currentCdaAttribute = new CdaAttribute();
 
-		String attrValue = "";
+		NameAttrContext nameAttrCtx = ctx.nameAttr();
+		if (nameAttrCtx != null)
+			currentCdaAttribute.setName(nameAttrCtx.AttrValue().getText().replace("\"", ""));
+
 		ValueAttrContext valueAttrCtx = ctx.valueAttr();
 		if (valueAttrCtx != null)
-			attrValue = valueAttrCtx.AttrValue().getText().replace("\"", "");
+			currentCdaAttribute.setValue(valueAttrCtx.AttrValue().getText().replace("\"", ""));
 
-		System.out.println("Attribute: " + attrName + "=" + attrValue);
+		DataTypeAttrContext dataTypeAttrCtx = ctx.dataTypeAttr();
+		if (dataTypeAttrCtx != null)
+			currentCdaAttribute
+					.setDataType(dataTypeAttrCtx.AttrValue().getText().replace("\"", ""));
+
+		if (currentCdaElement == null)
+			currentCdaTemplate.addAttribute(currentCdaAttribute);
+		else
+			currentCdaElement.addAttribute(currentCdaAttribute);
+
+		if (printParsingDebugInformation)
+			System.out.println("Attribute: " + currentCdaAttribute.getName() + "="
+					+ currentCdaAttribute.getValue() + " (dataType: "
+					+ currentCdaAttribute.getDataType() + ")");
 	}
 
 	@Override
@@ -316,7 +341,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		if ((processingElement > 0) && (processingAttribute == 0))
 			currentCdaElement.setDescription(desc);
 		if (processingAttribute > 0)
-			System.out.println("*** STOP ***: Description for an Attribute");
+			currentCdaAttribute.setDescription(desc);
 	}
 
 	@Override
@@ -340,9 +365,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		if (dataTypeAttrCtx != null)
 			cdaElement.setDataType(dataTypeAttrCtx.AttrValue().getText().replace("\"", ""));
 
-		System.out.println("Element: " + cdaElement.getName() + " (dataType: "
-				+ cdaElement.getDataType() + ")");
-
 		if (parentCdaElement != null)
 			if (elementInElement)
 				currentCdaElement.addChild(cdaElement);
@@ -355,18 +377,29 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		currentCdaElement = cdaElement;
 
-		// if (createChildElement) {
-		// currentCdaElement.addChild(cdaElement);
-		// currentCdaElement = cdaElement;
-		// } else {
-		// currentCdaElement = new CdaElement(parentCdaElement);
-		// if (parentCdaElement != null)
-		// parentCdaElement.addChild(currentCdaElement);
-		// else {
-		// parentCdaElement = currentCdaElement;
-		// currentCdaTemplate.setCdaElement(currentCdaElement);
-		// }
-		// }
+		ContainsAttrContext containsAttrCtx = ctx.containsAttr();
+		String contains = "";
+		String containsDataType = null;
+		if (containsAttrCtx != null) {
+			contains = containsAttrCtx.AttrValue().getText().replace("\"", "");
+			if (printParsingDebugInformation)
+				System.out.println(cdaElement.getName() + " contains " + contains);
+			try {
+				ArtDecor2JavaGenerator artDecor2JavaGenerator = new ArtDecor2JavaGenerator(
+						currentCdaElement, templateIndex, srcFilePath, dstFilePath, packageName,
+						fileHeader);
+				containsDataType = artDecor2JavaGenerator.doOneTemplate(contains);
+			} catch (SaxonApiException | IOException e) {
+				containsDataType = "FAILURE";
+				e.printStackTrace();
+			}
+			if (containsDataType != null)
+				cdaElement.setDataType(containsDataType);
+		}
+
+		if (printParsingDebugInformation)
+			System.out.println("Element: " + cdaElement.getName() + " (dataType: "
+					+ cdaElement.getDataType() + ")");
 
 	}
 
@@ -377,20 +410,17 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		String dataType = null;
 		if (refAttrCtx != null) {
 			ref = refAttrCtx.AttrValue().getText().replace("\"", "");
-			System.out.println("Include: " + ref);
-			if (templateIndex.containsKey(ref)) {
-				System.out.println(ref + " is already known as " + templateIndex.get(ref));
-				dataType = templateIndex.get(ref);
-			} else {
-				try {
-					ArtDecor2JavaGenerator artDecor2JavaGenerator = new ArtDecor2JavaGenerator(
-							parentCdaElement, templateIndex, srcFilePath, dstFilePath, packageName,
-							fileHeader);
-					dataType = artDecor2JavaGenerator.doOneTemplate(ref);
-				} catch (SaxonApiException | IOException e) {
-					dataType = "FAILURE";
-					e.printStackTrace();
-				}
+			if (printParsingDebugInformation)
+				if (printParsingDebugInformation)
+					System.out.println("Include: " + ref);
+			try {
+				ArtDecor2JavaGenerator artDecor2JavaGenerator = new ArtDecor2JavaGenerator(
+						parentCdaElement, templateIndex, srcFilePath, dstFilePath, packageName,
+						fileHeader);
+				dataType = artDecor2JavaGenerator.doOneTemplate(ref);
+			} catch (SaxonApiException | IOException e) {
+				dataType = "FAILURE";
+				e.printStackTrace();
 			}
 		}
 
@@ -408,8 +438,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		if (nameAttrCtx != null)
 			currentCdaTemplate.setName(nameAttrCtx.AttrValue().getText().replace("\"", ""));
 
-		System.out.println("Template: " + currentCdaTemplate.getName() + " (id: "
-				+ currentCdaTemplate.getId() + ")");
+		if (printParsingDebugInformation)
+			System.out.println("Template: " + currentCdaTemplate.getName() + " (id: "
+					+ currentCdaTemplate.getId() + ")");
 	}
 
 	@Override

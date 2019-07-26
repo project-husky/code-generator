@@ -9,6 +9,7 @@
  * 2019.04.16: Tony Schaller, medshare GmbH: First draft for PoC
  * 2019.07.23: Tony Schaller, medshare GmbH: Implementation of the ANTLR4 module for ART-DECOR to Java code generator.
  * 2019.07.25: Tony Schaller, medshare GmbH: Adding strength attribute to element
+ * 2019.07.26: Tony Schaller, medshare GmbH: Adding flexibility attribute to element and new vocabulary element
  * 
  * ******************************************************************************
  */
@@ -35,8 +36,12 @@ attribute : '<' ATTRIBUTE attr* conformanceAttr? dataTypeAttr? idAttr? isMandato
 
 choice : '<' CHOICE attr* maxOccursAttr? minOccursAttr? '>' content '<' '/' CHOICE '>' ;
 
-include : '<' INCLUDE attr* conformanceAttr? idAttr? isMandatoryAttr? maxOccursAttr? minOccursAttr? refAttr? attr* '/>' | 
-					'<' INCLUDE attr* conformanceAttr? idAttr? isMandatoryAttr? maxOccursAttr? minOccursAttr? refAttr? attr* '>' content '<' '/' INCLUDE '>';
+include : '<' INCLUDE attr* conformanceAttr? flexibilityAttr? idAttr? isMandatoryAttr? maxOccursAttr? minOccursAttr? refAttr? attr* '/>' | 
+          '<' INCLUDE attr* conformanceAttr? flexibilityAttr? idAttr? isMandatoryAttr? maxOccursAttr? minOccursAttr? refAttr? attr* '>' content '<' '/' INCLUDE '>';
+          
+vocab : '<' VOCAB attr* flexibilityAttr? valueSetAttr? attr* '/>' | 
+        '<' VOCAB attr* flexibilityAttr? valueSetAttr? attr* '>' content '<' '/' VOCAB '>';
+
 
 letter : '<' LET nameAttr? valueAttr? '/>' | 
 				 '<' LET nameAttr? valueAttr? '>' content '<' '/' LET '>';
@@ -48,7 +53,7 @@ report : '<' REPORT attr* '/>' |
 				 '<' REPORT attr* '>' content '<' '/' REPORT '>';
 
 content : chardata?
-          ((xmlelement | desc | element | include | choice | letter | assertion | report | reference | attribute | CDATA | PI | COMMENT) chardata?)* ;
+          ((xmlelement | desc | element | include | choice | letter | assertion | report | reference | attribute | vocab | CDATA | PI | COMMENT) chardata?)* ;
 
 xmlelement : '<' Name '>' content '<' '/' Name '>' |
              '<' Name '/>' |
@@ -60,6 +65,7 @@ reference : EntityRef | CharRef ;
 // handled attributes for HL7 ITS
 attr : Name '=' AttrValue ;
 conformanceAttr : CONFATTR AttrValue ;
+flexibilityAttr : FLEXIBILITYATTR AttrValue ;
 containsAttr : CONTAINSATTR AttrValue ;
 dataTypeAttr : TYPEATTR AttrValue ;
 idAttr : IDATTR AttrValue ;
@@ -72,6 +78,7 @@ prohibitedAttr : PROHIBITED AttrValue ;
 refAttr : REFATTR AttrValue;
 strengthAttr : STRENGTHATTR AttrValue;
 valueAttr : VALUEATTR AttrValue ;
+valueSetAttr : VALUESETATTR AttrValue;
 
 
 /** 

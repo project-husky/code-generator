@@ -80,6 +80,16 @@ public interface Hl7ItsParserListener extends ParseTreeListener {
 	 */
 	void exitInclude(Hl7ItsParser.IncludeContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link Hl7ItsParser#vocab}.
+	 * @param ctx the parse tree
+	 */
+	void enterVocab(Hl7ItsParser.VocabContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Hl7ItsParser#vocab}.
+	 * @param ctx the parse tree
+	 */
+	void exitVocab(Hl7ItsParser.VocabContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link Hl7ItsParser#letter}.
 	 * @param ctx the parse tree
 	 */
@@ -159,6 +169,16 @@ public interface Hl7ItsParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitConformanceAttr(Hl7ItsParser.ConformanceAttrContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Hl7ItsParser#flexibilityAttr}.
+	 * @param ctx the parse tree
+	 */
+	void enterFlexibilityAttr(Hl7ItsParser.FlexibilityAttrContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Hl7ItsParser#flexibilityAttr}.
+	 * @param ctx the parse tree
+	 */
+	void exitFlexibilityAttr(Hl7ItsParser.FlexibilityAttrContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link Hl7ItsParser#containsAttr}.
 	 * @param ctx the parse tree
@@ -279,6 +299,16 @@ public interface Hl7ItsParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitValueAttr(Hl7ItsParser.ValueAttrContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Hl7ItsParser#valueSetAttr}.
+	 * @param ctx the parse tree
+	 */
+	void enterValueSetAttr(Hl7ItsParser.ValueSetAttrContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Hl7ItsParser#valueSetAttr}.
+	 * @param ctx the parse tree
+	 */
+	void exitValueSetAttr(Hl7ItsParser.ValueSetAttrContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link Hl7ItsParser#chardata}.
 	 * @param ctx the parse tree

@@ -102,6 +102,18 @@ public class Hl7ItsParserBaseListener implements Hl7ItsParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterVocab(Hl7ItsParser.VocabContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitVocab(Hl7ItsParser.VocabContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterLetter(Hl7ItsParser.LetterContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -193,6 +205,18 @@ public class Hl7ItsParserBaseListener implements Hl7ItsParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitConformanceAttr(Hl7ItsParser.ConformanceAttrContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterFlexibilityAttr(Hl7ItsParser.FlexibilityAttrContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFlexibilityAttr(Hl7ItsParser.FlexibilityAttrContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -337,6 +361,18 @@ public class Hl7ItsParserBaseListener implements Hl7ItsParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitValueAttr(Hl7ItsParser.ValueAttrContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterValueSetAttr(Hl7ItsParser.ValueSetAttrContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitValueSetAttr(Hl7ItsParser.ValueSetAttrContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

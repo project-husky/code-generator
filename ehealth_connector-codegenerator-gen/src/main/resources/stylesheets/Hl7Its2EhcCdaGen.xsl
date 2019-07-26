@@ -10,6 +10,7 @@ none
 History:
 2019.04.16: Tony Schaller, medshare GmbH: First draft for PoC
 2019.07.23: Tony Schaller, medshare GmbH: Implementation of the XSLT module for ART-DECOR to Java code generator.
+2019.07.26: Tony Schaller, medshare GmbH: Omitting empty elements
 
 ******************************************************************************
 -->
@@ -22,11 +23,12 @@ History:
 	<!--
 	****************************************************************************
 	The following templates perform a deep copy of the entire XML tree.
+	Element not having a text or element inside will be omitted.
 	XSL templates matching specific element nodes or having a higher priority
 	may overwrite this default behavior.
 	****************************************************************************
 	-->
-	<xsl:template match="@*|node()" priority="-2">
+	<xsl:template match="@*|node()[./node()]" priority="-2">
 		<xsl:copy-of select="." />
 	</xsl:template>
 
@@ -59,7 +61,7 @@ History:
 	****************************************************************************
 	-->
 	<xsl:template match="desc">
-		<xsl:if test="@language='en-US'">
+		<xsl:if test="@language='en-US' and node()">
 			<desc>
 				<xsl:apply-templates select="@*|node()" />
 			</desc>
