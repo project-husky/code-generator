@@ -28,6 +28,7 @@ import java.io.IOException;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.ehealth_connector.codegenerator.cda.config.ContentProfileConfig;
+import org.ehealth_connector.common.utils.Util;
 import org.junit.Test;
 
 import com.github.javaparser.JavaParser;
@@ -155,10 +156,13 @@ public class JavaCodeGeneratorTest {
 		ParseResult<CompilationUnit> javaSource = new JavaParser()
 				.parse(compilationUnit.toString());
 
-		String generatedClassFileContent = JavaCodeGenerator.getFileHeader() + "\r\n"
-				+ javaSource.getResult().get().toString(ppc);
+		String generatedClassFileContent = JavaCodeGenerator.getFileHeader();
+		if (Util.isWindows())
+			generatedClassFileContent += "\r";
+		generatedClassFileContent += "\n" + javaSource.getResult().get().toString(ppc);
+
 		// This is for debugging purposes, only:
-		System.out.println(generatedClassFileContent);
+		// System.out.println(generatedClassFileContent);
 
 		File expectedFile = new File(
 				System.getProperty("user.dir") + "/src/test/resources/MyCamelCaser.java");
@@ -179,8 +183,7 @@ public class JavaCodeGeneratorTest {
 			fail(e.getMessage());
 		}
 
-		//TODO: Does not work on CI Build..
-		//assertTrue(expectedContent.equals(generatedClassFileContent));
+		assertTrue(expectedContent.equals(generatedClassFileContent));
 
 	}
 }
