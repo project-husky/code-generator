@@ -19,15 +19,18 @@ package org.ehealth_connector.codegenerator.cda;
 import java.io.IOException;
 import java.util.HashMap;
 
+import javax.xml.bind.JAXBException;
+
 import org.ehealth_connector.codegenerator.java.JavaCodeGenerator;
 import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.Util;
+import org.junit.Test;
 
 import net.sf.saxon.s9api.SaxonApiException;
 
 public class ArtDecor2JavaGeneratorTest {
 	// @Test
-	public void doEmedTest() throws SaxonApiException, IOException {
+	public void doEmedTest() throws SaxonApiException, IOException, JAXBException {
 
 		// Initialization
 		ArtDecor2JavaGenerator artDecor2JavaGenerator = null;
@@ -93,8 +96,8 @@ public class ArtDecor2JavaGeneratorTest {
 
 	}
 
-	// @Test
-	public void doLrepTest() throws SaxonApiException, IOException {
+	@Test
+	public void doLrepTest() throws SaxonApiException, IOException, JAXBException {
 
 		String templateId = "2.16.756.5.30.1.1.10.1.10";
 

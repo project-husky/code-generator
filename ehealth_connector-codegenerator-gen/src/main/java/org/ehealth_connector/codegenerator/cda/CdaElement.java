@@ -63,6 +63,16 @@ public class CdaElement {
 		return description;
 	}
 
+	public String getFullName() {
+		String retVal = getName();
+		CdaElement parent = getParentCdaElement();
+		while (parent != null) {
+			retVal = parent.getName() + "." + retVal;
+			parent = parent.getParentCdaElement();
+		}
+		return retVal;
+	}
+
 	public String getName() {
 		return name;
 	}

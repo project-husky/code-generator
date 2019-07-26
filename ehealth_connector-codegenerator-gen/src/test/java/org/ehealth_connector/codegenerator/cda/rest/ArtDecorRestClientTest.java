@@ -143,8 +143,10 @@ public class ArtDecorRestClientTest {
 		artDecorRestClient.downloadTemplateRecursive("cdachlrep-", "2.16.756.5.30.1.1.10.1.10",
 				"2018-04-19T00:00:00");
 
-		File dest = new File(dir);
-		assertTrue(dest.listFiles().length == 1);
+		File dest;
+		dest = new File(
+				dir + FileUtil.getPlatformSpecificPathSeparator() + "2.16.756.5.30.1.1.10.1.10");
+		assertTrue(dest.listFiles().length == 2);
 		dest = new File(
 				dir + FileUtil.getPlatformSpecificPathSeparator() + "2.16.756.5.30.1.1.10.1.10"
 						+ FileUtil.getPlatformSpecificPathSeparator() + "kit");

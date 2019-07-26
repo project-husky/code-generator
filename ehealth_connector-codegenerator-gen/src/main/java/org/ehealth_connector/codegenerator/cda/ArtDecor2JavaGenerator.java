@@ -26,6 +26,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.Interval;
@@ -51,6 +54,8 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import net.sf.saxon.s9api.SaxonApiException;
 
 public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
+
+	private static HashMap<JAXBElement, String> jaxbElementIndex = null;
 
 	private static void createField(ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
 
@@ -117,6 +122,21 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	}
 
+	private static void fillDatatypesRecursive(CdaElement cdaElement) throws JAXBException {
+		if (jaxbElementIndex == null)
+			jaxbElementIndex = loadJaxbElementIndex();
+		String dataType = cdaElement.getDataType();
+		if (dataType == null)
+			System.out.println("TODO Setting Datatype for " + cdaElement.getFullName());
+		for (CdaElement item : cdaElement.getChildrenCdaElementList()) {
+			fillDatatypesRecursive(item);
+		}
+	}
+
+	private static HashMap<JAXBElement, String> loadJaxbElementIndex() {
+		// TODO
+	}
+
 	private static void printCdaAttributes(String intend, ArrayList<CdaAttribute> attrList) {
 		for (CdaAttribute attr : attrList) {
 			System.out.println(intend + "  " + attr.getName() + " = " + attr.getValue()
@@ -135,7 +155,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	private boolean printParsingDebugInformation = false;
 
-	private boolean printAssembledDebugInformation = true;
+	private boolean printAssembledDebugInformation = false;
 
 	private int processingTemplate = 0;
 
@@ -185,7 +205,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	}
 
-	public String doOneTemplate(String templateId) throws SaxonApiException, IOException {
+	public String doOneTemplate(String templateId)
+			throws SaxonApiException, IOException, JAXBException {
 
 		String retVal = "FAILURE";
 
@@ -252,6 +273,10 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				System.out.println("-----------------------------------------------------------");
 				System.out.println("");
 			}
+
+			// filling missing data types
+			if (initialRun)
+				fillDatatypesRecursive(currentCdaTemplate.getCdaElement());
 
 			// Show the content (this is for debugging purposes, only)
 			if (printAssembledDebugInformation && initialRun) {
@@ -389,7 +414,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 						currentCdaElement, templateIndex, srcFilePath, dstFilePath, packageName,
 						fileHeader);
 				containsDataType = artDecor2JavaGenerator.doOneTemplate(contains);
-			} catch (SaxonApiException | IOException e) {
+			} catch (SaxonApiException | IOException | JAXBException e) {
 				containsDataType = "FAILURE";
 				e.printStackTrace();
 			}
@@ -418,7 +443,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 						parentCdaElement, templateIndex, srcFilePath, dstFilePath, packageName,
 						fileHeader);
 				dataType = artDecor2JavaGenerator.doOneTemplate(ref);
-			} catch (SaxonApiException | IOException e) {
+			} catch (SaxonApiException | IOException | JAXBException e) {
 				dataType = "FAILURE";
 				e.printStackTrace();
 			}
