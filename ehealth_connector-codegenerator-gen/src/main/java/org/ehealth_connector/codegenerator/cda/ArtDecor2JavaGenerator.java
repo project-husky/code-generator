@@ -21,10 +21,14 @@ import static com.github.javaparser.ast.Modifier.publicModifier;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -55,7 +59,7 @@ import net.sf.saxon.s9api.SaxonApiException;
 
 public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
-	private static HashMap<JAXBElement, String> jaxbElementIndex = null;
+	private static HashMap<String, JAXBElement> jaxbElementIndex = null;
 
 	private static void createField(ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
 
@@ -122,7 +126,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	}
 
-	private static void fillDatatypesRecursive(CdaElement cdaElement) throws JAXBException {
+	private static void fillDatatypesRecursive(CdaElement cdaElement)
+			throws JAXBException, ClassNotFoundException, IOException, IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException {
 		if (jaxbElementIndex == null)
 			jaxbElementIndex = loadJaxbElementIndex();
 		String dataType = cdaElement.getDataType();
@@ -133,8 +139,72 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		}
 	}
 
-	private static HashMap<JAXBElement, String> loadJaxbElementIndex() {
-		// TODO
+	private static List<Class> findClasses(File directory, String packageName)
+			throws ClassNotFoundException {
+		List<Class> classes = new ArrayList<Class>();
+		if (!directory.exists()) {
+			return classes;
+		}
+		File[] files = directory.listFiles();
+		for (File file : files) {
+			if (file.isDirectory()) {
+				assert !file.getName().contains(".");
+				classes.addAll(findClasses(file, packageName + "." + file.getName()));
+			} else if (file.getName().endsWith(".class")) {
+				classes.add(Class.forName(packageName + '.'
+						+ file.getName().substring(0, file.getName().length() - 6)));
+			}
+		}
+		return classes;
+	}
+
+	@SuppressWarnings("rawtypes")
+	private static Class[] getClasses(String packageName)
+			throws ClassNotFoundException, IOException {
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		assert classLoader != null;
+		String path = packageName.replace('.', '/');
+		Enumeration<URL> resources = classLoader.getResources(path);
+		List<File> dirs = new ArrayList<File>();
+		while (resources.hasMoreElements()) {
+			URL resource = resources.nextElement();
+			dirs.add(new File(resource.getFile()));
+		}
+		ArrayList<Class> classes = new ArrayList<Class>();
+		for (File directory : dirs) {
+			classes.addAll(findClasses(directory, packageName));
+		}
+		return classes.toArray(new Class[classes.size()]);
+	}
+
+	@SuppressWarnings("rawtypes")
+	private static HashMap<String, JAXBElement> loadJaxbElementIndex()
+			throws ClassNotFoundException, IOException, IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException {
+		HashMap<String, JAXBElement> retVal = new HashMap<String, JAXBElement>();
+
+		Class[] classes = getClasses("org.ehealth_connector.common.hl7cdar2");
+
+		System.out.println("hier weiterfahren...");
+		// for (int i = 0; i < classes.length; i++) {
+		// String className = classes[i].getName();
+		// // System.out.println(className);
+		// ObjectFactory factory = new ObjectFactory();
+		// Method[] methods = factory.getClass().getMethods();
+		// for (int j = 0; j < methods.length; j++) {
+		// if
+		// ("javax.xml.bind.JAXBElement".equals(methods[j].getReturnType().getName()))
+		// {
+		// System.out.println("public method: " + methods[j]);
+		// JAXBElement jaxbElement;
+		// jaxbElement = (JAXBElement) methods[j].invoke(factory, null);
+		// retVal.put(className, jaxbElement);
+		// }
+		// }
+		// }
+
+		return retVal;
+
 	}
 
 	private static void printCdaAttributes(String intend, ArrayList<CdaAttribute> attrList) {
@@ -206,7 +276,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	public String doOneTemplate(String templateId)
-			throws SaxonApiException, IOException, JAXBException {
+			throws SaxonApiException, IOException, JAXBException, ClassNotFoundException,
+			IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
 		String retVal = "FAILURE";
 
@@ -414,7 +485,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 						currentCdaElement, templateIndex, srcFilePath, dstFilePath, packageName,
 						fileHeader);
 				containsDataType = artDecor2JavaGenerator.doOneTemplate(contains);
-			} catch (SaxonApiException | IOException | JAXBException e) {
+			} catch (SaxonApiException | IOException | JAXBException | ClassNotFoundException
+					| IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException e) {
 				containsDataType = "FAILURE";
 				e.printStackTrace();
 			}
@@ -443,7 +516,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 						parentCdaElement, templateIndex, srcFilePath, dstFilePath, packageName,
 						fileHeader);
 				dataType = artDecor2JavaGenerator.doOneTemplate(ref);
-			} catch (SaxonApiException | IOException | JAXBException e) {
+			} catch (SaxonApiException | IOException | JAXBException | ClassNotFoundException
+					| IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException e) {
 				dataType = "FAILURE";
 				e.printStackTrace();
 			}
