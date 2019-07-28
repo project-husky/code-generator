@@ -147,7 +147,7 @@ public class UpdateValueSets {
 	// "SwissEprValueSetPackageConfig-201704.0-stable.yaml";
 	// private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG =
 	// "SwissEprValueSetPackageConfig-201704.3-beta.yaml";
-	private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG = "SwissEprValueSetPackageConfig-201906.0-beta.yaml";
+	private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG = "SwissEprValueSetPackageConfig-201907.0-beta.yaml";
 
 	/**
 	 * <div class="en">Adds all concepts of the value set definition as enum

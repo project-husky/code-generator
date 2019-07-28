@@ -283,7 +283,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		// TODO: This is a quick fix for CDA-CH-EMED
 		if (templateId.startsWith("1.3.6.1.4.1.19376.")
-				|| "2.16.756.5.30.1.1.10.4.2".contentEquals(templateId))
+				|| "2.16.756.5.30.1.1.10.4.2".equals(templateId))
 			return retVal;
 
 		if (templateIndex.containsKey(templateId)) {
