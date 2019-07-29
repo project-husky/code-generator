@@ -26,13 +26,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Optional;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -69,28 +67,6 @@ import net.sf.saxon.s9api.SaxonApiException;
 public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	private static HashMap<String, String> dataTypeIndex = null;
-
-	private static void createField(ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
-
-		if (cdaElement.getDataType() == null)
-			throw new NotImplementedException("Type undefined for " + cdaElement.getName());
-
-		String name = JavaCodeGenerator.toCamelCase(cdaElement.getName());
-
-		// This is for debugging purposes, only
-		// System.out.println("data type: " + cdaElement.getDataType() + " /
-		// name: " + name);
-		FieldDeclaration field = myClass.addField(cdaElement.getDataType(), name,
-				privateModifier().getKeyword());
-
-		String desc = cdaElement.getDescription();
-		if (desc != null)
-			field.setJavadocComment(desc);
-
-		createGetter(myClass, cdaElement);
-		createSetter(myClass, cdaElement);
-
-	}
 
 	private static void createGetter(ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
 
@@ -139,167 +115,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	}
 
-	private static List<Class> findClasses(File directory, String packageName)
-			throws ClassNotFoundException {
-		List<Class> classes = new ArrayList<Class>();
-		if (!directory.exists()) {
-			return classes;
-		}
-		File[] files = directory.listFiles();
-		for (File file : files) {
-			if (file.isDirectory()) {
-				assert !file.getName().contains(".");
-				classes.addAll(findClasses(file, packageName + "." + file.getName()));
-			} else if (file.getName().endsWith(".class")) {
-				classes.add(Class.forName(packageName + '.'
-						+ file.getName().substring(0, file.getName().length() - 6)));
-			}
-		}
-		return classes;
-	}
-
-	@SuppressWarnings("rawtypes")
-	private static Class[] getClasses(String packageName)
-			throws ClassNotFoundException, IOException {
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		assert classLoader != null;
-		String path = packageName.replace('.', '/');
-		Enumeration<URL> resources = classLoader.getResources(path);
-		List<File> dirs = new ArrayList<File>();
-		while (resources.hasMoreElements()) {
-			URL resource = resources.nextElement();
-			dirs.add(new File(resource.getFile()));
-		}
-		ArrayList<Class> classes = new ArrayList<Class>();
-		for (File directory : dirs) {
-			classes.addAll(findClasses(directory, packageName));
-		}
-		return classes.toArray(new Class[classes.size()]);
-	}
-
-	private static String getDataType(CdaElement cdaElement, HashMap<String, String> templateIndex)
-			throws InstantiationException, IllegalAccessException, ClassNotFoundException,
-			IllegalArgumentException, InvocationTargetException, NoSuchFieldException,
-			SecurityException {
-		String retVal = null;
-		String cdaElementName = cdaElement.getName().replace("hl7:", "").replace("pharm:", "");
-
-		if ((retVal == null) && (cdaElement.getParentCdaElement() != null)) {
-			String parentClassName = cdaElement.getParentCdaElement().getDataType();
-			if (parentClassName == null) {
-				parentClassName = getDataType(cdaElement.getParentCdaElement(), templateIndex);
-				cdaElement.getParentCdaElement().setDataType(parentClassName);
-			}
-			if (templateIndex.containsValue(parentClassName)) {
-				retVal = parentClassName;
-			}
-		}
-
-		if ((retVal == null) && (cdaElement.getParentCdaElement() != null)) {
-			String parentClassName = cdaElement.getParentCdaElement().getDataType();
-			if (parentClassName != null) {
-				if (parentClassName.startsWith("IVL_TS."))
-					retVal = "org.ehealth_connector.common.hl7cdar2.IVLTS";
-				if (parentClassName.startsWith("TS."))
-					retVal = "org.ehealth_connector.common.hl7cdar2.TS";
-				if (parentClassName.startsWith("SXPR_TS"))
-					retVal = "org.ehealth_connector.common.hl7cdar2.SXPRTS";
-				if (parentClassName.startsWith("SD.TEXT"))
-					retVal = "org.ehealth_connector.common.hl7cdar2.StrucDoc.Text";
-			}
-		}
-
-		if ((retVal == null) && (cdaElement.getParentCdaElement() != null)) {
-			String parentClassName = cdaElement.getParentCdaElement().getDataType();
-			if (parentClassName == null) {
-				String dataType = getDataType(cdaElement.getParentCdaElement(), templateIndex);
-				cdaElement.getParentCdaElement().setDataType(dataType);
-			}
-			if (parentClassName != null) {
-				if (!parentClassName.startsWith("org.ehealth_connector.common.hl7cdar2."))
-					parentClassName = "org.ehealth_connector.common.hl7cdar2." + parentClassName;
-				retVal = getDataType(parentClassName, cdaElementName);
-				if (retVal == null) {
-					String parentType = getParentDataType(parentClassName);
-					while ((retVal == null) && (parentType != null)) {
-						retVal = getDataType(parentType, cdaElementName);
-						parentType = getParentDataType(parentType);
-					}
-				}
-			}
-		}
-
-		if (retVal == null) {
-			ArrayList<String> candidates = new ArrayList<String>();
-			for (String key : dataTypeIndex.keySet()) {
-				String value = dataTypeIndex.get(key).toString();
-				if (key.startsWith(cdaElementName)
-						|| key.startsWith("all.InfrastructureRoot." + cdaElementName)) {
-					candidates.add(value);
-				}
-			}
-			if (candidates.size() == 1)
-				retVal = candidates.get(0);
-			else if (candidates.size() > 1) {
-				throw new RuntimeException(
-						"There are multiple data type candidates for " + cdaElement.getFullName());
-			}
-		}
-
-		if (retVal == null)
-			throw new RuntimeException(
-					"There is no data type candidate for " + cdaElement.getFullName());
-		return retVal;
-
-	}
-
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private static String getDataType(String parentClassName, String cdaElementName)
-			throws InstantiationException, IllegalAccessException, ClassNotFoundException,
-			NoSuchFieldException, SecurityException {
-		String retVal = null;
-		Class cl = Class.forName(parentClassName);
-		XmlType xmlType = (XmlType) cl.getAnnotation(XmlType.class);
-		if (xmlType != null) {
-			for (String prop : xmlType.propOrder()) {
-				if (prop.equals(cdaElementName)) {
-					String expectedMethodName = "get" + JavaCodeGenerator.toPascalCase(prop);
-					for (Method method : cl.getMethods()) {
-						if (method.getName().equals(expectedMethodName)) {
-							if ("java.util.List".equals(method.getReturnType().getName())) {
-								Field field = cl.getDeclaredField(prop);
-								Type type = field.getGenericType();
-								if (type instanceof ParameterizedType) {
-									ParameterizedType pt = (ParameterizedType) type;
-									if (pt.getActualTypeArguments().length > 1)
-										throw new RuntimeException("Unhandled data type:"
-												+ type.toString() + " (multiple types in list)");
-									if (pt.getActualTypeArguments().length == 0)
-										throw new RuntimeException("Unhandled data type:"
-												+ type.toString() + " (zero types in List)");
-									retVal = pt.getActualTypeArguments()[0].getTypeName();
-								}
-							} else
-								retVal = method.getReturnType().getName();
-						}
-					}
-				}
-			}
-		}
-		return retVal;
-	}
-
-	@SuppressWarnings("rawtypes")
-	private static String getParentDataType(String parentClassName)
-			throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-		String retVal = null;
-		Class cl = Class.forName(parentClassName);
-		if (cl != null)
-			if (cl.getSuperclass() != null)
-				retVal = cl.getSuperclass().getName();
-		return retVal;
-	}
-
 	private static void printCdaAttributes(String intend, ArrayList<CdaAttribute> attrList) {
 		for (CdaAttribute attr : attrList) {
 			System.out.println(intend + "  " + attr.getName() + " = " + attr.getValue()
@@ -316,60 +131,65 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		}
 	}
 
-	private boolean printParsingDebugInformation = false;
+	private CdaElement callingCdaElement;
 
-	private boolean printDataTypeDebugInformation = false;
-
-	private boolean printAssembledDebugInformation = false;
-
-	private int processingTemplate = 0;
-
-	private int processingElement = 0;
-
-	private int processingElementPrev = 0;
-
-	private int processingAttribute = 0;
+	private CdaAttribute currentCdaAttribute = null;
 
 	private CdaElement currentCdaElement = null;
 
 	private CdaTemplate currentCdaTemplate = null;
 
-	private CdaAttribute currentCdaAttribute = null;
-
-	private String srcFilePath = null;
-
 	private String dstFilePath = null;
 
 	private String fileHeader;
 
-	private String packageName;
-
-	private HashMap<String, String> templateIndex = null;
-
-	private CdaElement callingCdaElement;
-
-	private CdaElement parentForIncludes;
-
-	private CdaElement parentForContains;
-
 	private boolean isChildElement;
-
-	private boolean isSiblingElement;
 
 	private boolean isParentElement;
 
-	//
-	// private CdaElement lastParent;
-	//
+	private boolean isSiblingElement;
+
+	private String packageName;
+
+	private CdaElement parentForContains;
+
+	private CdaElement parentForIncludes;
+
+	private boolean printAssembledDebugInformation = false;
+
+	private boolean printDataTypeDebugInformation = false;
+
+	private boolean printParsingDebugInformation = true;
+
+	private int processingAttribute = 0;
+
+	private int processingElement = 0;
+
+	private int processingElementPrev = 0;
+
+	private int processingTemplate = 0;
+
+	private String srcFilePath = null;
+
+	private HashMap<String, String> templateIndex = null;
+
+	private ArrayList<CdaTemplate> templateList = null;
+
 	public ArtDecor2JavaGenerator(CdaElement callingCdaElement,
-			HashMap<String, String> templateIndex, String srcFilePath, String dstFilePath,
-			String packageName, String fileHeader) {
+			HashMap<String, String> templateIndex, ArrayList<CdaTemplate> templateList,
+			String srcFilePath, String dstFilePath, String packageName, String fileHeader) {
 		this.callingCdaElement = callingCdaElement;
 
 		if (templateIndex == null)
 			this.templateIndex = new HashMap<String, String>();
 		else
 			this.templateIndex = templateIndex;
+
+		if (templateList == null)
+			this.templateList = new ArrayList<CdaTemplate>();
+		else
+			this.templateList = templateList;
+
 		this.srcFilePath = srcFilePath;
 		this.dstFilePath = dstFilePath;
 		this.packageName = packageName;
@@ -381,6 +201,95 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		if (!this.srcFilePath.endsWith(FileUtil.getPlatformSpecificPathSeparator()))
 			this.srcFilePath += FileUtil.getPlatformSpecificPathSeparator();
 
+	}
+
+	private String adjustDataType(String dataType) {
+		String retVal = dataType;
+		if (retVal.startsWith("IVL_TS."))
+			retVal = "IVLTS";
+		if (retVal.startsWith("TS."))
+			retVal = "TS";
+		if (retVal.startsWith("SXPR_TS"))
+			retVal = "SXPRTS";
+		if (retVal.startsWith("SD.TEXT"))
+			retVal = "StrucDocText";
+		if (retVal.startsWith("INT.NONNEG"))
+			retVal = "INT";
+
+		if (!templateIndex.containsValue(dataType))
+			if (!retVal.contains("."))
+				retVal = "org.ehealth_connector.common.hl7cdar2." + retVal;
+
+		return retVal;
+	}
+
+	private void createField(ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
+
+		if (cdaElement.getDataType() == null)
+			throw new NotImplementedException("Type undefined for " + cdaElement.getName());
+
+		String dataType = adjustDataType(cdaElement.getDataType());
+		cdaElement.setDataType(dataType);
+
+		String name = JavaCodeGenerator.toCamelCase(cdaElement.getName());
+
+		// This is for debugging purposes, only
+		// System.out.println("data type: " + dataType + " /
+		// name: " + name);
+
+		int i = 0;
+		Optional<FieldDeclaration> obj = myClass.getFieldByName(name);
+		while (obj.isPresent()) {
+			i++;
+			name = name + Integer.toString(i);
+			obj = myClass.getFieldByName(name);
+		}
+		cdaElement.setName(name);
+		FieldDeclaration field = myClass.addField(cdaElement.getDataType(), name,
+				privateModifier().getKeyword());
+
+		String desc = cdaElement.getDescription();
+		if (desc != null)
+			field.setJavadocComment(desc);
+
+		createGetter(myClass, cdaElement);
+		createSetter(myClass, cdaElement);
+
+	}
+
+	private void createJavaClassFile(CdaTemplate cdaTemplate, String packageName,
+			String dstFilePath) throws IOException {
+
+		// Save the current CDA Element as Java Class File
+		CompilationUnit compilationUnit = new CompilationUnit();
+		compilationUnit.setPackageDeclaration(packageName);
+
+		String className = JavaCodeGenerator.toPascalCase(cdaTemplate.getName());
+		CdaElement cdaElement = cdaTemplate.getCdaElement();
+
+		if (cdaElement == null)
+			throw new RuntimeException(
+					"No root CDA element found in template " + cdaTemplate.getName());
+
+		String dataType = adjustDataType(cdaElement.getDataType());
+		cdaElement.setDataType(dataType);
+
+		ClassOrInterfaceDeclaration myClass = compilationUnit.addClass(className).setPublic(true);
+		String desc = cdaElement.getDescription();
+		if (desc != null)
+			myClass.setJavadocComment(desc);
+		String inheritenceOf = cdaElement.getDataType();
+		if (inheritenceOf == null)
+			throw new RuntimeException("Inheritance undefined for: " + cdaElement.getName());
+		myClass.setExtendedTypes(
+				new NodeList<ClassOrInterfaceType>(new ClassOrInterfaceType(null, inheritenceOf)));
+
+		for (CdaElement cdaElement1 : cdaElement.getChildrenCdaElementList()) {
+			createField(myClass, cdaElement1);
+		}
+
+		File outFile = new File(dstFilePath + className + ".java");
+		JavaCodeGenerator.completeAndSave(compilationUnit, outFile);
 	}
 
 	public String doOneTemplate(String templateId)
@@ -470,28 +379,15 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				printCdaElementRecursive("", currentCdaTemplate.getCdaElement());
 			}
 
-			// Create the Java Class
-			CompilationUnit compilationUnit = new CompilationUnit();
-			compilationUnit.setPackageDeclaration(packageName);
-
-			String className = JavaCodeGenerator.toPascalCase(currentCdaTemplate.getName());
-			ClassOrInterfaceDeclaration myClass = compilationUnit.addClass(className)
-					.setPublic(true);
-			String desc = currentCdaElement.getDescription();
-			if (desc != null)
-				myClass.setJavadocComment(desc);
-			String inheritenceOf = currentCdaElement.getDataType();
-			if (inheritenceOf == null)
-				inheritenceOf = "TODO";
-			myClass.setExtendedTypes(new NodeList<ClassOrInterfaceType>(
-					new ClassOrInterfaceType(null, inheritenceOf)));
-
-			for (CdaElement cdaElement : currentCdaElement.getChildrenCdaElementList()) {
-				createField(myClass, cdaElement);
+			// Create the Java Classes
+			if (initialRun) {
+				System.out.print("Writing Java Class files");
+				for (CdaTemplate cdaTemplate : templateList) {
+					System.out.print(".");
+					createJavaClassFile(cdaTemplate, packageName, dstFilePath);
+				}
+				System.out.println(" done.");
 			}
-
-			File outFile = new File(dstFilePath + className + ".java");
-			JavaCodeGenerator.completeAndSave(compilationUnit, outFile);
 		}
 
 		if (initialRun)
@@ -567,9 +463,16 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		if (dataTypeAttrCtx != null)
 			dataType = dataTypeAttrCtx.AttrValue().getText().replace("\"", "");
 
+		if ("hl7:serviceEvent".equals(name))
+			System.out.println("Stop here");
+		if ("hl7:performer".equals(name))
+			System.out.println("Stop here");
+
 		CdaElement cdaElement = new CdaElement(null);
 		cdaElement.setName(name);
 		cdaElement.setDataType(dataType);
+
+		parentForContains = cdaElement;
 
 		isChildElement = (processingElement > processingElementPrev);
 		isSiblingElement = (processingElement == processingElementPrev);
@@ -589,14 +492,15 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			parentForIncludes = cdaElement;
 		} else if ((callingCdaElement != null) && (currentCdaElement == null)) {
 			// This is the first level below a referenced template
+			currentCdaTemplate.setCdaElement(cdaElement);
 			parentCdaElement = callingCdaElement;
 			parentForIncludes = parentCdaElement;
 		} else {
-			if (isChildElement)
+			if (isChildElement) {
 				parentCdaElement = currentCdaElement;
-			else if (isSiblingElement)
+			} else if (isSiblingElement) {
 				parentCdaElement = currentCdaElement.getParentCdaElement();
-			else if (isParentElement) {
+			} else if (isParentElement) {
 				parentCdaElement = currentCdaElement.getParentCdaElement();
 				for (int i = 0; i < levels; i++) {
 					parentCdaElement = parentCdaElement.getParentCdaElement();
@@ -610,8 +514,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 			parentForIncludes = parentCdaElement;
 		}
-
-		parentForContains = cdaElement;
 
 		if (parentCdaElement != null) {
 			parentCdaElement.addChild(cdaElement);
@@ -628,9 +530,11 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			if (printParsingDebugInformation)
 				System.out.println(cdaElement.getName() + " contains " + contains);
 			try {
+				if (parentForContains == null)
+					System.out.println("Stop here");
 				ArtDecor2JavaGenerator artDecor2JavaGenerator = new ArtDecor2JavaGenerator(
-						parentForContains, templateIndex, srcFilePath, dstFilePath, packageName,
-						fileHeader);
+						parentForContains, templateIndex, templateList, srcFilePath, dstFilePath,
+						packageName, fileHeader);
 				containsDataType = artDecor2JavaGenerator.doOneTemplate(contains);
 			} catch (SaxonApiException | IOException | JAXBException | ClassNotFoundException
 					| IllegalAccessException | IllegalArgumentException | InvocationTargetException
@@ -650,6 +554,19 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	@Override
 	public void enterInclude(Hl7ItsParser.IncludeContext ctx) {
+
+		isParentElement = (processingElement < processingElementPrev);
+		int levels = 0;
+		if (isParentElement)
+			levels = processingElementPrev - processingElement;
+
+		if (isParentElement) {
+			parentForIncludes = currentCdaElement.getParentCdaElement();
+			for (int i = 0; i < levels; i++) {
+				parentForIncludes = parentForIncludes.getParentCdaElement();
+			}
+		}
+
 		RefAttrContext refAttrCtx = ctx.refAttr();
 		String ref = "";
 		String dataType = null;
@@ -660,8 +577,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 					System.out.println("Include: " + ref);
 			try {
 				ArtDecor2JavaGenerator artDecor2JavaGenerator = new ArtDecor2JavaGenerator(
-						parentForIncludes, templateIndex, srcFilePath, dstFilePath, packageName,
-						fileHeader);
+						parentForIncludes, templateIndex, templateList, srcFilePath, dstFilePath,
+						packageName, fileHeader);
 				dataType = artDecor2JavaGenerator.doOneTemplate(ref);
 			} catch (SaxonApiException | IOException | JAXBException | ClassNotFoundException
 					| IllegalAccessException | IllegalArgumentException | InvocationTargetException
@@ -677,6 +594,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	public void enterTemplate(Hl7ItsParser.TemplateContext ctx) {
 		processingTemplate++;
 		currentCdaTemplate = new CdaTemplate();
+		templateList.add(currentCdaTemplate);
 		IdAttrContext idAttrCtx = ctx.idAttr();
 		if (idAttrCtx != null)
 			currentCdaTemplate.setId(idAttrCtx.AttrValue().getText().replace("\"", ""));
@@ -727,6 +645,113 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		}
 	}
 
+	private String getDataType(CdaElement cdaElement, HashMap<String, String> templateIndex)
+			throws InstantiationException, IllegalAccessException, ClassNotFoundException,
+			IllegalArgumentException, InvocationTargetException, NoSuchFieldException,
+			SecurityException {
+		String retVal = null;
+		String cdaElementName = cdaElement.getName().replace("hl7:", "").replace("pharm:", "");
+
+		String parentClassName = null;
+		if (cdaElement.getParentCdaElement() != null) {
+			parentClassName = cdaElement.getParentCdaElement().getDataType();
+			if (parentClassName == null) {
+				parentClassName = getDataType(cdaElement.getParentCdaElement(), templateIndex);
+				if (parentClassName != null) {
+					parentClassName = adjustDataType(parentClassName);
+					cdaElement.getParentCdaElement().setDataType(parentClassName);
+				}
+			}
+		}
+
+		if ((retVal == null) && (parentClassName != null)) {
+			if (templateIndex.containsValue(parentClassName)) {
+				retVal = parentClassName;
+			}
+		}
+
+		if ((retVal == null) && (parentClassName != null)) {
+			retVal = getDataType(parentClassName, cdaElementName);
+			if (retVal == null) {
+				String parentType = getParentDataType(parentClassName);
+				while ((retVal == null) && (parentType != null)) {
+					retVal = getDataType(parentType, cdaElementName);
+					parentType = getParentDataType(parentType);
+				}
+			}
+		}
+
+		if (retVal == null) {
+			ArrayList<String> candidates = new ArrayList<String>();
+			for (String key : dataTypeIndex.keySet()) {
+				String value = dataTypeIndex.get(key).toString();
+				if (key.startsWith(cdaElementName)
+						|| key.startsWith("all.InfrastructureRoot." + cdaElementName)) {
+					candidates.add(value);
+				}
+			}
+			if (candidates.size() == 1)
+				retVal = candidates.get(0);
+			else if (candidates.size() > 1) {
+				throw new RuntimeException(
+						"There are multiple data type candidates for " + cdaElement.getFullName());
+			}
+		}
+
+		if (retVal == null)
+			throw new RuntimeException(
+					"There is no data type candidate for " + cdaElement.getFullName());
+		return retVal;
+
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private String getDataType(String parentClassName, String cdaElementName)
+			throws InstantiationException, IllegalAccessException, ClassNotFoundException,
+			NoSuchFieldException, SecurityException {
+		String retVal = null;
+		Class cl = Class.forName(adjustDataType(parentClassName));
+		XmlType xmlType = (XmlType) cl.getAnnotation(XmlType.class);
+		if (xmlType != null) {
+			for (String prop : xmlType.propOrder()) {
+				if (prop.equals(cdaElementName)) {
+					String expectedMethodName = "get" + JavaCodeGenerator.toPascalCase(prop);
+					for (Method method : cl.getMethods()) {
+						if (method.getName().equals(expectedMethodName)) {
+							if ("java.util.List".equals(method.getReturnType().getName())) {
+								Field field = cl.getDeclaredField(prop);
+								Type type = field.getGenericType();
+								if (type instanceof ParameterizedType) {
+									ParameterizedType pt = (ParameterizedType) type;
+									if (pt.getActualTypeArguments().length > 1)
+										throw new RuntimeException("Unhandled data type:"
+												+ type.toString() + " (multiple types in list)");
+									if (pt.getActualTypeArguments().length == 0)
+										throw new RuntimeException("Unhandled data type:"
+												+ type.toString() + " (zero types in List)");
+									retVal = pt.getActualTypeArguments()[0].getTypeName();
+								}
+							} else
+								retVal = method.getReturnType().getName();
+						}
+					}
+				}
+			}
+		}
+		return retVal;
+	}
+
+	@SuppressWarnings("rawtypes")
+	private String getParentDataType(String parentClassName)
+			throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+		String retVal = null;
+		Class cl = Class.forName(adjustDataType(parentClassName));
+		if (cl != null)
+			if (cl.getSuperclass() != null)
+				retVal = cl.getSuperclass().getName();
+		return retVal;
+	}
+
 	@SuppressWarnings("rawtypes")
 	private HashMap<String, String> loadDataTypeIndex() throws ClassNotFoundException, IOException,
 			IllegalAccessException, IllegalArgumentException, InvocationTargetException {
@@ -769,4 +794,5 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		return retVal;
 	}
+
 }
