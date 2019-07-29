@@ -21,7 +21,11 @@ import static com.github.javaparser.ast.Modifier.publicModifier;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -32,6 +36,7 @@ import java.util.List;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.annotation.XmlType;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -49,6 +54,7 @@ import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.ValueAttrConte
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParserBaseListener;
 import org.ehealth_connector.codegenerator.cda.xslt.Hl7Its2EhcTransformer;
 import org.ehealth_connector.codegenerator.java.JavaCodeGenerator;
+import org.ehealth_connector.common.hl7cdar2.ObjectFactory;
 import org.ehealth_connector.common.utils.FileUtil;
 
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -59,7 +65,7 @@ import net.sf.saxon.s9api.SaxonApiException;
 
 public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
-	private static HashMap<String, JAXBElement> jaxbElementIndex = null;
+	private static HashMap<String, String> dataTypeIndex = null;
 
 	private static void createField(ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
 
@@ -126,19 +132,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	}
 
-	private static void fillDatatypesRecursive(CdaElement cdaElement)
-			throws JAXBException, ClassNotFoundException, IOException, IllegalAccessException,
-			IllegalArgumentException, InvocationTargetException {
-		if (jaxbElementIndex == null)
-			jaxbElementIndex = loadJaxbElementIndex();
-		String dataType = cdaElement.getDataType();
-		if (dataType == null)
-			System.out.println("TODO Setting Datatype for " + cdaElement.getFullName());
-		for (CdaElement item : cdaElement.getChildrenCdaElementList()) {
-			fillDatatypesRecursive(item);
-		}
-	}
-
 	private static List<Class> findClasses(File directory, String packageName)
 			throws ClassNotFoundException {
 		List<Class> classes = new ArrayList<Class>();
@@ -177,34 +170,105 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		return classes.toArray(new Class[classes.size()]);
 	}
 
-	@SuppressWarnings("rawtypes")
-	private static HashMap<String, JAXBElement> loadJaxbElementIndex()
-			throws ClassNotFoundException, IOException, IllegalAccessException,
-			IllegalArgumentException, InvocationTargetException {
-		HashMap<String, JAXBElement> retVal = new HashMap<String, JAXBElement>();
+	private static String getDataType(CdaElement cdaElement, HashMap<String, String> templateIndex)
+			throws InstantiationException, IllegalAccessException, ClassNotFoundException,
+			IllegalArgumentException, InvocationTargetException, NoSuchFieldException,
+			SecurityException {
+		String retVal = null;
+		String cdaElementName = cdaElement.getName().replace("hl7:", "");
 
-		Class[] classes = getClasses("org.ehealth_connector.common.hl7cdar2");
+		for (String key : dataTypeIndex.keySet()) {
+			String value = dataTypeIndex.get(key).toString();
 
-		System.out.println("hier weiterfahren...");
-		// for (int i = 0; i < classes.length; i++) {
-		// String className = classes[i].getName();
-		// // System.out.println(className);
-		// ObjectFactory factory = new ObjectFactory();
-		// Method[] methods = factory.getClass().getMethods();
-		// for (int j = 0; j < methods.length; j++) {
-		// if
-		// ("javax.xml.bind.JAXBElement".equals(methods[j].getReturnType().getName()))
-		// {
-		// System.out.println("public method: " + methods[j]);
-		// JAXBElement jaxbElement;
-		// jaxbElement = (JAXBElement) methods[j].invoke(factory, null);
-		// retVal.put(className, jaxbElement);
-		// }
-		// }
-		// }
+			if (key.startsWith(cdaElementName)) {
+				System.out.println("Candidate for " + cdaElementName + ": " + key);
+				if (retVal != null)
+					System.out.println("*** Stop here. There are multiple candidates!");
+				retVal = value;
+			}
+		}
 
+		if ((retVal == null) && (cdaElement.getParentCdaElement() != null)) {
+			String parentClassName = cdaElement.getParentCdaElement().getDataType();
+			if (templateIndex.containsValue(parentClassName)) {
+				retVal = parentClassName;
+			}
+		}
+
+		if ((retVal == null) && (cdaElement.getParentCdaElement() != null)) {
+			String parentClassName = cdaElement.getParentCdaElement().getDataType();
+			if (parentClassName != null)
+				if (parentClassName.startsWith("IVL_TS"))
+					retVal = "org.ehealth_connector.common.hl7cdar2.IVLTS";
+		}
+
+		if ((retVal == null) && (cdaElement.getParentCdaElement() != null)) {
+			String parentClassName = cdaElement.getParentCdaElement().getDataType();
+			if (parentClassName != null) {
+				if (!parentClassName.startsWith("org.ehealth_connector.common.hl7cdar2."))
+					parentClassName = "org.ehealth_connector.common.hl7cdar2." + parentClassName;
+				retVal = getTodo(parentClassName, cdaElementName);
+				if (retVal == null) {
+					String parentType = getParentDataType(parentClassName);
+					while ((retVal == null) && (parentType != null)) {
+						retVal = getTodo(parentType, cdaElementName);
+						parentType = getParentDataType(parentType);
+					}
+				}
+			}
+		}
+
+		if (retVal == null)
+			System.out.println("*** Stop here. There is no candidate!");
 		return retVal;
 
+	}
+
+	@SuppressWarnings("rawtypes")
+	private static String getParentDataType(String parentClassName)
+			throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+		String retVal = null;
+		Class cl = Class.forName(parentClassName);
+		if (cl != null)
+			if (cl.getSuperclass() != null)
+				retVal = cl.getSuperclass().getName();
+		return retVal;
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private static String getTodo(String parentClassName, String cdaElementName)
+			throws InstantiationException, IllegalAccessException, ClassNotFoundException,
+			NoSuchFieldException, SecurityException {
+		String retVal = null;
+		Class cl = Class.forName(parentClassName);
+		XmlType xmlType = (XmlType) cl.getAnnotation(XmlType.class);
+		if (xmlType != null) {
+			for (String prop : xmlType.propOrder()) {
+				if (prop.equals(cdaElementName)) {
+					String expectedMethodName = "get" + JavaCodeGenerator.toPascalCase(prop);
+					for (Method method : cl.getMethods()) {
+						if (method.getName().equals(expectedMethodName)) {
+							if ("java.util.List".equals(method.getReturnType().getName())) {
+								Field field = cl.getDeclaredField(prop);
+								Type type = field.getGenericType();
+								if (type instanceof ParameterizedType) {
+									ParameterizedType pt = (ParameterizedType) type;
+									if (pt.getActualTypeArguments().length > 1)
+										throw new RuntimeException("Unhandled data type:"
+												+ type.toString() + " (multiple types in list)");
+									if (pt.getActualTypeArguments().length == 0)
+										throw new RuntimeException("Unhandled data type:"
+												+ type.toString() + " (zero types in List)");
+									retVal = pt.getActualTypeArguments()[0].getTypeName();
+								}
+							} else
+								retVal = method.getReturnType().getName();
+						}
+					}
+				}
+			}
+		}
+		return retVal;
 	}
 
 	private static void printCdaAttributes(String intend, ArrayList<CdaAttribute> attrList) {
@@ -223,7 +287,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		}
 	}
 
-	private boolean printParsingDebugInformation = false;
+	private boolean printParsingDebugInformation = true;
 
 	private boolean printAssembledDebugInformation = false;
 
@@ -277,7 +341,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	public String doOneTemplate(String templateId)
 			throws SaxonApiException, IOException, JAXBException, ClassNotFoundException,
-			IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+			IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+			InstantiationException, NoSuchFieldException, SecurityException {
 
 		String retVal = "FAILURE";
 
@@ -486,8 +551,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 						fileHeader);
 				containsDataType = artDecor2JavaGenerator.doOneTemplate(contains);
 			} catch (SaxonApiException | IOException | JAXBException | ClassNotFoundException
-					| IllegalAccessException | IllegalArgumentException
-					| InvocationTargetException e) {
+					| IllegalAccessException | IllegalArgumentException | InvocationTargetException
+					| InstantiationException | NoSuchFieldException | SecurityException e) {
 				containsDataType = "FAILURE";
 				e.printStackTrace();
 			}
@@ -517,8 +582,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 						fileHeader);
 				dataType = artDecor2JavaGenerator.doOneTemplate(ref);
 			} catch (SaxonApiException | IOException | JAXBException | ClassNotFoundException
-					| IllegalAccessException | IllegalArgumentException
-					| InvocationTargetException e) {
+					| IllegalAccessException | IllegalArgumentException | InvocationTargetException
+					| InstantiationException | NoSuchFieldException | SecurityException e) {
 				dataType = "FAILURE";
 				e.printStackTrace();
 			}
@@ -556,5 +621,77 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	@Override
 	public void exitTemplate(Hl7ItsParser.TemplateContext ctx) {
 		processingTemplate--;
+	}
+
+	private void fillDatatypesRecursive(CdaElement cdaElement)
+			throws JAXBException, ClassNotFoundException, IOException, IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException, InstantiationException,
+			NoSuchFieldException, SecurityException {
+		if (dataTypeIndex == null)
+			dataTypeIndex = loadDataTypeIndex();
+		String dataType = cdaElement.getDataType();
+		if (dataType == null) {
+			dataType = getDataType(cdaElement, templateIndex);
+			cdaElement.setDataType(dataType);
+			System.out.println("Datatype for " + cdaElement.getFullName().replace("hl7:", "")
+					+ " --> " + dataType);
+
+			// if
+			// (jaxbElementIndex.containsKey(cdaElement.getFullName().replace("hl7.",
+			// "")))
+			// System.out.println("TODO Setting Datatype for "
+			// + cdaElement.getFullName().replace("hl7.", ""));
+			// else
+			// System.out.println("TODO Datatype " +
+			// cdaElement.getFullName().replace("hl7.", "")
+			// + " not in jaxbElementIndex");
+			//
+		}
+		for (CdaElement item : cdaElement.getChildrenCdaElementList()) {
+			fillDatatypesRecursive(item);
+		}
+	}
+
+	@SuppressWarnings("rawtypes")
+	private HashMap<String, String> loadDataTypeIndex() throws ClassNotFoundException, IOException,
+			IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		HashMap<String, String> retVal = new HashMap<String, String>();
+
+		ObjectFactory factory = new ObjectFactory();
+		Method[] methods = factory.getClass().getMethods();
+		for (int j = 0; j < methods.length; j++) {
+			String key = null;
+			String value = null;
+			if ("javax.xml.bind.JAXBElement".equals(methods[j].getReturnType().getName())) {
+				JAXBElement jaxbElement = (JAXBElement) methods[j].invoke(factory,
+						new Object[] { null });
+				key = jaxbElement.getName().getLocalPart();
+				value = jaxbElement.getDeclaredType().getName();
+			} else if (methods[j].getName().startsWith("create")) {
+				Object obj = methods[j].invoke(factory);
+				value = obj.getClass().getName();
+				XmlType xmlType = (XmlType) obj.getClass().getAnnotation(XmlType.class);
+				key = xmlType.name();
+			}
+			if (key != null) {
+				int i = 0;
+				while (retVal.containsKey(key + i)) {
+					if (retVal.get(key + i).equals(value)) {
+						i = -1;
+						break;
+					}
+					i++;
+				}
+				if (i > -1)
+					retVal.put(key + i, value);
+			}
+		}
+
+		// This is for debugging purposes, only
+		// retVal.entrySet().forEach(entry -> {
+		// System.out.println(entry.getKey() + " " + entry.getValue());
+		// });
+
+		return retVal;
 	}
 }

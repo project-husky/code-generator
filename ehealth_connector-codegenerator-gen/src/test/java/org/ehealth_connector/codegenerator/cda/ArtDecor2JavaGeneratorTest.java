@@ -33,7 +33,8 @@ public class ArtDecor2JavaGeneratorTest {
 	// @Test
 	public void doEmedTest()
 			throws SaxonApiException, IOException, JAXBException, ClassNotFoundException,
-			IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+			IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+			InstantiationException, NoSuchFieldException, SecurityException {
 
 		// Initialization
 		ArtDecor2JavaGenerator artDecor2JavaGenerator = null;
@@ -102,7 +103,8 @@ public class ArtDecor2JavaGeneratorTest {
 	@Test
 	public void doLrepTest()
 			throws SaxonApiException, IOException, JAXBException, ClassNotFoundException,
-			IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+			IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+			InstantiationException, NoSuchFieldException, SecurityException {
 
 		String templateId = "2.16.756.5.30.1.1.10.1.10";
 
