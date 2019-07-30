@@ -20,7 +20,9 @@ import java.util.ArrayList;
 
 public class CdaTemplate {
 
-	private CdaElement cdaElement;
+	private CdaElement rootCdaElement;
+
+	private ArrayList<CdaElement> cdaElementList;
 
 	private String description;
 
@@ -36,12 +38,24 @@ public class CdaTemplate {
 		cdaAttributeList.add(cdaAttribute);
 	}
 
+	public void addCdaElement(CdaElement cdaElement) {
+		if (cdaElementList == null) {
+			cdaElementList = new ArrayList<CdaElement>();
+			rootCdaElement = cdaElement;
+		}
+		cdaElementList.add(cdaElement);
+	}
+
 	public ArrayList<CdaAttribute> getCdaAttributeList() {
 		return cdaAttributeList;
 	}
 
-	public CdaElement getCdaElement() {
-		return cdaElement;
+	public ArrayList<CdaElement> getCdaElementList() {
+		return cdaElementList;
+	}
+
+	public String getDataType() {
+		return dataType;
 	}
 
 	public String getDescription() {
@@ -56,12 +70,16 @@ public class CdaTemplate {
 		return name;
 	}
 
+	public CdaElement getRootCdaElement() {
+		return rootCdaElement;
+	}
+
 	public void setCdaAttributeList(ArrayList<CdaAttribute> cdaAttributeList) {
 		this.cdaAttributeList = cdaAttributeList;
 	}
 
-	public void setCdaElement(CdaElement cdaElement) {
-		this.cdaElement = cdaElement;
+	public void setDataType(String dataType) {
+		this.dataType = dataType;
 	}
 
 	public void setDescription(String description) {
@@ -74,13 +92,5 @@ public class CdaTemplate {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public String getDataType() {
-		return dataType;
-	}
-
-	public void setDataType(String dataType) {
-		this.dataType = dataType;
 	}
 }

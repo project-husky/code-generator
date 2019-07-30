@@ -196,6 +196,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	private CdaElement currentCdaElement = null;
 
+	private CdaTemplate mainCdaTemplate = null;
+
 	private CdaTemplate currentCdaTemplate = null;
 
 	private String dstFilePath = null;
@@ -234,9 +236,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	private ArrayList<CdaTemplate> templateList = null;
 
+	private boolean isContains;
+
 	public ArtDecor2JavaGenerator(CdaElement callingCdaElement,
 			HashMap<String, String> templateIndex, ArrayList<CdaTemplate> templateList,
-			String srcFilePath, String dstFilePath, String packageName, String fileHeader) {
+			String srcFilePath, String dstFilePath, String packageName, String fileHeader,
+			String containsDataType) {
 		this.callingCdaElement = callingCdaElement;
 
 		if (templateIndex == null)
@@ -253,6 +258,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		this.dstFilePath = dstFilePath;
 		this.packageName = packageName;
 		this.fileHeader = fileHeader;
+		this.isContains = isContains;
 
 		if (!this.dstFilePath.endsWith(FileUtil.getPlatformSpecificPathSeparator()))
 			this.dstFilePath += FileUtil.getPlatformSpecificPathSeparator();
@@ -348,7 +354,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		compilationUnit.setPackageDeclaration(packageName);
 
 		String className = JavaCodeGenerator.toPascalCase(cdaTemplate.getName());
-		CdaElement cdaElement = cdaTemplate.getCdaElement();
+		CdaElement cdaElement = cdaTemplate.getRootCdaElement();
 
 		if (cdaElement == null)
 			throw new RuntimeException(
@@ -462,18 +468,19 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			}
 
 			// filling missing data types
-			if (initialRun)
-				fillDatatypesRecursive(currentCdaTemplate.getCdaElement());
-			else
-				fillDatatypesRecursive(currentCdaElement);
+			for (CdaElement item : mainCdaTemplate.getCdaElementList()) {
+				fillDatatypesRecursive(item);
+			}
 
 			// Show the content (this is for debugging purposes, only)
 			if (printAssembledDebugInformation && initialRun) {
-				System.out.println("Assembled content for template " + currentCdaTemplate.getName()
-						+ " (id: " + currentCdaTemplate.getId() + ")");
-				printCdaAttributes(" ", currentCdaTemplate.getCdaAttributeList());
+				System.out.println("Assembled content for template " + mainCdaTemplate.getName()
+						+ " (id: " + mainCdaTemplate.getId() + ")");
+				printCdaAttributes(" ", mainCdaTemplate.getCdaAttributeList());
 
-				printCdaElementRecursive("", currentCdaTemplate.getCdaElement());
+				for (CdaElement item : mainCdaTemplate.getCdaElementList()) {
+					printCdaElementRecursive("", item);
+				}
 			}
 
 			// Create the Java Classes
@@ -609,7 +616,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			// This is the root element (the root element of the
 			// calling template)
 			parentCdaElement = null;
-			currentCdaTemplate.setCdaElement(cdaElement);
+			currentCdaTemplate.addCdaElement(cdaElement);
 			parentForIncludes = cdaElement;
 			try {
 				if (dataType == null)
@@ -624,7 +631,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			}
 		} else if ((callingCdaElement != null) && (currentCdaElement == null)) {
 			// This is the first level below a referenced template
-			currentCdaTemplate.setCdaElement(cdaElement);
+			currentCdaTemplate.addCdaElement(cdaElement);
 			parentCdaElement = callingCdaElement;
 			parentForIncludes = parentCdaElement;
 			if (dataType == null) {
@@ -691,7 +698,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		ContainsAttrContext containsAttrCtx = ctx.containsAttr();
 		String contains = "";
-		String containsDataType = null;
 		if (containsAttrCtx != null) {
 			contains = containsAttrCtx.AttrValue().getText().replace("\"", "");
 			if (printParsingDebugInformation)
@@ -701,16 +707,13 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 					throw new RuntimeException("parent is null for contains " + contains);
 				ArtDecor2JavaGenerator artDecor2JavaGenerator = new ArtDecor2JavaGenerator(
 						parentForContains, templateIndex, templateList, srcFilePath, dstFilePath,
-						packageName, fileHeader);
-				containsDataType = artDecor2JavaGenerator.doOneTemplate(contains);
+						packageName, fileHeader, dataType);
+				artDecor2JavaGenerator.doOneTemplate(contains);
 			} catch (SaxonApiException | IOException | JAXBException | ClassNotFoundException
 					| IllegalAccessException | IllegalArgumentException | InvocationTargetException
 					| InstantiationException | NoSuchFieldException | SecurityException e) {
-				containsDataType = "containsDataTypeFAILURE";
-				e.printStackTrace();
+				throw new RuntimeException(e.getMessage());
 			}
-			if (containsDataType != null)
-				cdaElement.setDataType(containsDataType);
 		}
 
 		if (printParsingDebugInformation)
@@ -745,7 +748,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			try {
 				ArtDecor2JavaGenerator artDecor2JavaGenerator = new ArtDecor2JavaGenerator(
 						parentForIncludes, templateIndex, templateList, srcFilePath, dstFilePath,
-						packageName, fileHeader);
+						packageName, fileHeader, null);
 				dataType = artDecor2JavaGenerator.doOneTemplate(ref);
 			} catch (SaxonApiException | IOException | JAXBException | ClassNotFoundException
 					| IllegalAccessException | IllegalArgumentException | InvocationTargetException
@@ -766,6 +769,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		if (idAttrCtx != null)
 			id = idAttrCtx.AttrValue().getText().replace("\"", "");
 
+		if ("2.16.756.5.30.1.1.10.9.16".equals(id))
+			System.out.println("Stop here");
+
 		NameAttrContext nameAttrCtx = ctx.nameAttr();
 		if (nameAttrCtx != null)
 			name = nameAttrCtx.AttrValue().getText().replace("\"", "");
@@ -782,6 +788,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		currentCdaTemplate = new CdaTemplate();
 		currentCdaTemplate.setId(id);
 		currentCdaTemplate.setName(name);
+
+		if (mainCdaTemplate == null)
+			mainCdaTemplate = currentCdaTemplate;
 
 		templateList.add(currentCdaTemplate);
 
@@ -836,6 +845,10 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			SecurityException, IOException {
 		String retVal = null;
 		String cdaElementName = cdaElement.getName().replace("hl7:", "").replace("pharm:", "");
+
+		if ("hl7:ClinicalDocument.hl7:component.hl7:structuredBody.hl7:component.hl7:section.hl7:component.hl7:section.hl7:entry.hl7:act.hl7:entryRelationship.hl7:organizer.hl7:entryRelationship"
+				.equals(cdaElement.getFullName()))
+			System.out.println("Stop here");
 
 		if (retVal == null) {
 			ArrayList<String> candidates = new ArrayList<String>();

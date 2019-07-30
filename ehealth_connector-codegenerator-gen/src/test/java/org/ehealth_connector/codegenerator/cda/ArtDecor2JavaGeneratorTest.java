@@ -54,7 +54,8 @@ public class ArtDecor2JavaGeneratorTest {
 				+ FileUtil.getPlatformSpecificPathSeparator() + templateId
 				+ FileUtil.getPlatformSpecificPathSeparator();
 		artDecor2JavaGenerator = new ArtDecor2JavaGenerator(null, templateIndex, templateList,
-				srcFilePath, dstFilePath, "org.ehealth_connector.testonly.cda.ch.emed", fileHeader);
+				srcFilePath, dstFilePath, "org.ehealth_connector.testonly.cda.ch.emed", fileHeader,
+				null);
 		artDecor2JavaGenerator.doOneTemplate(templateId);
 
 		// MedicationDispenseDocument
@@ -63,7 +64,8 @@ public class ArtDecor2JavaGeneratorTest {
 				+ FileUtil.getPlatformSpecificPathSeparator() + templateId
 				+ FileUtil.getPlatformSpecificPathSeparator();
 		artDecor2JavaGenerator = new ArtDecor2JavaGenerator(null, templateIndex, templateList,
-				srcFilePath, dstFilePath, "org.ehealth_connector.testonly.cda.ch.emed", fileHeader);
+				srcFilePath, dstFilePath, "org.ehealth_connector.testonly.cda.ch.emed", fileHeader,
+				null);
 		artDecor2JavaGenerator.doOneTemplate(templateId);
 
 		// MedicationListDocument
@@ -72,7 +74,8 @@ public class ArtDecor2JavaGeneratorTest {
 				+ FileUtil.getPlatformSpecificPathSeparator() + templateId
 				+ FileUtil.getPlatformSpecificPathSeparator();
 		artDecor2JavaGenerator = new ArtDecor2JavaGenerator(null, templateIndex, templateList,
-				srcFilePath, dstFilePath, "org.ehealth_connector.testonly.cda.ch.emed", fileHeader);
+				srcFilePath, dstFilePath, "org.ehealth_connector.testonly.cda.ch.emed", fileHeader,
+				null);
 		artDecor2JavaGenerator.doOneTemplate(templateId);
 
 		// MedicationPrescriptionDocument
@@ -81,7 +84,8 @@ public class ArtDecor2JavaGeneratorTest {
 				+ FileUtil.getPlatformSpecificPathSeparator() + templateId
 				+ FileUtil.getPlatformSpecificPathSeparator();
 		artDecor2JavaGenerator = new ArtDecor2JavaGenerator(null, templateIndex, templateList,
-				srcFilePath, dstFilePath, "org.ehealth_connector.testonly.cda.ch.emed", fileHeader);
+				srcFilePath, dstFilePath, "org.ehealth_connector.testonly.cda.ch.emed", fileHeader,
+				null);
 		artDecor2JavaGenerator.doOneTemplate(templateId);
 
 		// MedicationTreatmentPlanDocument
@@ -90,7 +94,8 @@ public class ArtDecor2JavaGeneratorTest {
 				+ FileUtil.getPlatformSpecificPathSeparator() + templateId
 				+ FileUtil.getPlatformSpecificPathSeparator();
 		artDecor2JavaGenerator = new ArtDecor2JavaGenerator(null, templateIndex, templateList,
-				srcFilePath, dstFilePath, "org.ehealth_connector.testonly.cda.ch.emed", fileHeader);
+				srcFilePath, dstFilePath, "org.ehealth_connector.testonly.cda.ch.emed", fileHeader,
+				null);
 		artDecor2JavaGenerator.doOneTemplate(templateId);
 
 		// PharmaceuticalAdviceDocument
@@ -99,7 +104,8 @@ public class ArtDecor2JavaGeneratorTest {
 				+ FileUtil.getPlatformSpecificPathSeparator() + templateId
 				+ FileUtil.getPlatformSpecificPathSeparator();
 		artDecor2JavaGenerator = new ArtDecor2JavaGenerator(null, templateIndex, templateList,
-				srcFilePath, dstFilePath, "org.ehealth_connector.testonly.cda.ch.emed", fileHeader);
+				srcFilePath, dstFilePath, "org.ehealth_connector.testonly.cda.ch.emed", fileHeader,
+				null);
 		artDecor2JavaGenerator.doOneTemplate(templateId);
 
 	}
@@ -129,7 +135,8 @@ public class ArtDecor2JavaGeneratorTest {
 		String fileHeader = JavaCodeGenerator.getFileHeader();
 
 		ArtDecor2JavaGenerator artDecor2JavaGenerator = new ArtDecor2JavaGenerator(null,
-				templateIndex, templateList, srcFilePath, dstFilePath, packageName, fileHeader);
+				templateIndex, templateList, srcFilePath, dstFilePath, packageName, fileHeader,
+				null);
 
 		artDecor2JavaGenerator.doOneTemplate(templateId);
 

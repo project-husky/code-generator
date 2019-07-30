@@ -142,7 +142,7 @@ public class ArtDecorRestClientTest {
 		artDecorRestClient.addArtDecorProject("cdachvacd-");
 
 		artDecorRestClient.downloadTemplateRecursive("cdachlrep-", "2.16.756.5.30.1.1.10.1.10",
-				"2018-04-19T00:00:00");
+				"2019-07-30T18:01:10");
 
 		File dest;
 		dest = new File(
