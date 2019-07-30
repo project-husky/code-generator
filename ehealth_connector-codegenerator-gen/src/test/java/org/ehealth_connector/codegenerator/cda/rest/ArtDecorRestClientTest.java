@@ -123,7 +123,7 @@ public class ArtDecorRestClientTest {
 
 	// This is for debugging purposes, only. Do not commit this test with the
 	// test annotation enabled!
-	@Test
+	// @Test
 	public void templateTestRecursiveCdaChLrep() throws Exception {
 
 		String dir = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
