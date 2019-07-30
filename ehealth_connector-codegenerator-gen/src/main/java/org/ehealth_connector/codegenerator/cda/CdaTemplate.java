@@ -28,6 +28,8 @@ public class CdaTemplate {
 
 	private String name;
 
+	private String dataType;
+
 	private ArrayList<CdaAttribute> cdaAttributeList = new ArrayList<CdaAttribute>();
 
 	public void addAttribute(CdaAttribute cdaAttribute) {
@@ -72,5 +74,13 @@ public class CdaTemplate {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getDataType() {
+		return dataType;
+	}
+
+	public void setDataType(String dataType) {
+		this.dataType = dataType;
 	}
 }

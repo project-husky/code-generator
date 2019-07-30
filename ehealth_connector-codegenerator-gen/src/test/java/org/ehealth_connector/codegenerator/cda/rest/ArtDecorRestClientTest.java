@@ -59,6 +59,7 @@ public class ArtDecorRestClientTest {
 		artDecorRestClient.addArtDecorProject("ad2bbr-");
 		artDecorRestClient.addArtDecorProject("ch-epr-");
 		artDecorRestClient.addArtDecorProject("ch-pharm-");
+		artDecorRestClient.addArtDecorProject("ch-pcc-");
 		artDecorRestClient.addArtDecorProject("hl7chcda-");
 
 		File dest;
@@ -122,7 +123,7 @@ public class ArtDecorRestClientTest {
 
 	// This is for debugging purposes, only. Do not commit this test with the
 	// test annotation enabled!
-	// @Test
+	@Test
 	public void templateTestRecursiveCdaChLrep() throws Exception {
 
 		String dir = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
