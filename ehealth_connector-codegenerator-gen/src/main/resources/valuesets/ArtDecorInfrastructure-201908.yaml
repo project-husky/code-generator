@@ -10,7 +10,7 @@
 # Accompanying materials are made available under the terms of the Creative Commons
 # Attribution-ShareAlike 4.0 License.
 #
-# This line is intended for UTF-8 encoding checks, do not modify/delete: äöüéè
+# This line is intended for UTF-8 encoding checks, do not modify/delete: Ã¤Ã¶Ã¼Ã©Ã¨
 
 # The list of all configured ART-DECOR value sets that will used for static and dynamic 
 # value set handling in the eHealth Connector
@@ -33,6 +33,21 @@ valueSetConfigList:
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=cdachlrep-&language=en-US&version=&id=2.16.840.1.113883.1.11.10609&effectiveDate=2014-03-26T00%3A00%3A00&format=json
+- className: org.ehealth_connector.common.enums.EntityNameUse
+  projectFolder: common/ehealth_connector-common-gen
+  sourceFormatType: JSON
+  sourceSystemType: ARTDECOR_FHIR
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ccda-&language=en-US&version=&id=2.16.840.1.113883.1.11.15913&effectiveDate=2013-01-31T00%3A00%3A00&format=json
+- className: org.ehealth_connector.common.enums.AdministrativeGender
+  projectFolder: common/ehealth_connector-common-gen
+  sourceFormatType: JSON
+  sourceSystemType: ARTDECOR_FHIR
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=eusht-&language=en-US&version=&id=2.16.840.1.113883.1.11.1&effectiveDate=2014-03-26T00%3A00%3A00&format=json
+- className: org.ehealth_connector.common.enums.PostalAddressUse
+  projectFolder: common/ehealth_connector-common-gen
+  sourceFormatType: JSON
+  sourceSystemType: ARTDECOR_FHIR
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ccda-&language=en-US&version=&id=2.16.840.1.113883.1.11.10637&effectiveDate=2013-01-31T00%3A00%3A00&format=json
 version:
   label: 201908
   validFrom: 2019-08-01T00:00:00+02:00
