@@ -148,6 +148,7 @@ public class UpdateValueSets {
 	// private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG =
 	// "SwissEprValueSetPackageConfig-201704.3-beta.yaml";
 	private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG = "SwissEprValueSetPackageConfig-201907.0-beta.yaml";
+	private final static String ART_DECOR_VALUE_SET_PACKAGE_CONFIG = "ArtDecorInfrastructure-201908.yaml";
 
 	/**
 	 * <div class="en">Adds all concepts of the value set definition as enum
@@ -160,14 +161,13 @@ public class UpdateValueSets {
 	 */
 	private static void addEnumElements(EnumDeclaration enumType, ValueSet valueSet) {
 
-		for (ValueSetEntry valueSetEntry : valueSet.sortValueSetEntriesByEnumName()) {
+		ArrayList<ValueSetEntry> list;
+		list = valueSet.getSortedEntryList();
 
-			if (valueSetEntry.getLevel() > 0) {
-				System.out.print("***WARNING: Nested enums are not currently supported (valueSet: "
-						+ valueSet.getDisplayName() + "\n");
-				break;
-			}
+		// TODO: nested lists not supported, yet (due to duplicate enum names).
+		// list=valueSet.getSortedEntryListRecursive();
 
+		for (ValueSetEntry valueSetEntry : list) {
 			String enumConstantName = ValueSet
 					.buildEnumName(valueSetEntry.getCodeBaseType().getDisplayName());
 			String preferredDesignation = valueSetEntry.getDesignation(LanguageCode.ENGLISH,
