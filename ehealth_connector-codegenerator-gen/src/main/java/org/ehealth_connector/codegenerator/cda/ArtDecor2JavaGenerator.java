@@ -46,6 +46,8 @@ import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.ContainsAttrContext;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.DataTypeAttrContext;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.IdAttrContext;
+import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.MaxOccursAttrContext;
+import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.MinOccursAttrContext;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.NameAttrContext;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.RefAttrContext;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.ValueAttrContext;
@@ -57,6 +59,7 @@ import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.Util;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -68,6 +71,61 @@ import net.sf.saxon.s9api.SaxonApiException;
 public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	private static HashMap<String, String> dataTypeIndex = null;
+
+	public static void addImport(CompilationUnit compilationUnit, String value) {
+		boolean isAlreadyThere = false;
+		for (ImportDeclaration item : compilationUnit.getImports()) {
+			isAlreadyThere = (item.getNameAsString().equals(value));
+			if (isAlreadyThere)
+				break;
+		}
+		if (!isAlreadyThere)
+			compilationUnit.addImport(value);
+	}
+
+	private static void createAdder(ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
+
+		if (cdaElement.getDataType() == null)
+			throw new NotImplementedException("Type undefined for " + cdaElement.getName());
+
+		MethodDeclaration method;
+
+		method = myClass.addMethod("add" + JavaCodeGenerator.toPascalCase(cdaElement.getName()),
+				publicModifier().getKeyword());
+
+		String comment = "Adds a " + cdaElement.getName();
+		String desc = cdaElement.getDescription();
+		if (desc != null)
+			comment += Util.getPlatformSpecificLineBreak() + desc;
+
+		method.setJavadocComment(comment);
+
+		method.addAndGetParameter(cdaElement.getDataType(), "value");
+
+		method.createBody().addStatement(cdaElement.getName() + ".add(value);");
+
+	}
+
+	private static void createClearer(ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
+
+		if (cdaElement.getDataType() == null)
+			throw new NotImplementedException("Type undefined for " + cdaElement.getName());
+
+		MethodDeclaration method;
+
+		method = myClass.addMethod("clear" + JavaCodeGenerator.toPascalCase(cdaElement.getName()),
+				publicModifier().getKeyword());
+
+		String comment = "Adds a " + cdaElement.getName();
+		String desc = cdaElement.getDescription();
+		if (desc != null)
+			comment += Util.getPlatformSpecificLineBreak() + desc;
+
+		method.setJavadocComment(comment);
+
+		method.createBody().addStatement(cdaElement.getName() + ".clear();");
+
+	}
 
 	private static void createGetter(ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
 
@@ -83,7 +141,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		String comment = "Gets the " + cdaElement.getName();
 		String desc = cdaElement.getDescription();
 		if (desc != null)
-			comment += "\r\n" + desc;
+			comment += Util.getPlatformSpecificLineBreak() + desc;
 
 		method.setJavadocComment(comment);
 
@@ -105,7 +163,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		String comment = "Sets the " + cdaElement.getName();
 		String desc = cdaElement.getDescription();
 		if (desc != null)
-			comment += "\r\n" + desc;
+			comment += Util.getPlatformSpecificLineBreak() + desc;
 
 		method.setJavadocComment(comment);
 
@@ -230,7 +288,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		return retVal;
 	}
 
-	private void createField(ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
+	private void createField(CompilationUnit compilationUnit, ClassOrInterfaceDeclaration myClass,
+			CdaElement cdaElement) {
 
 		if (cdaElement.getDataType() == null)
 			throw new NotImplementedException("Type undefined for " + cdaElement.getName());
@@ -246,23 +305,39 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		int i = 0;
 		String newName = name;
-		Optional<FieldDeclaration> obj = myClass.getFieldByName(name);
+		Optional<FieldDeclaration> obj = myClass.getFieldByName(newName);
 		while (obj.isPresent()) {
 			i++;
 			newName = name + Integer.toString(i);
 			obj = myClass.getFieldByName(newName);
 		}
 		cdaElement.setName(newName);
-		FieldDeclaration field = myClass.addField(cdaElement.getDataType(), newName,
-				privateModifier().getKeyword());
 
-		String desc = cdaElement.getDescription();
-		if (desc != null)
-			field.setJavadocComment(desc);
+		if (cdaElement.getMaxOccurs() > 1) {
+			// create a list field having a add and clear method
+			FieldDeclaration field = myClass.addField("ArrayList<" + cdaElement.getDataType() + ">",
+					cdaElement.getName(), privateModifier().getKeyword());
 
-		createGetter(myClass, cdaElement);
-		createSetter(myClass, cdaElement);
+			String desc = cdaElement.getDescription();
+			if (desc != null)
+				field.setJavadocComment(desc);
 
+			addImport(compilationUnit, "java.util.ArrayList");
+
+			createAdder(myClass, cdaElement);
+			createClearer(myClass, cdaElement);
+		} else {
+			// create a single field having a getter and a setter
+			FieldDeclaration field = myClass.addField(cdaElement.getDataType(),
+					cdaElement.getName(), privateModifier().getKeyword());
+
+			String desc = cdaElement.getDescription();
+			if (desc != null)
+				field.setJavadocComment(desc);
+
+			createGetter(myClass, cdaElement);
+			createSetter(myClass, cdaElement);
+		}
 	}
 
 	private void createJavaClassFile(CdaTemplate cdaTemplate, String packageName,
@@ -307,7 +382,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				new NodeList<ClassOrInterfaceType>(new ClassOrInterfaceType(null, inheritenceOf)));
 
 		for (CdaElement cdaElement1 : cdaElement.getChildrenCdaElementList()) {
-			createField(myClass, cdaElement1);
+			createField(compilationUnit, myClass, cdaElement1);
 		}
 
 		File outFile = new File(dstFilePath + className + ".java");
@@ -477,19 +552,46 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		String name = null;
 		String dataType = null;
+		String maxOccursStr = null;
+		String minOccursStr = null;
 
 		NameAttrContext nameAttrCtx = ctx.nameAttr();
 		if (nameAttrCtx != null)
 			name = nameAttrCtx.AttrValue().getText().replace("\"", "");
+
 		DataTypeAttrContext dataTypeAttrCtx = ctx.dataTypeAttr();
 		if (dataTypeAttrCtx != null)
 			dataType = dataTypeAttrCtx.AttrValue().getText().replace("\"", "");
+
+		MaxOccursAttrContext maxOccursAttrCtx = ctx.maxOccursAttr();
+		if (maxOccursAttrCtx != null)
+			maxOccursStr = maxOccursAttrCtx.AttrValue().getText().replace("\"", "");
+
+		MinOccursAttrContext minOccursAttrCtx = ctx.minOccursAttr();
+		if (minOccursAttrCtx != null)
+			minOccursStr = minOccursAttrCtx.AttrValue().getText().replace("\"", "");
 
 		dataType = adjustDataType(dataType);
 
 		CdaElement cdaElement = new CdaElement(null);
 		cdaElement.setName(name);
 		cdaElement.setDataType(dataType);
+		if (maxOccursStr != null) {
+			int temp = 0;
+			if ("*".equals(maxOccursStr))
+				temp = Integer.MAX_VALUE;
+			else
+				temp = Integer.parseInt(maxOccursStr);
+			cdaElement.setMaxOccurs(temp);
+		}
+		if (minOccursStr != null) {
+			int temp = 0;
+			if ("*".equals(minOccursStr))
+				temp = Integer.MAX_VALUE;
+			else
+				temp = Integer.parseInt(minOccursStr);
+			cdaElement.setMinOccurs(temp);
+		}
 
 		parentForContains = cdaElement;
 
@@ -879,5 +981,4 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		return retVal;
 	}
-
 }

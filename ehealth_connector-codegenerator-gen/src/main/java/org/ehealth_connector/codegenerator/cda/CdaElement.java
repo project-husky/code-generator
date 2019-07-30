@@ -34,6 +34,10 @@ public class CdaElement {
 
 	private String targetXmlElement;
 
+	private int maxOccurs;
+
+	private int minOccurs;
+
 	public CdaElement(CdaElement parentCdaElement) {
 		this.parentCdaElement = parentCdaElement;
 	}
@@ -111,6 +115,22 @@ public class CdaElement {
 
 	public void setTargetXmlElement(String targetXmlElement) {
 		this.targetXmlElement = targetXmlElement;
+	}
+
+	public int getMaxOccurs() {
+		return maxOccurs;
+	}
+
+	public void setMaxOccurs(int maxOccurs) {
+		this.maxOccurs = maxOccurs;
+	}
+
+	public int getMinOccurs() {
+		return minOccurs;
+	}
+
+	public void setMinOccurs(int minOccurs) {
+		this.minOccurs = minOccurs;
 	}
 
 }
