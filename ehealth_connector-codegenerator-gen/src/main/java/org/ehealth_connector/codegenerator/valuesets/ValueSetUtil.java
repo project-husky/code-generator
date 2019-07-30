@@ -18,7 +18,7 @@
 
 package org.ehealth_connector.codegenerator.valuesets;
 
-import static org.ehealth_connector.common.mdht.enums.LanguageCode.ENGLISH;
+import static org.ehealth_connector.common.enums.LanguageCode.ENGLISH;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +26,7 @@ import java.io.InvalidClassException;
 import java.util.List;
 import java.util.Map;
 
-import org.ehealth_connector.common.mdht.enums.LanguageCode;
+import org.ehealth_connector.common.enums.LanguageCode;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.TypeDeclaration;

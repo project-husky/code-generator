@@ -24,10 +24,10 @@ import static com.github.javaparser.ast.Modifier.staticModifier;
 import static java.util.Arrays.asList;
 import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.getSourceFileName;
 import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.loadPrimaryType;
-import static org.ehealth_connector.common.mdht.enums.LanguageCode.ENGLISH;
-import static org.ehealth_connector.common.mdht.enums.LanguageCode.FRENCH;
-import static org.ehealth_connector.common.mdht.enums.LanguageCode.GERMAN;
-import static org.ehealth_connector.common.mdht.enums.LanguageCode.ITALIAN;
+import static org.ehealth_connector.common.enums.LanguageCode.ENGLISH;
+import static org.ehealth_connector.common.enums.LanguageCode.FRENCH;
+import static org.ehealth_connector.common.enums.LanguageCode.GERMAN;
+import static org.ehealth_connector.common.enums.LanguageCode.ITALIAN;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,7 +39,7 @@ import javax.annotation.Generated;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
-import org.ehealth_connector.common.mdht.enums.LanguageCode;
+import org.ehealth_connector.common.enums.LanguageCode;
 import org.ehealth_connector.common.mdht.enums.ValueSetEnumInterface;
 import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.Util;
@@ -165,7 +165,7 @@ public class UpdateValueSets {
 		list = valueSet.getSortedEntryList();
 
 		// TODO: nested lists not supported, yet (due to duplicate enum names).
-		// list=valueSet.getSortedEntryListRecursive();
+		// list = valueSet.getSortedEntryListRecursive();
 
 		for (ValueSetEntry valueSetEntry : list) {
 			String enumConstantName = ValueSet
@@ -384,6 +384,8 @@ public class UpdateValueSets {
 		System.out.println("Temp. workspace: " + tempWorkspacePath.getAbsolutePath());
 
 		String fnPackageConfig = CONFIG_FILE_BASE_PATH + SWISS_EPR_VALUE_SET_PACKAGE_CONFIG;
+		// String fnPackageConfig = CONFIG_FILE_BASE_PATH +
+		// ART_DECOR_VALUE_SET_PACKAGE_CONFIG;
 
 		ValueSetPackageManager valueSetPackageManager;
 		valueSetPackageManager = new ValueSetPackageManager();
