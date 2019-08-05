@@ -77,7 +77,7 @@ import com.google.common.collect.ImmutableMap;
  */
 public class UpdateValueSets {
 
-	private static Logger log = LoggerFactory.getLogger(UpdateValueSets.class);
+	private final static String ART_DECOR_VALUE_SET_PACKAGE_CONFIG = "ArtDecorInfrastructure-201908.yaml";
 	/**
 	 * <div class="en">Javadoc comment prefix for the code fields.</div>
 	 */
@@ -106,6 +106,8 @@ public class UpdateValueSets {
 	private static final List<LanguageCode> LANGUAGE_CODES = asList(ENGLISH, GERMAN, FRENCH,
 			ITALIAN);;
 
+	private static Logger log = LoggerFactory.getLogger(UpdateValueSets.class);
+
 	/**
 	 * <div class="en">Java code formatter/pretty printer configuration used to
 	 * write Java code.</div>
@@ -125,6 +127,12 @@ public class UpdateValueSets {
 	private static final Type STRING_TYPE = com.github.javaparser.StaticJavaParser
 			.parseClassOrInterfaceType("String");
 
+	// private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG =
+	// "SwissEprValueSetPackageConfig-201704.0-stable.yaml";
+	// private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG =
+	// "SwissEprValueSetPackageConfig-201704.3-beta.yaml";
+	private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG = "SwissEprValueSetPackageConfig-201907.0-beta.yaml";
+
 	/**
 	 * <div class="en">Relative path where to find the Java template text
 	 * file.</div>
@@ -136,19 +144,11 @@ public class UpdateValueSets {
 	 * actual generated enum name.</div>
 	 */
 	private static final String TEMPLATE_NAME_TO_REPLACE = "TemplateNameToReplace";
-
 	/**
 	 * <div class="en">Package name in the template that will be replaced with
 	 * the actual generated enum name.</div>
 	 */
 	private static final String TEMPLATE_PACKAGE_NAME_TO_REPLACE = "TemplatePackageNameToReplace";
-
-	// private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG =
-	// "SwissEprValueSetPackageConfig-201704.0-stable.yaml";
-	// private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG =
-	// "SwissEprValueSetPackageConfig-201704.3-beta.yaml";
-	private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG = "SwissEprValueSetPackageConfig-201907.0-beta.yaml";
-	private final static String ART_DECOR_VALUE_SET_PACKAGE_CONFIG = "ArtDecorInfrastructure-201908.yaml";
 
 	/**
 	 * <div class="en">Adds all concepts of the value set definition as enum

@@ -31,11 +31,21 @@ import org.junit.Test;
 
 import net.sf.saxon.s9api.SaxonApiException;
 
+/**
+ * The test class for Hl7Its2EhcTransformer.
+ */
 public class Hl7Its2EhcTransformerTest {
 
+	/**
+	 * Transformation test for all ART-DECOR HL7 ITS XML files of the content
+	 * profile CDA-CH-LREP.
+	 *
+	 * @throws Exception
+	 *             the exception
+	 */
 	// This is for debugging purposes, only. Do not commit this test with the
 	// test annotation enabled!
-	@Test
+	// @Test
 	public void transformationTestLrep() throws Exception {
 
 		String dir = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
@@ -76,6 +86,14 @@ public class Hl7Its2EhcTransformerTest {
 		assertEquals((countTransformed * 2), folder.listFiles().length);
 	}
 
+	/**
+	 * Test a single transformation.
+	 *
+	 * @throws SaxonApiException
+	 *             the saxon api exception
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
+	 */
 	@Test
 	public void transformationTestSingle() throws SaxonApiException, IOException {
 

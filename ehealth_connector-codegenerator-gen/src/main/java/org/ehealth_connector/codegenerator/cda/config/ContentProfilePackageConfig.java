@@ -38,11 +38,11 @@ public class ContentProfilePackageConfig {
 	@Generated("SparkTools")
 	public static final class Builder {
 
-		/** The description. */
-		private String description;
-
 		/** The content profile config list. */
 		private ArrayList<ContentProfileConfig> contentProfileConfigList;
+
+		/** The description. */
+		private String description;
 
 		/**
 		 * Instantiates a new builder.
@@ -95,11 +95,11 @@ public class ContentProfilePackageConfig {
 		return new Builder();
 	}
 
-	/** The description. */
-	private String description;
-
 	/** The content profile config list. */
 	private ArrayList<ContentProfileConfig> contentProfileConfigList;
+
+	/** The description. */
+	private String description;
 
 	/**
 	 * Instantiates a new content profile package config. Default constructor.

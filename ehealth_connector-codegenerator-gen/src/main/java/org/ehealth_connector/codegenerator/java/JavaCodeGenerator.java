@@ -54,15 +54,15 @@ import com.github.javaparser.printer.PrettyPrinterConfiguration.IndentType;
 public class JavaCodeGenerator {
 
 	/**
-	 * The Constant REGEX to be used for Pascal, camel, kebab and snake casing.
-	 */
-	private final static String REGEX = "(?<=[a-z0-9])[A-Z0-9]";
-
-	/**
 	 * The Constant DELIMITERS to be used for Pascal, camel, kebab and snake
 	 * casing.
 	 */
 	private final static char[] DELIMITERS = new char[] { '-', '_', ' ' };
+
+	/**
+	 * The Constant REGEX to be used for Pascal, camel, kebab and snake casing.
+	 */
+	private final static String REGEX = "(?<=[a-z0-9])[A-Z0-9]";
 
 	public static void completeAndSave(CompilationUnit compilationUnit, File outFile)
 			throws IOException {

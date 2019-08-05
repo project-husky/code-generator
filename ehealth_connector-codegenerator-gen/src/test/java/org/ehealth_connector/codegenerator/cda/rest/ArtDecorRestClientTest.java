@@ -31,8 +31,19 @@ import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.Util;
 import org.junit.Test;
 
+/**
+ * The test class for ArtDecorRestClient.
+ */
 public class ArtDecorRestClientTest {
 
+	/**
+	 * Test ART-DECOR project index download.
+	 *
+	 * @throws ClientProtocolException
+	 *             the client protocol exception
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
+	 */
 	@Test
 	public void projectIndexTest() throws ClientProtocolException, IOException {
 
@@ -44,6 +55,13 @@ public class ArtDecorRestClientTest {
 		assertTrue(content.startsWith("<return prefix=\"cdachlrep-\""));
 	}
 
+	/**
+	 * Test download of all ART-DECOR templates used for the content profile
+	 * CDA-CH-EMED.
+	 *
+	 * @throws Exception
+	 *             the exception
+	 */
 	// This is for debugging purposes, only. Do not commit this test with the
 	// test annotation enabled!
 	// @Test
@@ -121,6 +139,13 @@ public class ArtDecorRestClientTest {
 
 	}
 
+	/**
+	 * Test download of all ART-DECOR templates used for the content profile
+	 * CDA-CH-LREP.
+	 *
+	 * @throws Exception
+	 *             the exception
+	 */
 	// This is for debugging purposes, only. Do not commit this test with the
 	// test annotation enabled!
 	// @Test
@@ -154,6 +179,14 @@ public class ArtDecorRestClientTest {
 		assertTrue(dest.listFiles().length > 1);
 	}
 
+	/**
+	 * Test a single template download from ART-DECOR.
+	 *
+	 * @throws ClientProtocolException
+	 *             the client protocol exception
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
+	 */
 	@Test
 	public void templateTestSingle() throws ClientProtocolException, IOException {
 

@@ -44,8 +44,14 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.printer.PrettyPrinterConfiguration;
 import com.github.javaparser.printer.PrettyPrinterConfiguration.IndentType;
 
+/**
+ * The test class for JavaCodeGenerator.
+ */
 public class JavaCodeGeneratorTest {
 
+	/**
+	 * Test to check whether casiing is done correctly.
+	 */
 	@Test
 	public void casingTests() {
 
@@ -79,7 +85,7 @@ public class JavaCodeGeneratorTest {
 
 	/**
 	 * Tests whether the Java Code generator generates the desired content
-	 * (including sorting of imports, fields and methods). Remember that
+	 * (including sorting of imports, fields and methods).
 	 */
 	@Test
 	public void javaClassFileTest() {

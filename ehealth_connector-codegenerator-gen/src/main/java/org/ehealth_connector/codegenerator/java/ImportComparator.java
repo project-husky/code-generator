@@ -20,11 +20,25 @@ import java.util.Comparator;
 
 import com.github.javaparser.ast.ImportDeclaration;
 
+/**
+ * <div class="en">This class is used as comparator to sort items in an
+ * ArrayList. It is used to sort all import declarations of a Java class in
+ * alphabetical order. The result shall be equal to the "Sort members..." and
+ * "Format" menu calls of Eclipse IDE.</div>
+ *
+ * <div class="de">Diese Klasse wird als Komparator zum Sortieren von Elementen
+ * in einer ArrayList verwendet. Es wird verwendet, um alle import Deklarationen
+ * einer Java-Klasse in alphabetischer Reihenfolge zu sortieren. Das Ergebnis
+ * soll dem Menüaufruf "Sort members..." und "Format" der Eclipse IDE
+ * entsprechen.</div>
+ */
 public class ImportComparator implements Comparator<ImportDeclaration> {
 
 	/**
 	 *
-	 * Compares two members on their name.
+	 * <div class="en">Compares two members on their name.</div>
+	 *
+	 * <div class="de">Vergleicht zwei Member nach Name.</div>
 	 *
 	 * {@inheritDoc}
 	 *

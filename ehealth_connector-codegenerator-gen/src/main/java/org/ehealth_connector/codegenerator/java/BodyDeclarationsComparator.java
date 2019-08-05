@@ -22,11 +22,25 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 
+/**
+ * <div class="en">This class is used as comparator to sort items in an
+ * ArrayList. It is used to sort all fields and methods of a Java class in
+ * alphabetical order. The result shall be equal to the "Sort members..." menu
+ * call of Eclipse IDE.</div>
+ *
+ * <div class="de">Diese Klasse wird als Komparator zum Sortieren von Elementen
+ * in einer ArrayList verwendet. Es wird verwendet, um alle Felder und Methoden
+ * einer Java-Klasse in alphabetischer Reihenfolge zu sortieren. Das Ergebnis
+ * soll dem Menüaufruf "Sort members..." der Eclipse IDE entsprechen.</div>
+ *
+ */
 public class BodyDeclarationsComparator implements Comparator<BodyDeclaration<?>> {
 
 	/**
 	 *
-	 * Compares two members on their type and name.
+	 * <div class="en">Compares two members on their type and name.</div>
+	 *
+	 * <div class="de">Vergleicht zwei Member nach Typ und Name.</div>
 	 *
 	 * {@inheritDoc}
 	 *

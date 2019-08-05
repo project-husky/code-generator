@@ -31,7 +31,37 @@ import org.ehealth_connector.common.utils.Util;
 
 import net.sf.saxon.s9api.SaxonApiException;
 
+/**
+ * The test class for ArtDecor2JavaGenerator.
+ */
 public class ArtDecor2JavaGeneratorTest {
+
+	/**
+	 * Java code generation test the content profile CDA-CH-EMED.
+	 *
+	 * @throws SaxonApiException
+	 *             the saxon api exception
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
+	 * @throws JAXBException
+	 *             the JAXB exception
+	 * @throws ClassNotFoundException
+	 *             the class not found exception
+	 * @throws IllegalAccessException
+	 *             the illegal access exception
+	 * @throws IllegalArgumentException
+	 *             the illegal argument exception
+	 * @throws InvocationTargetException
+	 *             the invocation target exception
+	 * @throws InstantiationException
+	 *             the instantiation exception
+	 * @throws NoSuchFieldException
+	 *             the no such field exception
+	 * @throws SecurityException
+	 *             the security exception
+	 */
+	// This is for debugging purposes, only. Do not commit this test with the
+	// test annotation enabled!
 	// @Test
 	public void doEmedTest()
 			throws SaxonApiException, IOException, JAXBException, ClassNotFoundException,
@@ -109,6 +139,32 @@ public class ArtDecor2JavaGeneratorTest {
 
 	}
 
+	/**
+	 * Java code generation test the content profile CDA-CH-LREP.
+	 *
+	 * @throws SaxonApiException
+	 *             the saxon api exception
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
+	 * @throws JAXBException
+	 *             the JAXB exception
+	 * @throws ClassNotFoundException
+	 *             the class not found exception
+	 * @throws IllegalAccessException
+	 *             the illegal access exception
+	 * @throws IllegalArgumentException
+	 *             the illegal argument exception
+	 * @throws InvocationTargetException
+	 *             the invocation target exception
+	 * @throws InstantiationException
+	 *             the instantiation exception
+	 * @throws NoSuchFieldException
+	 *             the no such field exception
+	 * @throws SecurityException
+	 *             the security exception
+	 */
+	// This is for debugging purposes, only. Do not commit this test with the
+	// test annotation enabled!
 	// @Test
 	public void doLrepTest()
 			throws SaxonApiException, IOException, JAXBException, ClassNotFoundException,

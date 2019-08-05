@@ -38,17 +38,17 @@ public class ContentProfileConfig {
 		/** The art decor base url. */
 		private String artDecorBaseUrl;
 
-		/** The art decor prefix. */
-		private String artDecorPrefix;
-
 		/** The art decor doc template id. */
 		private String artDecorDocTemplateId;
 
-		/** The target namespace. */
-		private String targetNamespace;
+		/** The art decor prefix. */
+		private String artDecorPrefix;
 
 		/** The target dir. */
 		private String targetDir;
+
+		/** The target namespace. */
+		private String targetNamespace;
 
 		/**
 		 * Instantiates a new builder.
@@ -139,17 +139,17 @@ public class ContentProfileConfig {
 	/** The art decor base url. */
 	private String artDecorBaseUrl;
 
-	/** The art decor prefix. */
-	private String artDecorPrefix;
-
 	/** The art decor doc template id. */
 	private String artDecorDocTemplateId;
 
-	/** The target namespace. */
-	private String targetNamespace;
+	/** The art decor prefix. */
+	private String artDecorPrefix;
 
 	/** The target dir. */
 	private String targetDir;
+
+	/** The target namespace. */
+	private String targetNamespace;
 
 	/**
 	 * Instantiates a new content profile config. Default constructor.
@@ -176,6 +176,7 @@ public class ContentProfileConfig {
 	 * <div class="en">Gets the ART-DECOR base URL. e.g.:
 	 * https://art-decor.org/decor/services/. ART-DECOR prefix and template id
 	 * will be added to this base URL to correctly access the templates.</div>
+	 *
 	 * <div class="de">Ruft die ART-DECOR-Basis-URL ab. Beispiel:
 	 * https://art-decor.org/decor/services/. ART-DECOR Präfix und die Template
 	 * ID werden zu dieser Basis-URL hinzugefügt, um den korrekten Zugriff auf
@@ -189,6 +190,7 @@ public class ContentProfileConfig {
 
 	/**
 	 * <div class="en">Gets the ART-DECOR document template id.</div>
+	 *
 	 * <div class="de">Ruft die ART-DECOR document template ID ab.</div>
 	 *
 	 *
@@ -199,8 +201,9 @@ public class ContentProfileConfig {
 	}
 
 	/**
-	 * <div class="en">Gets the ART-DECOR prefix.</div> <div class="de">Ruft den
-	 * ART-DECOR Präfix ab.</div>
+	 * <div class="en">Gets the ART-DECOR prefix.</div>
+	 *
+	 * <div class="de">Ruft den ART-DECOR Präfix ab.</div>
 	 *
 	 * @return the art decor prefix
 	 */
@@ -210,8 +213,10 @@ public class ContentProfileConfig {
 
 	/**
 	 * <div class="en">Gets the target dir. That's where the Java class files
-	 * will be generated to.</div> <div class="de">Ruft das Zielverzeichnis ab.
-	 * Dorthin werden die Java-Klassendateien generiert.</div>
+	 * will be generated to.</div>
+	 *
+	 * <div class="de">Ruft das Zielverzeichnis ab. Dorthin werden die
+	 * Java-Klassendateien generiert.</div>
 	 *
 	 * @return the target dir
 	 */
@@ -221,9 +226,10 @@ public class ContentProfileConfig {
 
 	/**
 	 * <div class="en">Gets the target namespace. That's the namespace to put in
-	 * the generated Java class files.</div> <div class="de">Ruft den Ziel
-	 * namespace ab. Dies ist der Namespace, der in die generierten
-	 * Java-Klassendateien eingefügt werden soll.</div>
+	 * the generated Java class files.</div>
+	 *
+	 * <div class="de">Ruft den Ziel namespace ab. Dies ist der Namespace, der
+	 * in die generierten Java-Klassendateien eingefügt werden soll.</div>
 	 *
 	 * @return the target namespace
 	 */
@@ -235,6 +241,7 @@ public class ContentProfileConfig {
 	 * <div class="en">Sets the ART-DECOR base URL. e.g.:
 	 * https://art-decor.org/decor/services/ ART-DECOR. prefix and template id
 	 * will be added to this base URL to correctly access the templates.</div>
+	 *
 	 * <div class="de">Legt die ART-DECOR-Basis-URL fest. Beispiel:
 	 * https://art-decor.org/decor/services/. ART-DECOR Präfix und die Template
 	 * ID werden zu dieser Basis-URL hinzugefügt, um den korrekten Zugriff auf
@@ -249,6 +256,7 @@ public class ContentProfileConfig {
 
 	/**
 	 * <div class="en">Sets the ART-DECOR document template id.</div>
+	 *
 	 * <div class="de">Legt die ART-DECOR document template ID fest.</div>
 	 *
 	 * @param artDecorDocTemplateId
@@ -259,8 +267,9 @@ public class ContentProfileConfig {
 	}
 
 	/**
-	 * <div class="en">Sets the ART-DECOR prefix.</div> <div class="de">Legt den
-	 * ART-DECOR Präfix fest.</div>
+	 * <div class="en">Sets the ART-DECOR prefix.</div>
+	 *
+	 * <div class="de">Legt den ART-DECOR Präfix fest.</div>
 	 *
 	 *
 	 * @param artDecorPrefix
@@ -272,8 +281,10 @@ public class ContentProfileConfig {
 
 	/**
 	 * <div class="en">Sets the target dir. That's where the Java class files
-	 * will be generated to.</div> <div class="de">Legt das Zielverzeichnis
-	 * fest. Dorthin werden die Java-Klassendateien generiert.</div>
+	 * will be generated to.</div>
+	 *
+	 * <div class="de">Legt das Zielverzeichnis fest. Dorthin werden die
+	 * Java-Klassendateien generiert.</div>
 	 *
 	 * @param targetDir
 	 *            the new target dir
@@ -284,9 +295,10 @@ public class ContentProfileConfig {
 
 	/**
 	 * <div class="en">Sets the target namespace. That's the namespace to put in
-	 * the generated Java class files.</div> <div class="de">Legt den Ziel
-	 * namespace fest. Dies ist der Namespace, der in die generierten
-	 * Java-Klassendateien eingefügt werden soll.</div>
+	 * the generated Java class files.</div>
+	 *
+	 * <div class="de">Legt den Ziel namespace fest. Dies ist der Namespace, der
+	 * in die generierten Java-Klassendateien eingefügt werden soll.</div>
 	 *
 	 * @param targetNamespace
 	 *            the new target namespace

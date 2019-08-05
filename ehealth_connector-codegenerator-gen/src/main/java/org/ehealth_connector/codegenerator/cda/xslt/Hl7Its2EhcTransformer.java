@@ -36,13 +36,34 @@ import net.sf.saxon.s9api.XsltTransformer;
 
 /**
  *
- * TODO This class acts as XSL transformer of all templates downloaded by the
- * ArtDecorRestClient. It performs XML stylesheet transformations (XSLT) based
- * on Hl7Its2Ehc.xsl.
+ * <div class="en">This class acts as XSL transformer of all templates
+ * downloaded by the ArtDecorRestClient. It performs XML stylesheet
+ * transformations (XSLT) based on Hl7Its2Ehc.xsl.</div>
+ *
+ * <div class="de">Diese Klasse fungiert als XSL-Transformer aller vom
+ * ArtDecorRestClient heruntergeladenen Templates. Er führt
+ * XML-Stylesheet-Transformationen (XSLT) basierend auf Hl7Its2Ehc.xsl
+ * durch.</div>
  *
  */
 public class Hl7Its2EhcTransformer {
 
+	/**
+	 * <div class="en">Performs one XSL transformation. The inputFile will be
+	 * transformed by using the internally stored XSL stylesheet and then stored
+	 * in the outputFile.</div>
+	 *
+	 * <div class="de">Führt eine XSL-Transformation durch. Die Eingabedatei
+	 * wird mithilfe des intern gespeicherten XSL-Stylesheets transformiert und
+	 * dann in der Ausgabedatei gespeichert.</div>
+	 *
+	 * @param inputFile
+	 *            the input file
+	 * @param outputFile
+	 *            the output file
+	 * @throws SaxonApiException
+	 *             the saxon api exception
+	 */
 	public static void transform(File inputFile, File outputFile) throws SaxonApiException {
 		Processor processor = new Processor(false);
 		XsltCompiler compiler = processor.newXsltCompiler();
@@ -65,6 +86,22 @@ public class Hl7Its2EhcTransformer {
 
 	}
 
+	/**
+	 * <div class="en">Performs one XSL transformation. The inputFile will be
+	 * transformed by using the internally stored XSL stylesheet and then stored
+	 * in the outputFile.</div>
+	 *
+	 * <div class="de">Führt eine XSL-Transformation durch. Die Eingabedatei
+	 * wird mithilfe des intern gespeicherten XSL-Stylesheets transformiert und
+	 * dann in der Ausgabedatei gespeichert.</div>
+	 *
+	 * @param inputFn
+	 *            the input fn
+	 * @param outputFn
+	 *            the output fn
+	 * @throws SaxonApiException
+	 *             the saxon api exception
+	 */
 	public static void transform(String inputFn, String outputFn) throws SaxonApiException {
 		transform(new File(inputFn), new File(outputFn));
 	}

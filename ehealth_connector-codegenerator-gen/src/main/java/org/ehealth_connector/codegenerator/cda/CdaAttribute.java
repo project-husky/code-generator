@@ -38,6 +38,10 @@ public class CdaAttribute {
 		return name;
 	}
 
+	public String getValue() {
+		return value;
+	}
+
 	public void setDataType(String dataType) {
 		this.dataType = dataType;
 	}
@@ -48,10 +52,6 @@ public class CdaAttribute {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public String getValue() {
-		return value;
 	}
 
 	public void setValue(String value) {

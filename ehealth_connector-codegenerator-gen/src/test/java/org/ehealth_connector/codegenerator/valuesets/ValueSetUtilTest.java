@@ -22,8 +22,14 @@ import static org.junit.Assert.assertEquals;
 import org.ehealth_connector.valueset.model.ValueSet;
 import org.junit.Test;
 
+/**
+ * The test class for ValueSetUtil.
+ */
 public class ValueSetUtilTest {
 
+	/**
+	 * Test correct building of enum names .
+	 */
 	@Test
 	public void testBuildEnumName() {
 

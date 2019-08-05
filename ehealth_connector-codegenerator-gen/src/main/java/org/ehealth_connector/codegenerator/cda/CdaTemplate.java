@@ -20,9 +20,11 @@ import java.util.ArrayList;
 
 public class CdaTemplate {
 
-	private CdaElement rootCdaElement;
+	private ArrayList<CdaAttribute> cdaAttributeList = new ArrayList<CdaAttribute>();
 
 	private ArrayList<CdaElement> cdaElementList;
+
+	private String dataType;
 
 	private String description;
 
@@ -30,9 +32,7 @@ public class CdaTemplate {
 
 	private String name;
 
-	private String dataType;
-
-	private ArrayList<CdaAttribute> cdaAttributeList = new ArrayList<CdaAttribute>();
+	private CdaElement rootCdaElement;
 
 	public void addAttribute(CdaAttribute cdaAttribute) {
 		cdaAttributeList.add(cdaAttribute);

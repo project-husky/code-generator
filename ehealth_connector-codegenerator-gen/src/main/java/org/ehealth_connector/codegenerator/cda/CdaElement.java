@@ -20,23 +20,23 @@ import java.util.ArrayList;
 
 public class CdaElement {
 
-	private CdaElement parentCdaElement;
+	private ArrayList<CdaAttribute> cdaAttributeList = new ArrayList<CdaAttribute>();
 
 	private ArrayList<CdaElement> childrenCdaElementList = new ArrayList<CdaElement>();
-
-	private ArrayList<CdaAttribute> cdaAttributeList = new ArrayList<CdaAttribute>();
 
 	private String dataType;
 
 	private String description;
 
-	private String name;
-
-	private String targetXmlElement;
-
 	private int maxOccurs;
 
 	private int minOccurs;
+
+	private String name;
+
+	private CdaElement parentCdaElement;
+
+	private String targetXmlElement;
 
 	public CdaElement(CdaElement parentCdaElement) {
 		this.parentCdaElement = parentCdaElement;
@@ -77,6 +77,14 @@ public class CdaElement {
 		return retVal;
 	}
 
+	public int getMaxOccurs() {
+		return maxOccurs;
+	}
+
+	public int getMinOccurs() {
+		return minOccurs;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -105,6 +113,14 @@ public class CdaElement {
 		this.description = description;
 	}
 
+	public void setMaxOccurs(int maxOccurs) {
+		this.maxOccurs = maxOccurs;
+	}
+
+	public void setMinOccurs(int minOccurs) {
+		this.minOccurs = minOccurs;
+	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -115,22 +131,6 @@ public class CdaElement {
 
 	public void setTargetXmlElement(String targetXmlElement) {
 		this.targetXmlElement = targetXmlElement;
-	}
-
-	public int getMaxOccurs() {
-		return maxOccurs;
-	}
-
-	public void setMaxOccurs(int maxOccurs) {
-		this.maxOccurs = maxOccurs;
-	}
-
-	public int getMinOccurs() {
-		return minOccurs;
-	}
-
-	public void setMinOccurs(int minOccurs) {
-		this.minOccurs = minOccurs;
 	}
 
 }

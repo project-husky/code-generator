@@ -196,8 +196,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	private CdaElement currentCdaElement = null;
 
-	private CdaTemplate mainCdaTemplate = null;
-
 	private CdaTemplate currentCdaTemplate = null;
 
 	private String dstFilePath = null;
@@ -206,9 +204,13 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	private boolean isChildElement;
 
+	private boolean isContains;
+
 	private boolean isParentElement;
 
 	private boolean isSiblingElement;
+
+	private CdaTemplate mainCdaTemplate = null;
 
 	private String packageName;
 
@@ -235,8 +237,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	private HashMap<String, String> templateIndex = null;
 
 	private ArrayList<CdaTemplate> templateList = null;
-
-	private boolean isContains;
 
 	public ArtDecor2JavaGenerator(CdaElement callingCdaElement,
 			HashMap<String, String> templateIndex, ArrayList<CdaTemplate> templateList,
