@@ -329,5 +329,4 @@ public class ArtDecor2JavaManager {
 			throws IOException {
 		saveContentProfilePackageConfig(config, new File(fileName));
 	}
-
 }

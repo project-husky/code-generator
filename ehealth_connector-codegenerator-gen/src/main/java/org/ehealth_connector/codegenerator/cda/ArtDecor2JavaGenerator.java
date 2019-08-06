@@ -30,6 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 import javax.xml.bind.JAXBElement;
@@ -59,11 +60,15 @@ import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.Util;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.DataKey;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.expr.Name;
+import com.github.javaparser.ast.expr.NormalAnnotationExpr;
+import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 
 import net.sf.saxon.s9api.SaxonApiException;
@@ -102,7 +107,10 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		method.addAndGetParameter(cdaElement.getDataType(), "value");
 
-		method.createBody().addStatement(cdaElement.getName() + ".add(value);");
+		BlockStmt body = method.createBody();
+		body.addStatement("if (" + cdaElement.getName() + " == null) " + cdaElement.getName()
+				+ " = new ArrayList<" + cdaElement.getDataType() + ">();");
+		body.addStatement(cdaElement.getName() + ".add(value);");
 
 	}
 
@@ -123,7 +131,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		method.setJavadocComment(comment);
 
-		method.createBody().addStatement(cdaElement.getName() + ".clear();");
+		BlockStmt body = method.createBody();
+		body.addStatement(cdaElement.getName() + ".clear();");
 
 	}
 
@@ -145,8 +154,48 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		method.setJavadocComment(comment);
 
-		method.createBody().addStatement(
-				"return " + JavaCodeGenerator.toCamelCase(cdaElement.getName()) + ";");
+		BlockStmt body = method.createBody();
+		body.addStatement("return " + JavaCodeGenerator.toCamelCase(cdaElement.getName()) + ";");
+
+	}
+
+	private static void createSaveToFileMethod(CompilationUnit compilationUnit,
+			ClassOrInterfaceDeclaration myClass) {
+		addImport(compilationUnit, "java.io.File");
+		addImport(compilationUnit, "javax.xml.bind.JAXBContext");
+		addImport(compilationUnit, "javax.xml.bind.JAXBException");
+		addImport(compilationUnit, "javax.xml.bind.Marshaller");
+		addImport(compilationUnit, "org.ehealth_connector.common.CdaNamespacePrefixMapper");
+		addImport(compilationUnit,
+				"org.ehealth_connector.common.hl7cdar2.POCDMT000040ClinicalDocument");
+
+		MethodDeclaration method;
+		String comment = "Saves the current CDA document to file.";
+
+		// The one with the file name as parameter
+		method = myClass.addMethod("saveToFile", publicModifier().getKeyword());
+		method.setJavadocComment(comment
+				+ "\n@param outputFileName the full path and filename of the destination file.\n@throws JAXBException");
+		method.addAndGetParameter("String", "outputFileName");
+		method.addThrownException(JAXBException.class);
+
+		BlockStmt body = method.createBody();
+		body.addStatement("saveToFile(new File(outputFileName));");
+
+		// The one with the file as parameter
+		method = myClass.addMethod("saveToFile", publicModifier().getKeyword());
+		method.setJavadocComment(
+				comment + "\n@param outputFile the destination file.\n@throws JAXBException");
+		method.addAndGetParameter("File", "outputFile");
+		method.addThrownException(JAXBException.class);
+
+		body = method.createBody();
+		body.addStatement("JAXBContext context = JAXBContext.newInstance(this.getClass());");
+		body.addStatement("Marshaller mar = context.createMarshaller();");
+		body.addStatement(
+				"mar.setProperty(\"com.sun.xml.bind.namespacePrefixMapper\", new CdaNamespacePrefixMapper());");
+		body.addStatement("mar.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);");
+		body.addStatement("mar.marshal(this, outputFile);");
 
 	}
 
@@ -169,8 +218,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		method.addAndGetParameter(cdaElement.getDataType(), "value");
 
-		method.createBody()
-				.addStatement(JavaCodeGenerator.toCamelCase(cdaElement.getName()) + " = value;");
+		BlockStmt body = method.createBody();
+		body.addStatement(JavaCodeGenerator.toCamelCase(cdaElement.getName()) + " = value;");
 
 	}
 
@@ -364,6 +413,25 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		cdaElement.setDataType(dataType);
 
 		ClassOrInterfaceDeclaration myClass = compilationUnit.addClass(className).setPublic(true);
+
+		DataKey<List<String>> LISTY = new DataKey<List<String>>() {
+		};
+
+		if ("org.ehealth_connector.common.hl7cdar2.POCDMT000040ClinicalDocument"
+				.equals(cdaElement.getDataType())) {
+			addImport(compilationUnit, "javax.xml.bind.annotation.XmlRootElement");
+			NormalAnnotationExpr annotation = new NormalAnnotationExpr();
+			annotation.setName(new Name("XmlRootElement"));
+			annotation.addPair("name", "\"ClinicalDocument\"");
+			myClass.addAnnotation(annotation);
+		}
+		// addImport(compilationUnit,
+		// "javax.xml.bind.annotation.XmlRootElement");
+		// NormalAnnotationExpr annotation = new NormalAnnotationExpr();
+		//
+		// annotation.addPair("name", "gugus");
+		// myClass.addAnnotation(annotation);
+
 		String descTemplate = cdaTemplate.getDescription();
 		if (descTemplate == null)
 			descTemplate = "";
@@ -390,6 +458,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		for (CdaElement cdaElement1 : cdaElement.getChildrenCdaElementList()) {
 			createField(compilationUnit, myClass, cdaElement1);
 		}
+
+		// if (isDocTemplate)
+		createSaveToFileMethod(compilationUnit, myClass);
 
 		File outFile = new File(dstFilePath + className + ".java");
 		JavaCodeGenerator.completeAndSave(compilationUnit, outFile);
