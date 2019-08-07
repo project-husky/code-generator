@@ -190,17 +190,17 @@ public class ArtDecor2JavaManagerTest {
 				.loadContentProfilePackageConfig(configFile);
 
 		int count = 6;
-		assertEquals(count, contentProfilePackageConfig.listContentProfileConfigs().size());
+		assertEquals(count, contentProfilePackageConfig.getContentProfileConfigList().size());
 
-		assertTrue(artDecorBaseUrl.equals(contentProfilePackageConfig2.listContentProfileConfigs()
+		assertTrue(artDecorBaseUrl.equals(contentProfilePackageConfig2.getContentProfileConfigList()
 				.get(count - 1).getArtDecorBaseUrl()));
-		assertTrue(artDecorPrefix.equals(contentProfilePackageConfig2.listContentProfileConfigs()
+		assertTrue(artDecorPrefix.equals(contentProfilePackageConfig2.getContentProfileConfigList()
 				.get(count - 1).getArtDecorPrefix()));
 		assertTrue(artDecorDocTemplateId.equals(contentProfilePackageConfig2
-				.listContentProfileConfigs().get(count - 1).getArtDecorDocTemplateId()));
-		assertTrue(targetNamespace.equals(contentProfilePackageConfig2.listContentProfileConfigs()
+				.getContentProfileConfigList().get(count - 1).getArtDecorDocTemplateId()));
+		assertTrue(targetNamespace.equals(contentProfilePackageConfig2.getContentProfileConfigList()
 				.get(count - 1).getTargetNamespace()));
-		assertTrue(targetDir.equals(contentProfilePackageConfig2.listContentProfileConfigs()
+		assertTrue(targetDir.equals(contentProfilePackageConfig2.getContentProfileConfigList()
 				.get(count - 1).getTargetDir()));
 
 	}

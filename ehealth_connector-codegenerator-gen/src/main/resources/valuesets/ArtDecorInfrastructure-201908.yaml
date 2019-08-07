@@ -48,6 +48,11 @@ valueSetConfigList:
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ccda-&language=en-US&version=&id=2.16.840.1.113883.1.11.10637&effectiveDate=2013-01-31T00%3A00%3A00&format=json
+- className: org.ehealth_connector.common.enums.EntityNameUse
+  projectFolder: common/ehealth_connector-common-gen
+  sourceFormatType: JSON
+  sourceSystemType: ARTDECOR_FHIR
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=elga-&language=de-DE&version=2018-08-23T18%3A27%3A20&id=1.2.40.0.34.10.27&effectiveDate=2011-12-19T00%3A00%3A00&format=json
 version:
   label: 201908
   validFrom: 2019-08-01T00:00:00+02:00

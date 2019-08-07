@@ -31,7 +31,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Optional;
 
 import javax.xml.bind.JAXBElement;
@@ -61,7 +60,6 @@ import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.Util;
 
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.DataKey;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -467,9 +465,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		cdaElement.setDataType(dataType);
 
 		ClassOrInterfaceDeclaration myClass = compilationUnit.addClass(className).setPublic(true);
-
-		DataKey<List<String>> LISTY = new DataKey<List<String>>() {
-		};
 
 		if ("org.ehealth_connector.common.hl7cdar2.POCDMT000040ClinicalDocument"
 				.equals(cdaElement.getDataType())) {

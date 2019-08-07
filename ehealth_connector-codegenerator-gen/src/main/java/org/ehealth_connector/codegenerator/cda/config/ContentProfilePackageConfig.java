@@ -17,7 +17,6 @@
 package org.ehealth_connector.codegenerator.cda.config;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.annotation.Generated;
 
@@ -152,7 +151,10 @@ public class ContentProfilePackageConfig {
 	 * @return the content profile config list
 	 */
 	public ArrayList<ContentProfileConfig> getContentProfileConfigList() {
-		return contentProfileConfigList;
+		if (this.contentProfileConfigList == null) {
+			this.contentProfileConfigList = new ArrayList<ContentProfileConfig>();
+		}
+		return this.contentProfileConfigList;
 	}
 
 	/**
@@ -167,22 +169,6 @@ public class ContentProfilePackageConfig {
 	 */
 	public String getDescription() {
 		return description;
-	}
-
-	/**
-	 * <div class="en">Gets the list of content profile configs.</div>
-	 *
-	 * <div class="de">Ruft die Liste der Inhaltsprofil-Konfigurationen
-	 * ab.</div>
-	 *
-	 * @return the list
-	 */
-	public List<ContentProfileConfig> listContentProfileConfigs() {
-		if (this.contentProfileConfigList == null) {
-			this.contentProfileConfigList = new ArrayList<ContentProfileConfig>();
-		}
-		return this.contentProfileConfigList;
-
 	}
 
 	/**

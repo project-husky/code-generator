@@ -69,19 +69,19 @@ public class ContentProfilePackageConfigTest {
 		contentProfilePackageConfig.addContentProfileConfig(contentProfileConfig1);
 		contentProfilePackageConfig.addContentProfileConfig(contentProfileConfig2);
 
-		assertEquals(2, contentProfilePackageConfig.listContentProfileConfigs().size());
+		assertEquals(2, contentProfilePackageConfig.getContentProfileConfigList().size());
 
-		assertTrue(artDecorBaseUrl1.equals(contentProfilePackageConfig.listContentProfileConfigs()
+		assertTrue(artDecorBaseUrl1.equals(contentProfilePackageConfig.getContentProfileConfigList()
 				.get(0).getArtDecorBaseUrl()));
-		assertTrue(artDecorPrefix1.equals(contentProfilePackageConfig.listContentProfileConfigs()
+		assertTrue(artDecorPrefix1.equals(contentProfilePackageConfig.getContentProfileConfigList()
 				.get(0).getArtDecorPrefix()));
 		assertTrue(artDecorDocTemplateId1.equals(contentProfilePackageConfig
-				.listContentProfileConfigs().get(0).getArtDecorDocTemplateId()));
+				.getContentProfileConfigList().get(0).getArtDecorDocTemplateId()));
 
-		assertTrue(targetNamespace2.equals(contentProfilePackageConfig.listContentProfileConfigs()
+		assertTrue(targetNamespace2.equals(contentProfilePackageConfig.getContentProfileConfigList()
 				.get(1).getTargetNamespace()));
 		assertTrue(targetDir2.equals(
-				contentProfilePackageConfig.listContentProfileConfigs().get(1).getTargetDir()));
+				contentProfilePackageConfig.getContentProfileConfigList().get(1).getTargetDir()));
 
 	}
 }
