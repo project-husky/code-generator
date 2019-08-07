@@ -18,6 +18,7 @@ package org.ehealth_connector.codegenerator.cda;
 
 import static com.github.javaparser.ast.Modifier.privateModifier;
 import static com.github.javaparser.ast.Modifier.publicModifier;
+import static com.github.javaparser.ast.Modifier.staticModifier;
 
 import java.io.File;
 import java.io.IOException;
@@ -159,7 +160,60 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	}
 
-	private static void createSaveToFileMethod(CompilationUnit compilationUnit,
+	private static void createLoaderMethods(CompilationUnit compilationUnit,
+			ClassOrInterfaceDeclaration myClass) {
+		addImport(compilationUnit, "java.io.File");
+		addImport(compilationUnit, "javax.xml.bind.JAXBContext");
+		addImport(compilationUnit, "javax.xml.bind.JAXBException");
+		addImport(compilationUnit, "org.ehealth_connector.common.CdaNamespacePrefixMapper");
+		addImport(compilationUnit,
+				"org.ehealth_connector.common.hl7cdar2.POCDMT000040ClinicalDocument");
+
+		addImport(compilationUnit, "java.io.IOException");
+		addImport(compilationUnit, "javax.xml.bind.Unmarshaller");
+		addImport(compilationUnit, "javax.xml.transform.stream.StreamSource");
+		addImport(compilationUnit, "javax.xml.bind.JAXBElement");
+
+		MethodDeclaration method;
+		String comment = "Loads the CDA document from file.";
+
+		// The one with the file name as parameter
+		method = myClass.addMethod("loadFromFile", publicModifier().getKeyword(),
+				staticModifier().getKeyword());
+		method.setType(myClass.getNameAsString());
+		method.setJavadocComment(comment
+				+ "\n@param inputFileName the full path and filename of the sourcefile.\n@return the CDA document\\n@throws JAXBException\\n@throws IOException Signals that an I/O exception has occurred.");
+		method.addAndGetParameter("String", "inputFileName");
+		method.addThrownException(JAXBException.class);
+		method.addThrownException(IOException.class);
+
+		BlockStmt body = method.createBody();
+		body.addStatement("return loadFromFile(new File(inputFileName));");
+
+		// The one with the file as parameter
+		method = myClass.addMethod("loadFromFile", publicModifier().getKeyword(),
+				staticModifier().getKeyword());
+		method.setType(myClass.getNameAsString());
+		method.setJavadocComment(comment
+				+ "\n@param inputFile the source file.\nn@return the CDA document\\n@throws JAXBException\\n@throws IOException Signals that an I/O exception has occurred.");
+		method.addAndGetParameter("File", "inputFile");
+		method.addThrownException(JAXBException.class);
+		method.addThrownException(IOException.class);
+
+		body = method.createBody();
+		body.addStatement(myClass.getNameAsString() + " retVal;");
+		body.addStatement("JAXBContext context = JAXBContext.newInstance("
+				+ myClass.getNameAsString() + ".class);");
+		body.addStatement("Unmarshaller mar = context.createUnmarshaller();");
+		body.addStatement("StreamSource source = new StreamSource(inputFile);");
+		body.addStatement("JAXBElement<" + myClass.getNameAsString()
+				+ "> root = mar.unmarshal(source, " + myClass.getNameAsString() + ".class);");
+		body.addStatement("retVal = root.getValue();");
+		body.addStatement("return retVal;");
+
+	}
+
+	private static void createSaverMethods(CompilationUnit compilationUnit,
 			ClassOrInterfaceDeclaration myClass) {
 		addImport(compilationUnit, "java.io.File");
 		addImport(compilationUnit, "javax.xml.bind.JAXBContext");
@@ -422,7 +476,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			addImport(compilationUnit, "javax.xml.bind.annotation.XmlRootElement");
 			NormalAnnotationExpr annotation = new NormalAnnotationExpr();
 			annotation.setName(new Name("XmlRootElement"));
-			annotation.addPair("name", "\"ClinicalDocument\"");
+			annotation.addPair("name", "\"hl7:ClinicalDocument\"");
 			myClass.addAnnotation(annotation);
 		}
 		// addImport(compilationUnit,
@@ -459,8 +513,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			createField(compilationUnit, myClass, cdaElement1);
 		}
 
-		// if (isDocTemplate)
-		createSaveToFileMethod(compilationUnit, myClass);
+		createLoaderMethods(compilationUnit, myClass);
+		createSaverMethods(compilationUnit, myClass);
 
 		File outFile = new File(dstFilePath + className + ".java");
 		JavaCodeGenerator.completeAndSave(compilationUnit, outFile);
