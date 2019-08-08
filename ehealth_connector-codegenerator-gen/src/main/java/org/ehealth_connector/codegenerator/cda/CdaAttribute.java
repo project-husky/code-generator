@@ -26,6 +26,15 @@ public class CdaAttribute {
 
 	private String value;
 
+	private CdaElement cdaElement;
+
+	public CdaAttribute() {
+	}
+
+	public CdaElement getCdaElement() {
+		return cdaElement;
+	}
+
 	public String getDataType() {
 		return dataType;
 	}
@@ -40,6 +49,10 @@ public class CdaAttribute {
 
 	public String getValue() {
 		return value;
+	}
+
+	public void setCdaElement(CdaElement cdaElement) {
+		this.cdaElement = cdaElement;
 	}
 
 	public void setDataType(String dataType) {

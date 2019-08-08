@@ -19,6 +19,7 @@ package org.ehealth_connector.codegenerator.java;
 import java.util.Comparator;
 
 import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 
@@ -55,7 +56,16 @@ public class BodyDeclarationsComparator implements Comparator<BodyDeclaration<?>
 		else if ((a != null) && (b == null))
 			return 1;
 		else {
-			if (a instanceof FieldDeclaration && b instanceof FieldDeclaration) {
+
+			// TODO: static declarations need to come first!
+
+			if (a instanceof ConstructorDeclaration && b instanceof ConstructorDeclaration) {
+				ConstructorDeclaration constructor_a = (ConstructorDeclaration) a;
+				ConstructorDeclaration constructor_b = (ConstructorDeclaration) b;
+				// TODO when there are multiple constructors, add a comparision
+				// on their arg list, here
+				return 0;
+			} else if (a instanceof FieldDeclaration && b instanceof FieldDeclaration) {
 				FieldDeclaration field_a = (FieldDeclaration) a;
 				FieldDeclaration field_b = (FieldDeclaration) b;
 				return field_a.getVariable(0).getNameAsString()
@@ -64,6 +74,14 @@ public class BodyDeclarationsComparator implements Comparator<BodyDeclaration<?>
 				MethodDeclaration method_a = (MethodDeclaration) a;
 				MethodDeclaration method_b = (MethodDeclaration) b;
 				return method_a.getNameAsString().compareTo(method_b.getNameAsString());
+			} else if (a instanceof ConstructorDeclaration && b instanceof FieldDeclaration) {
+				return -1;
+			} else if (a instanceof FieldDeclaration && b instanceof ConstructorDeclaration) {
+				return 1;
+			} else if (a instanceof ConstructorDeclaration && b instanceof MethodDeclaration) {
+				return -1;
+			} else if (a instanceof MethodDeclaration && b instanceof ConstructorDeclaration) {
+				return 1;
 			} else if (a instanceof FieldDeclaration && b instanceof MethodDeclaration) {
 				return -1;
 			} else if (a instanceof MethodDeclaration && b instanceof FieldDeclaration) {
