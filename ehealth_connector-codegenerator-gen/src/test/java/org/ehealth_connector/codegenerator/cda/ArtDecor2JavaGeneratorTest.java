@@ -28,6 +28,8 @@ import org.apache.commons.io.FileUtils;
 import org.ehealth_connector.codegenerator.java.JavaCodeGenerator;
 import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.Util;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import net.sf.saxon.s9api.SaxonApiException;
 
@@ -62,7 +64,8 @@ public class ArtDecor2JavaGeneratorTest {
 	 */
 	// This is for debugging purposes, only. Do not commit this test with the
 	// test annotation enabled!
-	// @Test
+	@Ignore
+	@Test
 	public void doEmedTest()
 			throws SaxonApiException, IOException, JAXBException, ClassNotFoundException,
 			IllegalAccessException, IllegalArgumentException, InvocationTargetException,
@@ -165,7 +168,7 @@ public class ArtDecor2JavaGeneratorTest {
 	 */
 	// This is for debugging purposes, only. Do not commit this test with the
 	// test annotation enabled!
-	// @Test
+	@Test
 	public void doLrepTest()
 			throws SaxonApiException, IOException, JAXBException, ClassNotFoundException,
 			IllegalAccessException, IllegalArgumentException, InvocationTargetException,

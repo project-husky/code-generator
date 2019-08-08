@@ -32,7 +32,9 @@ public class CdaElement {
 
 	private int minOccurs;
 
-	private String name;
+	private String xmlName;
+
+	private String javaName;
 
 	private CdaElement parentCdaElement;
 
@@ -67,14 +69,28 @@ public class CdaElement {
 		return description;
 	}
 
-	public String getFullName() {
-		String retVal = getName();
+	public String getFullJavaName() {
+		String retVal = getJavaName();
 		CdaElement parent = getParentCdaElement();
 		while (parent != null) {
-			retVal = parent.getName() + "." + retVal;
+			retVal = parent.getJavaName() + "." + retVal;
 			parent = parent.getParentCdaElement();
 		}
 		return retVal;
+	}
+
+	public String getFullXmlName() {
+		String retVal = getXmlName();
+		CdaElement parent = getParentCdaElement();
+		while (parent != null) {
+			retVal = parent.getXmlName() + "." + retVal;
+			parent = parent.getParentCdaElement();
+		}
+		return retVal;
+	}
+
+	public String getJavaName() {
+		return javaName;
 	}
 
 	public int getMaxOccurs() {
@@ -85,16 +101,16 @@ public class CdaElement {
 		return minOccurs;
 	}
 
-	public String getName() {
-		return name;
-	}
-
 	public CdaElement getParentCdaElement() {
 		return parentCdaElement;
 	}
 
 	public String getTargetXmlElement() {
 		return targetXmlElement;
+	}
+
+	public String getXmlName() {
+		return xmlName;
 	}
 
 	public void setCdaAttributeList(ArrayList<CdaAttribute> cdaAttributeList) {
@@ -113,6 +129,10 @@ public class CdaElement {
 		this.description = description;
 	}
 
+	public void setJavaName(String javaName) {
+		this.javaName = javaName;
+	}
+
 	public void setMaxOccurs(int maxOccurs) {
 		this.maxOccurs = maxOccurs;
 	}
@@ -121,16 +141,16 @@ public class CdaElement {
 		this.minOccurs = minOccurs;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	public void setParentCdaElement(CdaElement parentCdaElement) {
 		this.parentCdaElement = parentCdaElement;
 	}
 
 	public void setTargetXmlElement(String targetXmlElement) {
 		this.targetXmlElement = targetXmlElement;
+	}
+
+	public void setXmlName(String xmlName) {
+		this.xmlName = xmlName;
 	}
 
 }
