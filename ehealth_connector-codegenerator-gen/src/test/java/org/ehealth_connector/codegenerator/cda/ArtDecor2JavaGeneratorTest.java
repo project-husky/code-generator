@@ -168,6 +168,7 @@ public class ArtDecor2JavaGeneratorTest {
 	 */
 	// This is for debugging purposes, only. Do not commit this test with the
 	// test annotation enabled!
+	@Ignore
 	@Test
 	public void doLrepTest()
 			throws SaxonApiException, IOException, JAXBException, ClassNotFoundException,

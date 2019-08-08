@@ -41,7 +41,7 @@ public class ArtDecor2JavaManagerTest {
 	 * @throws IOException
 	 * @throws ConfigurationException
 	 */
-	// @Test
+	@Test
 	public void saveLoadTestContentProfileConfig() throws IOException, ConfigurationException {
 		ArtDecor2JavaManager artDecor2JavaManager = new ArtDecor2JavaManager();
 		File configFile = new File(Util.getTempDirectory()
