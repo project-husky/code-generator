@@ -11,7 +11,7 @@
  * Accompanying materials are made available under the terms of the Creative Commons
  * Attribution-ShareAlike 4.0 License.
  *
- * This line is intended for UTF-8 encoding checks, do not modify/delete: Ã¤Ã¶Ã¼Ã©Ã¨
+ * This line is intended for UTF-8 encoding checks, do not modify/delete: äöüéè
  *
  */
 package org.ehealth_connector.codegenerator.cda.xslt;
@@ -110,11 +110,12 @@ public class Hl7Its2EhcTransformerTest {
 
 		Hl7Its2EhcTransformer.transform(srcFile, destFile);
 
-		String expectedContent = IOUtils.toString(
-				getClass().getResourceAsStream("/2.16.756.5.30.1.1.10.1.10_transformed.xml"),
-				Charsets.UTF_8);
+		String expectedContent = IOUtils
+				.toString(getClass().getResourceAsStream(
+						"/2.16.756.5.30.1.1.10.1.10_transformed.xml"), Charsets.UTF_8)
+				.replace("\r\n", "\n");
 
-		String content = FileUtils.readFileToString(destFile, Charsets.UTF_8);
+		String content = FileUtils.readFileToString(destFile, Charsets.UTF_8).replace("\r\n", "\n");
 
 		assertTrue(expectedContent.equals(content));
 	}

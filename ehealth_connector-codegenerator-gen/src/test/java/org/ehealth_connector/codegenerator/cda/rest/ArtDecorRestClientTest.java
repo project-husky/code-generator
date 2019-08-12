@@ -11,7 +11,7 @@
  * Accompanying materials are made available under the terms of the Creative Commons
  * Attribution-ShareAlike 4.0 License.
  *
- * This line is intended for UTF-8 encoding checks, do not modify/delete: Ã¤Ã¶Ã¼Ã©Ã¨
+ * This line is intended for UTF-8 encoding checks, do not modify/delete: äöüéè
  *
  */
 package org.ehealth_connector.codegenerator.cda.rest;
@@ -193,14 +193,16 @@ public class ArtDecorRestClientTest {
 		InputStream is = ArtDecorRestClient.getArtDecorTemplate(
 				new URL("https://art-decor.org/decor/services/"), "cdachlrep-",
 				"2.16.756.5.30.1.1.10.1.10", "2018-04-19T00:00:00");
-		content = IOUtils.toString(is, Charsets.UTF_8);
+		content = IOUtils.toString(is, Charsets.UTF_8).replace("\r\n", "\n");
 
 		// This is just to write down the expected content. Do not commit with
 		// the following line enabled!
 		// FileUtils.writeStringToFile(expectedFile, content, Charsets.UTF_8);
 
-		String expectedContent = IOUtils.toString(
-				getClass().getResourceAsStream("/2.16.756.5.30.1.1.10.1.10.xml"), Charsets.UTF_8);
+		String expectedContent = IOUtils
+				.toString(getClass().getResourceAsStream("/2.16.756.5.30.1.1.10.1.10.xml"),
+						Charsets.UTF_8)
+				.replace("\r\n", "\n");
 
 		assertTrue(expectedContent.equals(content));
 	}
