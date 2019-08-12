@@ -22,6 +22,7 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
@@ -48,8 +49,8 @@ public class ArtDecorRestClientTest {
 	public void projectIndexTest() throws ClientProtocolException, IOException {
 
 		String content = "";
-		InputStream is = ArtDecorRestClient
-				.getArtDecorProjectIndex("https://art-decor.org/decor/services/", "cdachlrep-");
+		InputStream is = ArtDecorRestClient.getArtDecorProjectIndex(
+				new URL("https://art-decor.org/decor/services/"), "cdachlrep-");
 		content = IOUtils.toString(is, Charsets.UTF_8);
 
 		assertTrue(content.startsWith("<return prefix=\"cdachlrep-\""));
@@ -70,7 +71,7 @@ public class ArtDecorRestClientTest {
 		String dir = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
 				+ FileUtil.getPlatformSpecificPathSeparator();
 		ArtDecorRestClient artDecorRestClient = new ArtDecorRestClient(
-				"https://art-decor.org/decor/services/", dir);
+				new URL("https://art-decor.org/decor/services/"), dir);
 
 		artDecorRestClient.addArtDecorProject("cdachemed-");
 		artDecorRestClient.addArtDecorProject("ad1bbr-");
@@ -154,7 +155,7 @@ public class ArtDecorRestClientTest {
 		String dir = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
 				+ FileUtil.getPlatformSpecificPathSeparator();
 		ArtDecorRestClient artDecorRestClient = new ArtDecorRestClient(
-				"https://art-decor.org/decor/services/", dir);
+				new URL("https://art-decor.org/decor/services/"), dir);
 
 		artDecorRestClient.addArtDecorProject("cdachlrep-");
 		artDecorRestClient.addArtDecorProject("hl7chcda-");
@@ -192,8 +193,8 @@ public class ArtDecorRestClientTest {
 
 		String content = "";
 		InputStream is = ArtDecorRestClient.getArtDecorTemplate(
-				"https://art-decor.org/decor/services/", "cdachlrep-", "2.16.756.5.30.1.1.10.1.10",
-				"2018-04-19T00:00:00");
+				new URL("https://art-decor.org/decor/services/"), "cdachlrep-",
+				"2.16.756.5.30.1.1.10.1.10", "2018-04-19T00:00:00");
 		content = IOUtils.toString(is, Charsets.UTF_8);
 
 		File expectedFile = new File(System.getProperty("user.dir")

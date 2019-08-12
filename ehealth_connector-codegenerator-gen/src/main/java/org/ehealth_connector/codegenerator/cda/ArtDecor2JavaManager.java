@@ -18,13 +18,14 @@ package org.ehealth_connector.codegenerator.cda;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 
 import org.apache.commons.io.Charsets;
-import org.apache.commons.io.FileUtils;
 import org.ehealth_connector.codegenerator.cda.config.ConfigurationException;
 import org.ehealth_connector.codegenerator.cda.config.ContentProfileConfig;
 import org.ehealth_connector.codegenerator.cda.config.ContentProfilePackageConfig;
@@ -62,21 +63,15 @@ public class ArtDecor2JavaManager {
 	 * @param config
 	 *            the config
 	 * @return the content profile config
-	 * @throws FileNotFoundException
-	 *             the file not found exception
 	 * @throws ConfigurationException
 	 *             the configuration exception
+	 * @throws IOException
 	 */
 	public ContentProfileConfig loadContentProfileConfig(File config)
-			throws FileNotFoundException, ConfigurationException {
-		FileInputStream is = new FileInputStream(config);
-		ContentProfileConfig retVal = loadContentProfileConfig(is);
-		try {
-			is.close();
-		} catch (IOException e) {
-			// Do nothing
+			throws ConfigurationException, IOException {
+		try (FileInputStream is = new FileInputStream(config)) {
+			return loadContentProfileConfig(is);
 		}
-		return retVal;
 	}
 
 	/**
@@ -86,33 +81,15 @@ public class ArtDecor2JavaManager {
 	 * <div class="de">Lädt eine Inhaltsprofil-Konfigurationaus dem angegebenen
 	 * Stream.</div>
 	 *
-	 * @param config
+	 * @param inputStream
 	 *            the config
 	 * @return the content profile config
 	 * @throws ConfigurationException
 	 *             the configuration exception
 	 */
-	public ContentProfileConfig loadContentProfileConfig(InputStream config)
+	public ContentProfileConfig loadContentProfileConfig(InputStream inputStream)
 			throws ConfigurationException {
-		return loadContentProfileConfig(new InputStreamReader(config, Charsets.UTF_8));
-	}
-
-	/**
-	 * <div class="en">Loads a content profile configuration from the given
-	 * stream reader.</div>
-	 *
-	 * <div class="de">Lädt eine Inhaltsprofil-Konfigurationaus dem angegebenen
-	 * Stream-Reader.</div>
-	 *
-	 * @param reader
-	 *            the reader
-	 * @return the content profile config
-	 * @throws ConfigurationException
-	 *             the configuration exception
-	 */
-	public ContentProfileConfig loadContentProfileConfig(InputStreamReader reader)
-			throws ConfigurationException {
-
+		InputStreamReader reader = new InputStreamReader(inputStream, Charsets.UTF_8);
 		ContentProfileConfig contentProfileConfig = new ContentProfileConfig();
 		try {
 			contentProfileConfig = CustomizedYaml.getCustomizedYaml().loadAs(reader,
@@ -138,13 +115,12 @@ public class ArtDecor2JavaManager {
 	 * @param fileName
 	 *            the file name
 	 * @return the content profile config
-	 * @throws FileNotFoundException
-	 *             the file not found exception
 	 * @throws ConfigurationException
 	 *             the configuration exception
+	 * @throws IOException
 	 */
 	public ContentProfileConfig loadContentProfileConfig(String fileName)
-			throws FileNotFoundException, ConfigurationException {
+			throws ConfigurationException, IOException {
 		return loadContentProfileConfig(new File(fileName));
 
 	}
@@ -159,21 +135,15 @@ public class ArtDecor2JavaManager {
 	 * @param config
 	 *            the config
 	 * @return the content profile package config
-	 * @throws FileNotFoundException
-	 *             the file not found exception
 	 * @throws ConfigurationException
 	 *             the configuration exception
+	 * @throws IOException
 	 */
 	public ContentProfilePackageConfig loadContentProfilePackageConfig(File config)
-			throws FileNotFoundException, ConfigurationException {
-		FileInputStream is = new FileInputStream(config);
-		ContentProfilePackageConfig retVal = loadContentProfilePackageConfig(is);
-		try {
-			is.close();
-		} catch (IOException e) {
-			// Do nothing
+			throws ConfigurationException, IOException {
+		try (FileInputStream is = new FileInputStream(config)) {
+			return loadContentProfilePackageConfig(is);
 		}
-		return retVal;
 	}
 
 	/**
@@ -183,33 +153,15 @@ public class ArtDecor2JavaManager {
 	 * <div class="de">Lädt eine Inhaltsprofil Paket-Konfigurationaus dem
 	 * angegebenen Stream.</div>
 	 *
-	 * @param config
+	 * @param inputStream
 	 *            the config
 	 * @return the content profile package config
 	 * @throws ConfigurationException
 	 *             the configuration exception
 	 */
-	public ContentProfilePackageConfig loadContentProfilePackageConfig(InputStream config)
+	public ContentProfilePackageConfig loadContentProfilePackageConfig(InputStream inputStream)
 			throws ConfigurationException {
-		return loadContentProfilePackageConfig(new InputStreamReader(config, Charsets.UTF_8));
-	}
-
-	/**
-	 * <div class="en">Loads a content profile package configuration from the
-	 * given stream reader.</div>
-	 *
-	 * <div class="de">Lädt eine Inhaltsprofil Paket-Konfigurationaus dem
-	 * angegebenen Stream-Reader.</div>
-	 *
-	 * @param reader
-	 *            the reader
-	 * @return the content profile package config
-	 * @throws ConfigurationException
-	 *             the configuration exception
-	 */
-	public ContentProfilePackageConfig loadContentProfilePackageConfig(InputStreamReader reader)
-			throws ConfigurationException {
-
+		InputStreamReader reader = new InputStreamReader(inputStream, Charsets.UTF_8);
 		ContentProfilePackageConfig contentProfilePackageConfig = new ContentProfilePackageConfig();
 		try {
 			contentProfilePackageConfig = CustomizedYaml.getCustomizedYaml().loadAs(reader,
@@ -235,13 +187,12 @@ public class ArtDecor2JavaManager {
 	 * @param fileName
 	 *            the file name
 	 * @return the content profile package config
-	 * @throws FileNotFoundException
-	 *             the file not found exception
 	 * @throws ConfigurationException
 	 *             the configuration exception
+	 * @throws IOException
 	 */
 	public ContentProfilePackageConfig loadContentProfilePackageConfig(String fileName)
-			throws FileNotFoundException, ConfigurationException {
+			throws ConfigurationException, IOException {
 		return loadContentProfilePackageConfig(new File(fileName));
 
 	}
@@ -262,8 +213,29 @@ public class ArtDecor2JavaManager {
 	 */
 	public void saveContentProfileConfig(ContentProfileConfig contentProfileConfig, File file)
 			throws IOException {
-		FileUtils.writeByteArrayToFile(file, CustomizedYaml.getCustomizedYaml()
-				.dumpAsMap(contentProfileConfig).getBytes(Charsets.UTF_8));
+		saveContentProfileConfig(contentProfileConfig, new FileOutputStream(file));
+	}
+
+	/**
+	 * <div class="en">Saves the given content profile configuration in YAML
+	 * format to the given output stream.</div>
+	 *
+	 * <div class="de">Speichert die angegebene Inhaltsprofil-Konfiguration im
+	 * YAML-Format in der angegebenen Datei.</div>
+	 *
+	 * @param contentProfileConfig
+	 *            the content profile config
+	 * @param outputStream
+	 *            the outputStream
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
+	 */
+	public void saveContentProfileConfig(ContentProfileConfig contentProfileConfig,
+			OutputStream outputStream) throws IOException {
+		OutputStreamWriter writer = new OutputStreamWriter(outputStream, Charsets.UTF_8);
+		writer.write(CustomizedYaml.getCustomizedYaml().dumpAsMap(contentProfileConfig));
+		writer.flush();
+		writer.close();
 	}
 
 	/**
@@ -304,8 +276,29 @@ public class ArtDecor2JavaManager {
 	 */
 	public void saveContentProfilePackageConfig(ContentProfilePackageConfig config, File file)
 			throws IOException {
-		FileUtils.writeByteArrayToFile(file,
-				CustomizedYaml.getCustomizedYaml().dumpAsMap(config).getBytes(Charsets.UTF_8));
+		saveContentProfilePackageConfig(config, new FileOutputStream(file));
+	}
+
+	/**
+	 * <div class="en">Saves a content profile package configuration in YAML
+	 * format into the given output stream.</div>
+	 *
+	 * <div class="de">Speichert eine Inhaltsprofil-Paket Konfiguration im
+	 * YAML-Format in der angegebenen Datei.</div>
+	 *
+	 * @param config
+	 *            the config
+	 * @param outputStream
+	 *            the outputStream
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
+	 */
+	public void saveContentProfilePackageConfig(ContentProfilePackageConfig config,
+			OutputStream outputStream) throws IOException {
+		OutputStreamWriter writer = new OutputStreamWriter(outputStream, Charsets.UTF_8);
+		writer.write(CustomizedYaml.getCustomizedYaml().dumpAsMap(config));
+		writer.flush();
+		writer.close();
 	}
 
 	/**

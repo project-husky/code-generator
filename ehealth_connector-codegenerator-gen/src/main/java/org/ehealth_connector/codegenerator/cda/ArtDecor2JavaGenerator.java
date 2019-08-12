@@ -1595,8 +1595,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		}
 
 		if (retVal == null)
-			throw new RuntimeException(
-					"There is no data type candidate for " + cdaElement.getFullXmlName());
+			throw new RuntimeException("There is no data type candidate for "
+					+ cdaElement.getFullXmlName()
+					+ ". Make sure, the ART-DECOR model conforms to the XML schema (CDA_extPHARM.xsd).");
 		return retVal;
 
 	}

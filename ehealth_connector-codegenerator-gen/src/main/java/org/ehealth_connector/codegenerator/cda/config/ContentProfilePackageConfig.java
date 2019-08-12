@@ -50,7 +50,7 @@ public class ContentProfilePackageConfig {
 		}
 
 		/**
-		 * Builds the.
+		 * Builds the ContentProfilePackageConfig.
 		 *
 		 * @return the content profile package config
 		 */

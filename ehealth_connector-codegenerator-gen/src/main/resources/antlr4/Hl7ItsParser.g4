@@ -28,8 +28,8 @@ template : prolog? '<' TEMPLATE attr* idAttr? attr* nameAttr? attr* '>' content 
 
 desc : '<' DESC attr* '>' content '<' '/' DESC '>' ;
 
-element : '<' ELEMENT attr* conformanceAttr? containsAttr? dataTypeAttr? idAttr? isMandatoryAttr? maxOccursAttr? minOccursAttr? nameAttr? valueAttr? strengthAttr? '/>' |
-          '<' ELEMENT attr* conformanceAttr? containsAttr? dataTypeAttr? idAttr? isMandatoryAttr? maxOccursAttr? minOccursAttr? nameAttr? valueAttr? strengthAttr? '>' content '<' '/' ELEMENT '>' ;
+element : '<' ELEMENT attr* conformanceAttr? containsAttr? dataTypeAttr? flexibilityAttr? idAttr? isMandatoryAttr? maxOccursAttr? minOccursAttr? nameAttr? valueAttr? strengthAttr? '/>' |
+          '<' ELEMENT attr* conformanceAttr? containsAttr? dataTypeAttr? flexibilityAttr? idAttr? isMandatoryAttr? maxOccursAttr? minOccursAttr? nameAttr? valueAttr? strengthAttr? '>' content '<' '/' ELEMENT '>' ;
 
 attribute : '<' ATTRIBUTE attr* conformanceAttr? dataTypeAttr? idAttr? isMandatoryAttr? isOptionalAttr? maxOccursAttr? minOccursAttr? nameAttr? prohibitedAttr? valueAttr? '/>' |
             '<' ATTRIBUTE attr* conformanceAttr? dataTypeAttr? idAttr? isMandatoryAttr? isOptionalAttr? maxOccursAttr? minOccursAttr? nameAttr? prohibitedAttr? valueAttr? '>' content '<' '/' ATTRIBUTE '>' ;

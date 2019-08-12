@@ -3,7 +3,7 @@
  * All rights reserved. https://medshare.net
  *
  * Source code, documentation and other resources have been contributed by various people.
- * Project Team: https://sourceforge.net/p/ehealthconnector/wiki/Team/
+ * Project Team: https://gitlab.com/ehealth-connector/api/wikis/Team/
  * For exact developer information, please refer to the commit history of the forge.
  *
  * This code is made available under the terms of the Eclipse Public License v1.0.
@@ -11,13 +11,20 @@
  * Accompanying materials are made available under the terms of the Creative Commons
  * Attribution-ShareAlike 4.0 License.
  *
- * This line is intended for UTF-8 encoding checks, do not modify/delete: äöüéè
+ * This line is intended for UTF-8 encoding checks, do not modify/delete: Ã¤Ã¶Ã¼Ã©Ã¨
  *
  */
 package org.ehealth_connector.codegenerator.cda.config;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import javax.annotation.Generated;
 
+import org.ehealth_connector.common.utils.FileUtil;
+import org.ehealth_connector.common.utils.Util;
+
+// TODO: Auto-generated Javadoc
 /**
  * <div class="en">The Class ContentProfileConfig is intended to contains all
  * relevant information (the configuration) for a given content profile to be
@@ -34,92 +41,39 @@ public class ContentProfileConfig {
 	 */
 	@Generated("SparkTools")
 	public static final class Builder {
-
-		/** The art decor base url. */
 		private String artDecorBaseUrl;
-
-		/** The art decor doc template id. */
 		private String artDecorDocTemplateId;
-
-		/** The art decor prefix. */
 		private String artDecorPrefix;
-
-		/** The target dir. */
 		private String targetDir;
-
-		/** The target namespace. */
 		private String targetNamespace;
 
-		/**
-		 * Instantiates a new builder.
-		 */
 		private Builder() {
 		}
 
-		/**
-		 * Builds the.
-		 *
-		 * @return the content profile config
-		 */
 		public ContentProfileConfig build() {
 			return new ContentProfileConfig(this);
 		}
 
-		/**
-		 * With art decor base url.
-		 *
-		 * @param artDecorBaseUrl
-		 *            the art decor base url
-		 * @return the builder
-		 */
 		public Builder withArtDecorBaseUrl(String artDecorBaseUrl) {
 			this.artDecorBaseUrl = artDecorBaseUrl;
 			return this;
 		}
 
-		/**
-		 * With art decor doc template id.
-		 *
-		 * @param artDecorDocTemplateId
-		 *            the art decor doc template id
-		 * @return the builder
-		 */
 		public Builder withArtDecorDocTemplateId(String artDecorDocTemplateId) {
 			this.artDecorDocTemplateId = artDecorDocTemplateId;
 			return this;
 		}
 
-		/**
-		 * With art decor prefix.
-		 *
-		 * @param artDecorPrefix
-		 *            the art decor prefix
-		 * @return the builder
-		 */
 		public Builder withArtDecorPrefix(String artDecorPrefix) {
 			this.artDecorPrefix = artDecorPrefix;
 			return this;
 		}
 
-		/**
-		 * With target dir.
-		 *
-		 * @param targetDir
-		 *            the target dir
-		 * @return the builder
-		 */
 		public Builder withTargetDir(String targetDir) {
 			this.targetDir = targetDir;
 			return this;
 		}
 
-		/**
-		 * With target namespace.
-		 *
-		 * @param targetNamespace
-		 *            the target namespace
-		 * @return the builder
-		 */
 		public Builder withTargetNamespace(String targetNamespace) {
 			this.targetNamespace = targetNamespace;
 			return this;
@@ -146,10 +100,11 @@ public class ContentProfileConfig {
 	private String artDecorPrefix;
 
 	/** The target dir. */
-	private String targetDir;
+	private String targetDir = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator()
+			+ "Ad2Java";
 
 	/** The target namespace. */
-	private String targetNamespace;
+	private String targetNamespace = "org.ehealth_connector.cda.ad2java";
 
 	/**
 	 * Instantiates a new content profile config. Default constructor.
@@ -157,19 +112,36 @@ public class ContentProfileConfig {
 	public ContentProfileConfig() {
 	}
 
-	/**
-	 * Instantiates a new content profile config.
-	 *
-	 * @param builder
-	 *            the builder
-	 */
 	@Generated("SparkTools")
 	private ContentProfileConfig(Builder builder) {
 		this.artDecorBaseUrl = builder.artDecorBaseUrl;
-		this.artDecorPrefix = builder.artDecorPrefix;
 		this.artDecorDocTemplateId = builder.artDecorDocTemplateId;
-		this.targetNamespace = builder.targetNamespace;
+		this.artDecorPrefix = builder.artDecorPrefix;
 		this.targetDir = builder.targetDir;
+		this.targetNamespace = builder.targetNamespace;
+	}
+
+	/**
+	 * Instantiates a new content profile config.
+	 *
+	 * @param artDecorBaseUrl
+	 *            the art decor base url
+	 * @param artDecorPrefix
+	 *            the art decor prefix
+	 * @param artDecorDocTemplateId
+	 *            the art decor doc template id
+	 * @param targetNamespace
+	 *            the target namespace
+	 * @param targetDir
+	 *            the target dir
+	 */
+	public ContentProfileConfig(URL artDecorBaseUrl, String artDecorPrefix,
+			String artDecorDocTemplateId, String targetNamespace, String targetDir) {
+		this.artDecorBaseUrl = artDecorBaseUrl.toString();
+		this.artDecorPrefix = artDecorPrefix;
+		this.artDecorDocTemplateId = artDecorDocTemplateId;
+		this.targetNamespace = targetNamespace;
+		this.targetDir = targetDir;
 	}
 
 	/**
@@ -182,10 +154,31 @@ public class ContentProfileConfig {
 	 * ID werden zu dieser Basis-URL hinzugefügt, um den korrekten Zugriff auf
 	 * die Templates zu ermöglichen.</div>
 	 *
-	 * @return the art decor base url
+	 * @return the art decor base url as string
 	 */
 	public String getArtDecorBaseUrl() {
-		return artDecorBaseUrl;
+		return artDecorBaseUrl.toString();
+	}
+
+	/**
+	 * <div class="en">Gets the ART-DECOR base URL. e.g.:
+	 * https://art-decor.org/decor/services/. ART-DECOR prefix and template id
+	 * will be added to this base URL to correctly access the templates.</div>
+	 *
+	 * <div class="de">Ruft die ART-DECOR-Basis-URL ab. Beispiel:
+	 * https://art-decor.org/decor/services/. ART-DECOR Präfix und die Template
+	 * ID werden zu dieser Basis-URL hinzugefügt, um den korrekten Zugriff auf
+	 * die Templates zu ermöglichen.</div>
+	 *
+	 * @return the art decor base url as URL
+	 */
+	public URL getArtDecorBaseUrlAsUrl() {
+		URL retVal = null;
+		try {
+			retVal = new URL(artDecorBaseUrl);
+		} catch (Exception e) {
+		}
+		return retVal;
 	}
 
 	/**
@@ -249,9 +242,29 @@ public class ContentProfileConfig {
 	 *
 	 * @param artDecorBaseUrl
 	 *            the new art decor base url
+	 * @throws MalformedURLException
+	 *             the malformed URL exception
 	 */
-	public void setArtDecorBaseUrl(String artDecorBaseUrl) {
-		this.artDecorBaseUrl = artDecorBaseUrl;
+	public void setArtDecorBaseUrl(String artDecorBaseUrl) throws MalformedURLException {
+		URL url = new URL(artDecorBaseUrl);
+		this.artDecorBaseUrl = url.toString();
+	}
+
+	/**
+	 * <div class="en">Sets the ART-DECOR base URL. e.g.:
+	 * https://art-decor.org/decor/services/ ART-DECOR. prefix and template id
+	 * will be added to this base URL to correctly access the templates.</div>
+	 *
+	 * <div class="de">Legt die ART-DECOR-Basis-URL fest. Beispiel:
+	 * https://art-decor.org/decor/services/. ART-DECOR Präfix und die Template
+	 * ID werden zu dieser Basis-URL hinzugefügt, um den korrekten Zugriff auf
+	 * die Templates zu ermöglichen.</div>
+	 *
+	 * @param artDecorBaseUrl
+	 *            the new art decor base url
+	 */
+	public void setArtDecorBaseUrl(URL artDecorBaseUrl) {
+		this.artDecorBaseUrl = artDecorBaseUrl.toString();
 	}
 
 	/**
