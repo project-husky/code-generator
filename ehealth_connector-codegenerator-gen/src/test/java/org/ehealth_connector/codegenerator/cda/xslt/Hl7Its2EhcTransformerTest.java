@@ -3,7 +3,7 @@
  * All rights reserved. https://medshare.net
  *
  * Source code, documentation and other resources have been contributed by various people.
- * Project Team: https://sourceforge.net/p/ehealthconnector/wiki/Team/
+ * Project Team: https://gitlab.com/ehealth-connector/api/wikis/Team/
  * For exact developer information, please refer to the commit history of the forge.
  *
  * This code is made available under the terms of the Eclipse Public License v1.0.
@@ -11,7 +11,7 @@
  * Accompanying materials are made available under the terms of the Creative Commons
  * Attribution-ShareAlike 4.0 License.
  *
- * This line is intended for UTF-8 encoding checks, do not modify/delete: äöüéè
+ * This line is intended for UTF-8 encoding checks, do not modify/delete: Ã¤Ã¶Ã¼Ã©Ã¨
  *
  */
 package org.ehealth_connector.codegenerator.cda.xslt;
@@ -24,6 +24,7 @@ import java.io.IOException;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.ehealth_connector.codegenerator.cda.rest.ArtDecorRestClientTest;
 import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.Util;
@@ -109,9 +110,9 @@ public class Hl7Its2EhcTransformerTest {
 
 		Hl7Its2EhcTransformer.transform(srcFile, destFile);
 
-		File expectedFile = new File(System.getProperty("user.dir")
-				+ "/src/test/resources/2.16.756.5.30.1.1.10.1.10_transformed.xml");
-		String expectedContent = FileUtils.readFileToString(expectedFile, Charsets.UTF_8);
+		String expectedContent = IOUtils.toString(
+				getClass().getResourceAsStream("/2.16.756.5.30.1.1.10.1.10_transformed.xml"),
+				Charsets.UTF_8);
 
 		String content = FileUtils.readFileToString(destFile, Charsets.UTF_8);
 

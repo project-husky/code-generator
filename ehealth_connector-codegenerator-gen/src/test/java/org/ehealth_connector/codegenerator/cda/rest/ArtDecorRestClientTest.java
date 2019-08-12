@@ -3,7 +3,7 @@
  * All rights reserved. https://medshare.net
  *
  * Source code, documentation and other resources have been contributed by various people.
- * Project Team: https://sourceforge.net/p/ehealthconnector/wiki/Team/
+ * Project Team: https://gitlab.com/ehealth-connector/api/wikis/Team/
  * For exact developer information, please refer to the commit history of the forge.
  *
  * This code is made available under the terms of the Eclipse Public License v1.0.
@@ -11,13 +11,12 @@
  * Accompanying materials are made available under the terms of the Creative Commons
  * Attribution-ShareAlike 4.0 License.
  *
- * This line is intended for UTF-8 encoding checks, do not modify/delete: äöüéè
+ * This line is intended for UTF-8 encoding checks, do not modify/delete: Ã¤Ã¶Ã¼Ã©Ã¨
  *
  */
 package org.ehealth_connector.codegenerator.cda.rest;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +24,6 @@ import java.io.InputStream;
 import java.net.URL;
 
 import org.apache.commons.io.Charsets;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.ehealth_connector.common.utils.FileUtil;
@@ -197,19 +195,12 @@ public class ArtDecorRestClientTest {
 				"2.16.756.5.30.1.1.10.1.10", "2018-04-19T00:00:00");
 		content = IOUtils.toString(is, Charsets.UTF_8);
 
-		File expectedFile = new File(System.getProperty("user.dir")
-				+ "/src/test/resources/2.16.756.5.30.1.1.10.1.10.xml");
-
 		// This is just to write down the expected content. Do not commit with
 		// the following line enabled!
 		// FileUtils.writeStringToFile(expectedFile, content, Charsets.UTF_8);
 
-		String expectedContent = "";
-		try {
-			expectedContent = FileUtils.readFileToString(expectedFile, Charsets.UTF_8);
-		} catch (IOException e) {
-			fail(e.getMessage());
-		}
+		String expectedContent = IOUtils.toString(
+				getClass().getResourceAsStream("/2.16.756.5.30.1.1.10.1.10.xml"), Charsets.UTF_8);
 
 		assertTrue(expectedContent.equals(content));
 	}
