@@ -16,6 +16,7 @@
  */
 package org.ehealth_connector.codegenerator.cda;
 
+import static com.github.javaparser.ast.Modifier.privateModifier;
 import static com.github.javaparser.ast.Modifier.publicModifier;
 import static com.github.javaparser.ast.Modifier.staticModifier;
 
@@ -68,20 +69,16 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
-import com.github.javaparser.ast.comments.Comment;
-import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
-import com.github.javaparser.ast.stmt.ExpressionStmt;
+import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.javadoc.Javadoc;
 
 import net.sf.saxon.s9api.SaxonApiException;
 
 public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
-
-	private static final String COMMENT_SETTER_FOR_FIXED_CONTENTS_COMPLETED = "setting the fixed value";
 
 	private static HashMap<String, String> dataTypeIndex = null;
 
@@ -102,10 +99,10 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			compilationUnit.addImport(value);
 	}
 
-	private static void completeSetterForFixedContentsMethod(
-			MethodDeclaration setterForFixedContentsMethod, CdaElement cdaElement) {
+	private static void completeCreatorForFixedContentsMethod(
+			MethodDeclaration creatorForFixedContentsMethod, CdaElement cdaElement) {
 
-		Optional<BlockStmt> bodyOpt = setterForFixedContentsMethod.getBody();
+		Optional<BlockStmt> bodyOpt = creatorForFixedContentsMethod.getBody();
 		if (bodyOpt.isPresent()) {
 			BlockStmt body = bodyOpt.get();
 
@@ -120,31 +117,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 						name);
 				isMethod = (memberType != null);
 			}
-			if (!(isField || isMethod)) {
-				// TODO for prefix of names (Academic is default for
-				// doctors), and so on
-				// throw new RuntimeException(
-				// name + " is neither an accesible field nor a accessible
-				// getter");
-			} else {
-				String cast = "";
-				boolean doCast = false;
-				if (doCast)
-					cast = "(" + memberType.getName() + ")";
-				ExpressionStmt statement = null;
-				if (isClassCollection(memberType)) {
-					statement = body.addAndGetStatement("super.get"
-							+ toUpperFirstChar(cdaElement.getXmlName().replace("hl7:", ""))
-							+ "().add(" + cast + "member)");
-				} else {
-					statement = body.addAndGetStatement("super.set"
-							+ toUpperFirstChar(cdaElement.getXmlName().replace("hl7:", "")) + "("
-							+ cast + "member)");
-				}
-				if (statement != null)
-					statement.setComment(
-							new LineComment(COMMENT_SETTER_FOR_FIXED_CONTENTS_COMPLETED));
-			}
+			body.addStatement("return retVal;");
 		}
 	}
 
@@ -180,7 +153,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		}
 		// if (!(isField || isMethod))
 		// throw new RuntimeException(
-		// name + " is neither an accesible field nor a accessible getter");
+		// name + " is neither an accesible field nor an accessible getter");
 
 		BlockStmt body = method.createBody();
 		if (isClassCollection(memberType)) {
@@ -224,7 +197,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		}
 		// if (!(isField || isMethod))
 		// throw new RuntimeException(
-		// name + " is neither an accesible field nor a accessible getter");
+		// name + " is neither an accesible field nor an accessible getter");
 
 		if (isClassCollection(memberType)) {
 			MethodDeclaration method;
@@ -249,6 +222,53 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	}
 
+	private static MethodDeclaration createCreatorForFixedContents(CompilationUnit compilationUnit,
+			ClassOrInterfaceDeclaration myClass, CdaElement cdaElement,
+			String setterForFixedContentsName) {
+		MethodDeclaration method = myClass.addMethod(setterForFixedContentsName,
+				publicModifier().getKeyword());
+		method.setJavadocComment("Creates fixed contents for " + cdaElement.getJavaName() + "\n\n");
+
+		compilationUnit.addImport("org.ehealth_connector.common.hl7cdar2.ObjectFactory");
+
+		BlockStmt body = method.createBody();
+
+		String dataType = cdaElement.getDataType();
+
+		String name = cdaElement.getXmlName().replace("hl7:", "");
+		@SuppressWarnings("rawtypes")
+		Class memberType = getFieldDatatype(cdaElement.getParentCdaElement().getDataType(), name);
+		boolean isField = (memberType != null);
+		boolean isMethod = false;
+		if (!isField) {
+			memberType = getMethodDatatype(cdaElement.getParentCdaElement().getDataType(), name);
+			isMethod = (memberType != null);
+		}
+		if (!(isField || isMethod)) {
+			if (cdaElement.getDataType().endsWith(".ENXP")) {
+				method.setType(dataType);
+
+				String enPartL = name;
+				String enPartU = toUpperFirstChar(enPartL);
+
+				addImport(compilationUnit, "org.ehealth_connector.common.hl7cdar2.En" + enPartU);
+
+				body.addStatement("En" + enPartU + " retVal = new En" + enPartU + "();");
+			} else
+				throw new RuntimeException(
+						name + " is neither an accesible field nor an accessible getter");
+		} else {
+			if (memberType.getName().endsWith("POCDMT000040InfrastructureRootTypeId")) {
+				dataType = memberType.getName();
+			}
+			method.setType(dataType);
+			body.addStatement("ObjectFactory factory = new ObjectFactory();");
+			body.addStatement(dataType + " retVal = factory.create"
+					+ dataType.replace("org.ehealth_connector.common.hl7cdar2.", "") + "();");
+		}
+		return method;
+	}
+
 	private static ConstructorDeclaration createDefaultConstructor(CompilationUnit compilationUnit,
 			ClassOrInterfaceDeclaration myClass) {
 		return myClass.addConstructor(publicModifier().getKeyword());
@@ -256,7 +276,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	private static void createFixedAttributeValues(CompilationUnit compilationUnit,
 			ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
-		MethodDeclaration setterForFixedContentsMethod = null;
+		MethodDeclaration creatorForFixedContentsMethod = null;
 		ConstructorDeclaration constructor = null;
 		StringBuilder sb = new StringBuilder();
 		for (CdaAttribute cdaAttribute : cdaElement.getCdaAttributeList()) {
@@ -269,19 +289,20 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				} else
 					constructor = constructorOpt.get();
 
-				String setterForFixedContentsName = createSetterNamePascalCase(
-						cdaElement.getJavaName()) + "FixedValue";
-				List<MethodDeclaration> setterForFixedContentsMethodList = myClass
-						.getMethodsByName(setterForFixedContentsName);
+				String creatorForFixedContentsName = "create"
+						+ JavaCodeGenerator.toPascalCase(cdaElement.getJavaName()) + "FixedValue";
+				List<MethodDeclaration> creatorForFixedContentsMethodList = myClass
+						.getMethodsByName(creatorForFixedContentsName);
 
-				boolean setterForFixedContentsExist = (setterForFixedContentsMethodList.size() > 0);
-				if (!setterForFixedContentsExist) {
-					setterForFixedContentsMethod = createSetterForFixedContents(compilationUnit,
-							myClass, cdaElement, setterForFixedContentsName);
+				boolean creatorForFixedContentsExist = (creatorForFixedContentsMethodList
+						.size() > 0);
+				if (!creatorForFixedContentsExist) {
+					creatorForFixedContentsMethod = createCreatorForFixedContents(compilationUnit,
+							myClass, cdaElement, creatorForFixedContentsName);
 				} else
-					setterForFixedContentsMethod = setterForFixedContentsMethodList.get(0);
+					creatorForFixedContentsMethod = creatorForFixedContentsMethodList.get(0);
 
-				updateSetterForFixedContentsMethod(compilationUnit, setterForFixedContentsMethod,
+				updateCreatorForFixedContentsMethod(compilationUnit, creatorForFixedContentsMethod,
 						cdaElement, cdaAttribute);
 
 				if (sb.length() != 0)
@@ -290,26 +311,26 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 			}
 		}
-		if (setterForFixedContentsMethod != null) {
-			int argCountMethod = setterForFixedContentsMethod.getParameters().size();
+		if (creatorForFixedContentsMethod != null) {
+			int argCountMethod = creatorForFixedContentsMethod.getParameters().size();
 			// fix for setHl7EntryRelationshipFixedValue: sometimes in the first
 			// occurrence, there is no inversionInd in the ART-DECOR model
-			if ("setHl7EntryRelationshipFixedValue"
-					.contentEquals(setterForFixedContentsMethod.getNameAsString())) {
+			if ("createHl7EntryRelationshipFixedValue"
+					.contentEquals(creatorForFixedContentsMethod.getNameAsString())) {
 				if (argCountMethod == 1) {
 					CdaAttribute attr = new CdaAttribute();
 					attr.setCdaElement(cdaElement);
 					attr.setName("inversionInd");
-					updateSetterForFixedContentsMethod(compilationUnit,
-							setterForFixedContentsMethod, cdaElement, attr);
+					updateCreatorForFixedContentsMethod(compilationUnit,
+							creatorForFixedContentsMethod, cdaElement, attr);
 
 				}
 				argCountMethod = 2;
 			}
 			// end of fix
 
-			if (!isCompleteSetterForFixedContentsMethod(setterForFixedContentsMethod))
-				completeSetterForFixedContentsMethod(setterForFixedContentsMethod, cdaElement);
+			if (!isCompleteCreatorForFixedContentsMethod(creatorForFixedContentsMethod))
+				completeCreatorForFixedContentsMethod(creatorForFixedContentsMethod, cdaElement);
 
 			int argCountGiven = org.apache.commons.lang3.StringUtils.countMatches(sb.toString(),
 					",") + 1;
@@ -321,8 +342,45 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 						",") + 1;
 			}
 
-			addBodyStatement(constructor,
-					setterForFixedContentsMethod.getNameAsString() + "(" + sb.toString() + ");");
+			String name = cdaElement.getXmlName().replace("hl7:", "");
+			boolean createElement = false;
+			createElement = ("templateId".equals(name) || "typeId".equals(name));
+			boolean preserveElement = false;
+			preserveElement = ("code".equals(name) || "translation".equals(name));
+
+			@SuppressWarnings("rawtypes")
+			Class memberType = getDeclaredFieldDatatype(
+					cdaElement.getParentCdaElement().getDataType(), name);
+			String statement = "";
+			String creator = creatorForFixedContentsMethod.getNameAsString() + "(" + sb.toString()
+					+ ")";
+
+			if (createElement) {
+				if (isClassCollection(memberType)) {
+					statement = "super.get"
+							+ toUpperFirstChar(cdaElement.getXmlName().replace("hl7:", ""))
+							+ "().add(" + creator + ");";
+				} else {
+					statement = "super.set"
+							+ toUpperFirstChar(cdaElement.getXmlName().replace("hl7:", "")) + "("
+							+ creator + ");";
+				}
+
+				addBodyStatement(constructor, statement);
+			} else if (preserveElement) {
+				if (isClassCollection(memberType)) {
+					throw new RuntimeException("Lists not supported, yet for preserve elements");
+				} else {
+					statement = name + "FixedValue = " + creator + ";";
+				}
+				createMemberAndGetter(compilationUnit, myClass,
+						creatorForFixedContentsMethod.getType().toString(), name + "FixedValue",
+						createGetterNamePascalCase(name + "FixedValue"));
+				statement = name + "FixedValue = " + creator + ";";
+				addBodyStatement(constructor, statement);
+			} else {
+				System.out.println("stop here - " + creator + " not applied, yet.");
+			}
 		}
 	}
 
@@ -359,7 +417,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		}
 		if (!(isField || isMethod))
 			throw new RuntimeException(
-					name + " is neither an accesible field nor a accessible getter");
+					name + " is neither an accesible field nor an accessible getter");
 		String temp = name;
 		String cast = "";
 		boolean doCast = false;
@@ -449,6 +507,24 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	}
 
+	private static void createMemberAndGetter(CompilationUnit compilationUnit,
+			ClassOrInterfaceDeclaration myClass, String dataType, String memberName,
+			String methodName) {
+
+		myClass.addField(dataType, memberName, privateModifier().getKeyword());
+
+		MethodDeclaration method;
+		method = myClass.addMethod(methodName, publicModifier().getKeyword());
+		method.setType(dataType);
+
+		String comment = "Gets the member " + memberName;
+		method.setJavadocComment(comment);
+
+		BlockStmt body = method.createBody();
+		body.addStatement("return " + memberName + ";");
+
+	}
+
 	private static void createSaverMethods(CompilationUnit compilationUnit,
 			ClassOrInterfaceDeclaration myClass) {
 		addImport(compilationUnit, "java.io.File");
@@ -523,7 +599,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		}
 		if (!(isField || isMethod))
 			throw new RuntimeException(
-					name + " is neither an accesible field nor a accessible getter");
+					name + " is neither an accesible field nor an accessible getter");
 		String temp = name;
 		if (isClassCollection(memberType)) {
 			if (isMethod)
@@ -559,45 +635,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				body.addStatement(temp + " = " + cast + "value;");
 		}
 
-	}
-
-	private static MethodDeclaration createSetterForFixedContents(CompilationUnit compilationUnit,
-			ClassOrInterfaceDeclaration myClass, CdaElement cdaElement,
-			String setterForFixedContentsName) {
-		MethodDeclaration method = myClass.addMethod(setterForFixedContentsName,
-				publicModifier().getKeyword());
-		method.setJavadocComment("Creates fixed contents for " + cdaElement.getJavaName() + "\n\n");
-
-		compilationUnit.addImport("org.ehealth_connector.common.hl7cdar2.ObjectFactory");
-
-		BlockStmt body = method.createBody();
-		body.addStatement("ObjectFactory factory = new ObjectFactory();");
-
-		String dataType = cdaElement.getDataType();
-
-		String name = cdaElement.getXmlName().replace("hl7:", "");
-		@SuppressWarnings("rawtypes")
-		Class memberType = getFieldDatatype(cdaElement.getParentCdaElement().getDataType(), name);
-		boolean isField = (memberType != null);
-		boolean isMethod = false;
-		if (!isField) {
-			memberType = getMethodDatatype(cdaElement.getParentCdaElement().getDataType(), name);
-			isMethod = (memberType != null);
-		}
-		if (!(isField || isMethod)) {
-			// TODO for prefix of names (Academic is default for
-			// doctors), and so on
-			// throw new RuntimeException(
-			// name + " is neither an accesible field nor a accessible
-			// getter");
-		} else {
-			if (memberType.getName().endsWith("POCDMT000040InfrastructureRootTypeId")) {
-				dataType = memberType.getName();
-			}
-			body.addStatement(dataType + " member = factory.create"
-					+ dataType.replace("org.ehealth_connector.common.hl7cdar2.", "") + "();");
-		}
-		return method;
 	}
 
 	private static String createSetterNamePascalCase(String name) {
@@ -766,14 +803,14 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			return Collection.class.isAssignableFrom(c) || Map.class.isAssignableFrom(c);
 	}
 
-	private static boolean isCompleteSetterForFixedContentsMethod(
+	private static boolean isCompleteCreatorForFixedContentsMethod(
 			MethodDeclaration setterForFixedContentsMethod) {
 		Optional<BlockStmt> bodyOpt = setterForFixedContentsMethod.getBody();
 		boolean retVal = false;
 		if (bodyOpt.isPresent()) {
 			BlockStmt body = bodyOpt.get();
-			for (Comment comment : body.getAllContainedComments()) {
-				retVal = (COMMENT_SETTER_FOR_FIXED_CONTENTS_COMPLETED.equals(comment.getContent()));
+			for (Statement stmt : body.getStatements()) {
+				retVal = ("return retVal;".equals(stmt.toString()));
 			}
 		}
 		return retVal;
@@ -799,12 +836,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		return value.substring(0, 1).toUpperCase() + value.substring(1, value.length());
 	}
 
-	private static void updateSetterForFixedContentsMethod(CompilationUnit compilationUnit,
+	private static void updateCreatorForFixedContentsMethod(CompilationUnit compilationUnit,
 			MethodDeclaration setterForFixedContentsMethod, CdaElement cdaElement,
 			CdaAttribute cdaAttribute) {
-
-		if ("setHl7TypeIdFixedValue".equals(setterForFixedContentsMethod.getNameAsString()))
-			System.out.println("Stop here");
 
 		Optional<Parameter> params = setterForFixedContentsMethod
 				.getParameterByName(cdaAttribute.getName());
@@ -827,68 +861,68 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 						cdaElement.getParentCdaElement().getDataType(), name);
 
 				if ((memberType == null) && (!"translation".equals(name))) {
-					System.out.println("Stop here - " + cdaElement.getFullXmlName()
-							+ " cannot set fixed content");
-					// TODO for prefix of names (Academic is default for
-					// doctors), and so on
-					// throw new RuntimeException(
-					// name + " is neither an accesible field nor a accessible
-					// getter");
+					if (cdaElement.getDataType().endsWith(".ENXP")) {
+						String enPartL = cdaAttribute.getName();
+						String enPartU = toUpperFirstChar(enPartL);
+						body.addStatement("retVal.get" + enPartU + "().add(" + enPartL + ");");
+					} else
+						throw new RuntimeException(
+								name + " is neither an accesible field nor an accessible getter");
 				} else {
 					if ("nullFlavor".equals(cdaAttribute.getName())) {
 						addImport(compilationUnit, "java.util.ArrayList");
-						body.addStatement("member.nullFlavor = new ArrayList<String>();");
-						body.addStatement("member.nullFlavor.add(nullFlavor);");
+						body.addStatement("retVal.nullFlavor = new ArrayList<String>();");
+						body.addStatement("retVal.nullFlavor.add(nullFlavor);");
 					} else if ((isClassCollection(memberType) && (!"translation".equals(name))
 							&& (!"templateId".equals(name)) && (!"relatedDocument".equals(name))
 							&& (!"targetSiteCode".equals(name))) || ("serviceEvent".equals(name))
 							|| ("associatedEntity".equals(name))) {
-						if ("setHl7EntryFixedValue"
+						if ("createHl7EntryFixedValue"
 								.equals(setterForFixedContentsMethod.getNameAsString())) {
 							addImport(compilationUnit,
 									"org.ehealth_connector.common.hl7cdar2.XActRelationshipEntry");
 							body.addStatement(
-									"member.setTypeCode(XActRelationshipEntry.valueOf(typeCode));");
-						} else if ("setHl7ComponentFixedValue"
+									"retVal.setTypeCode(XActRelationshipEntry.valueOf(typeCode));");
+						} else if ("createHl7ComponentFixedValue"
 								.equals(setterForFixedContentsMethod.getNameAsString())) {
 							addImport(compilationUnit,
 									"org.ehealth_connector.common.hl7cdar2.ActRelationshipHasComponent");
 							body.addStatement(
-									"member.setTypeCode(ActRelationshipHasComponent.fromValue(typeCode));");
-						} else if ("setHl7ReferenceFixedValue"
+									"retVal.setTypeCode(ActRelationshipHasComponent.fromValue(typeCode));");
+						} else if ("createHl7ReferenceFixedValue"
 								.equals(setterForFixedContentsMethod.getNameAsString())) {
 							addImport(compilationUnit,
 									"org.ehealth_connector.common.hl7cdar2.XActRelationshipExternalReference");
 							body.addStatement(
-									"member.setTypeCode(XActRelationshipExternalReference.fromValue(typeCode));");
-						} else if ("setHl7EntryRelationshipFixedValue"
+									"retVal.setTypeCode(XActRelationshipExternalReference.fromValue(typeCode));");
+						} else if ("createHl7EntryRelationshipFixedValue"
 								.equals(setterForFixedContentsMethod.getNameAsString())) {
 							addImport(compilationUnit,
 									"org.ehealth_connector.common.hl7cdar2.XActRelationshipEntryRelationship");
 							if ("typeCode".equals(cdaAttribute.getName()))
 								body.addStatement(
-										"member.setTypeCode(XActRelationshipEntryRelationship.fromValue(typeCode));");
+										"retVal.setTypeCode(XActRelationshipEntryRelationship.fromValue(typeCode));");
 							else
 								body.addStatement(
-										"member.setInversionInd(Boolean.parseBoolean(inversionInd));");
+										"retVal.setInversionInd(Boolean.parseBoolean(inversionInd));");
 						} else
 							body.addStatement(
-									"member.get" + toUpperFirstChar(cdaAttribute.getName())
+									"retVal.get" + toUpperFirstChar(cdaAttribute.getName())
 											+ "().add(" + cdaAttribute.getName() + ");");
 					} else {
 						if ("relatedDocument".equals(name)) {
 							addImport(compilationUnit,
 									"org.ehealth_connector.common.hl7cdar2.XActRelationshipDocument");
 							body.addStatement(
-									"member.setTypeCode(XActRelationshipDocument.fromValue(typeCode));");
+									"retVal.setTypeCode(XActRelationshipDocument.fromValue(typeCode));");
 						} else if ("representation".contentEquals(cdaAttribute.getName())) {
 							addImport(compilationUnit,
 									"org.ehealth_connector.common.hl7cdar2.BinaryDataEncoding");
 							body.addStatement(
-									"member.setRepresentation(BinaryDataEncoding.fromValue(representation));");
+									"retVal.setRepresentation(BinaryDataEncoding.fromValue(representation));");
 						} else
 							body.addStatement(
-									"member.set" + toUpperFirstChar(cdaAttribute.getName()) + "("
+									"retVal.set" + toUpperFirstChar(cdaAttribute.getName()) + "("
 											+ cdaAttribute.getName() + ");");
 					}
 				}
@@ -924,7 +958,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	private CdaElement parentForIncludes;
 
-	private boolean printAssembledDebugInformation = true;
+	private boolean printAssembledDebugInformation = false;
 
 	private boolean printDataTypeDebugInformation = false;
 
@@ -1470,9 +1504,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		if (idAttrCtx != null)
 			id = idAttrCtx.AttrValue().getText().replace("\"", "");
 
-		if ("2.16.756.5.30.1.1.10.9.16".equals(id))
-			System.out.println("Stop here");
-
+		// if ("2.16.756.5.30.1.1.10.9.16".equals(id))
+		// System.out.println("Stop here");
+		//
 		NameAttrContext nameAttrCtx = ctx.nameAttr();
 		if (nameAttrCtx != null)
 			name = nameAttrCtx.AttrValue().getText().replace("\"", "");

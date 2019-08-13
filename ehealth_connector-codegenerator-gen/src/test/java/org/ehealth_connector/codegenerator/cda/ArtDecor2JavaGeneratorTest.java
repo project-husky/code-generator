@@ -3,7 +3,7 @@
  * All rights reserved. https://medshare.net
  *
  * Source code, documentation and other resources have been contributed by various people.
- * Project Team: https://sourceforge.net/p/ehealthconnector/wiki/Team/
+ * Project Team: https://gitlab.com/ehealth-connector/api/wikis/Team/
  * For exact developer information, please refer to the commit history of the forge.
  *
  * This code is made available under the terms of the Eclipse Public License v1.0.
@@ -28,6 +28,7 @@ import org.apache.commons.io.FileUtils;
 import org.ehealth_connector.codegenerator.java.JavaCodeGenerator;
 import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.Util;
+import org.junit.Test;
 
 import net.sf.saxon.s9api.SaxonApiException;
 
@@ -165,7 +166,7 @@ public class ArtDecor2JavaGeneratorTest {
 	 */
 	// This is for debugging purposes, only. Do not commit this test with the
 	// test annotation enabled!
-	// @Test
+	@Test
 	public void doLrepTest()
 			throws SaxonApiException, IOException, JAXBException, ClassNotFoundException,
 			IllegalAccessException, IllegalArgumentException, InvocationTargetException,
