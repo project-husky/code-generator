@@ -47,6 +47,7 @@ mode INSIDE;
 ASSERT : 'assert';
 ATTRIBUTE : 'attribute';
 CHOICE : 'choice';
+CODEATTR : 'code=';
 CONFATTR : 'conformance=';
 FLEXIBILITYATTR : 'flexibility=';
 CONTAINSATTR : 'contains=';

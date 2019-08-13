@@ -39,8 +39,8 @@ choice : '<' CHOICE attr* maxOccursAttr? minOccursAttr? '>' content '<' '/' CHOI
 include : '<' INCLUDE attr* conformanceAttr? flexibilityAttr? idAttr? isMandatoryAttr? maxOccursAttr? minOccursAttr? refAttr? attr* '/>' | 
           '<' INCLUDE attr* conformanceAttr? flexibilityAttr? idAttr? isMandatoryAttr? maxOccursAttr? minOccursAttr? refAttr? attr* '>' content '<' '/' INCLUDE '>';
           
-vocab : '<' VOCAB attr* flexibilityAttr? valueSetAttr? attr* '/>' | 
-        '<' VOCAB attr* flexibilityAttr? valueSetAttr? attr* '>' content '<' '/' VOCAB '>';
+vocab : '<' VOCAB attr* codeAttr? flexibilityAttr? valueSetAttr? attr* '/>' | 
+        '<' VOCAB attr* codeAttr? flexibilityAttr? valueSetAttr? attr* '>' content '<' '/' VOCAB '>';
 
 
 letter : '<' LET nameAttr? valueAttr? '/>' | 
@@ -66,6 +66,7 @@ reference : EntityRef | CharRef ;
 attr : Name '=' AttrValue ;
 conformanceAttr : CONFATTR AttrValue ;
 flexibilityAttr : FLEXIBILITYATTR AttrValue ;
+codeAttr : CODEATTR AttrValue ;
 containsAttr : CONTAINSATTR AttrValue ;
 dataTypeAttr : TYPEATTR AttrValue ;
 idAttr : IDATTR AttrValue ;
