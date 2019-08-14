@@ -274,7 +274,7 @@ public class UpdateValueSets {
 	 * @throws IOException
 	 *             When reading or writing the Java source file fails.
 	 */
-	private static void createEnumClassFromTemplate(String baseJavaFolder,
+	public static void createEnumClassFromTemplate(String baseJavaFolder,
 			String fullyQualifiedclassName) throws IOException {
 
 		String className = fullyQualifiedclassName
@@ -525,7 +525,7 @@ public class UpdateValueSets {
 	 * @throws IllegalStateException
 	 *             If the class does not declare an Enum type.
 	 */
-	private static File updateEnumClass(String id, String valueSetName, String baseJavaFolder,
+	public static File updateEnumClass(String id, String valueSetName, String baseJavaFolder,
 			String className, ValueSet valueSet) throws IOException, IllegalStateException {
 
 		JavaParser javaParser = new JavaParser();

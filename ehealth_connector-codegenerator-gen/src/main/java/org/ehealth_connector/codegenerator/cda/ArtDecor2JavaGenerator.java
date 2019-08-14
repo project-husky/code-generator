@@ -46,18 +46,21 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsLexer;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.CodeAttrContext;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.ContainsAttrContext;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.DataTypeAttrContext;
+import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.FlexibilityAttrContext;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.IdAttrContext;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.MaxOccursAttrContext;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.MinOccursAttrContext;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.NameAttrContext;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.RefAttrContext;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.ValueAttrContext;
+import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.ValueSetAttrContext;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParserBaseListener;
 import org.ehealth_connector.codegenerator.cda.xslt.Hl7Its2EhcTransformer;
 import org.ehealth_connector.codegenerator.java.JavaCodeGenerator;
@@ -318,6 +321,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 					sb.append(", ");
 				sb.append("\"" + cdaAttribute.getValue() + "\"");
 
+			} else if (cdaAttribute.getValueSetId() != null) {
+				System.out.println("Stop here");
 			}
 		}
 		if (creatorForFixedContentsMethod != null) {
@@ -933,6 +938,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		Optional<Parameter> params = setterForFixedContentsMethod
 				.getParameterByName(cdaAttribute.getName());
+
 		if (!params.isPresent()) {
 			setterForFixedContentsMethod.addAndGetParameter("String", cdaAttribute.getName());
 			Optional<Javadoc> javaDocOpt = setterForFixedContentsMethod.getJavadoc();
@@ -1037,6 +1043,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	private String dstFilePath = null;
 
+	private String fullDstFilePath = null;
+
 	private String fileHeader;
 
 	private boolean isChildElement;
@@ -1067,7 +1075,11 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	private int processingTemplate = 0;
 
+	boolean initialRun;
+
 	private String srcFilePath = null;
+
+	private String artDecorPrefix;
 
 	private HashMap<String, String> templateIndex = null;
 
@@ -1076,8 +1088,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	public ArtDecor2JavaGenerator(CdaElement callingCdaElement,
 			HashMap<String, String> templateIndex, ArrayList<CdaTemplate> templateList,
 			String srcFilePath, String dstFilePath, String packageName, String fileHeader,
-			String containsDataType) {
+			String artDecorPrefix) throws IOException {
 		this.callingCdaElement = callingCdaElement;
+		this.artDecorPrefix = artDecorPrefix;
 
 		if (templateIndex == null)
 			this.templateIndex = new HashMap<String, String>();
@@ -1096,6 +1109,15 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		if (!this.dstFilePath.endsWith(FileUtil.getPlatformSpecificPathSeparator()))
 			this.dstFilePath += FileUtil.getPlatformSpecificPathSeparator();
+		fullDstFilePath = new File(new File(dstFilePath, "src/main/java"),
+				packageName.replaceAll("\\.", "/")).getAbsolutePath();
+
+		if (!this.fullDstFilePath.endsWith(FileUtil.getPlatformSpecificPathSeparator()))
+			this.fullDstFilePath += FileUtil.getPlatformSpecificPathSeparator();
+
+		initialRun = (callingCdaElement == null);
+		if (initialRun)
+			FileUtils.deleteDirectory(new File(fullDstFilePath));
 
 		if (!this.srcFilePath.endsWith(FileUtil.getPlatformSpecificPathSeparator()))
 			this.srcFilePath += FileUtil.getPlatformSpecificPathSeparator();
@@ -1219,7 +1241,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			createInitVersionMethods(compilationUnit, myClass);
 		}
 
-		File outFile = new File(dstFilePath + className + ".java");
+		File outFile = new File(fullDstFilePath + className + ".java");
 		JavaCodeGenerator.completeAndSave(compilationUnit, outFile);
 	}
 
@@ -1240,8 +1262,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 						templateId + " is already known as " + templateIndex.get(templateId));
 			retVal = templateIndex.get(templateId);
 		}
-
-		boolean initialRun = (callingCdaElement == null);
 
 		if ("FAILURE".equals(retVal)) {
 			retVal = "templateDataTypeFAILURE";
@@ -1316,7 +1336,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				System.out.print("Writing Java Class files");
 				for (CdaTemplate cdaTemplate : templateList) {
 					System.out.print(".");
-					createJavaClassFile(cdaTemplate, packageName, dstFilePath);
+					createJavaClassFile(cdaTemplate, packageName, fullDstFilePath);
 				}
 				System.out.println(" done.");
 			}
@@ -1536,7 +1556,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 					throw new RuntimeException("parent is null for contains " + contains);
 				ArtDecor2JavaGenerator artDecor2JavaGenerator = new ArtDecor2JavaGenerator(
 						parentForContains, templateIndex, templateList, srcFilePath, dstFilePath,
-						packageName, fileHeader, dataType);
+						packageName, fileHeader, artDecorPrefix);
 				artDecor2JavaGenerator.doOneTemplate(contains);
 			} catch (SaxonApiException | IOException | JAXBException | ClassNotFoundException
 					| IllegalAccessException | IllegalArgumentException | InvocationTargetException
@@ -1577,7 +1597,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			try {
 				ArtDecor2JavaGenerator artDecor2JavaGenerator = new ArtDecor2JavaGenerator(
 						parentForIncludes, templateIndex, templateList, srcFilePath, dstFilePath,
-						packageName, fileHeader, null);
+						packageName, fileHeader, artDecorPrefix);
 				dataType = artDecor2JavaGenerator.doOneTemplate(ref);
 			} catch (SaxonApiException | IOException | JAXBException | ClassNotFoundException
 					| IllegalAccessException | IllegalArgumentException | InvocationTargetException
@@ -1598,9 +1618,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		if (idAttrCtx != null)
 			id = idAttrCtx.AttrValue().getText().replace("\"", "");
 
-		// if ("2.16.756.5.30.1.1.10.9.16".equals(id))
-		// System.out.println("Stop here");
-		//
 		NameAttrContext nameAttrCtx = ctx.nameAttr();
 		if (nameAttrCtx != null)
 			name = nameAttrCtx.AttrValue().getText().replace("\"", "");
@@ -1636,13 +1653,93 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		if (codeAttrCtx != null)
 			code = codeAttrCtx.AttrValue().getText().replace("\"", "");
 
-		if (code != null) {
-			currentCdaAttribute = new CdaAttribute();
-			currentCdaAttribute.setCdaElement(currentCdaElement);
-			currentCdaAttribute.setName("code");
-			currentCdaAttribute.setDataType("cs");
-			currentCdaAttribute.setValue(code);
+		String valueSetId = null;
+		ValueSetAttrContext valueSetAttrCtx = ctx.valueSetAttr();
+		if (valueSetAttrCtx != null)
+			valueSetId = valueSetAttrCtx.AttrValue().getText().replace("\"", "");
 
+		String flexibility = null;
+		FlexibilityAttrContext flexibilityAttrCtx = ctx.flexibilityAttr();
+		if (flexibilityAttrCtx != null)
+			flexibility = flexibilityAttrCtx.AttrValue().getText().replace("\"", "");
+
+		if ((code != null) || (valueSetId != null)) {
+			if (currentCdaAttribute == null) {
+				currentCdaAttribute = new CdaAttribute();
+				currentCdaAttribute.setCdaElement(currentCdaElement);
+				currentCdaAttribute.setDataType("cs");
+			}
+			if (code != null) {
+				if (currentCdaAttribute.getName() == null)
+					currentCdaAttribute.setName("code");
+				currentCdaAttribute.setValue(code);
+
+			} else if (valueSetId != null) {
+				if (currentCdaAttribute.getName() == null)
+					currentCdaAttribute.setName("valueSet");
+				currentCdaAttribute.setValueSetId(valueSetId);
+
+				// Create Enum from ValueSet
+				// TODO in eigene Methode auslagern und von UpdateValueSets
+				// einsetzen
+				// System.out.print("- downloading ValueSet...");
+				// String sourceUrl =
+				// "http://art-decor.org/decor/services/RetrieveValueSet?prefix="
+				// + artDecorPrefix + "&id=" + valueSetId + "&format=json";
+				// if (!"dynamic".equals(flexibility) && flexibility != null)
+				// try {
+				// System.out.println("Stop here");
+				// sourceUrl += "&effectiveDate=" +
+				// java.net.URLEncoder.encode(flexibility,
+				// Charsets.UTF_8.toString());
+				// } catch (UnsupportedEncodingException e) {
+				// throw new RuntimeException("flexibility (" + flexibility
+				// + ") cannot be URL encoded: " + e.getMessage());
+				// }
+				// ValueSetManager valueSetManager = new ValueSetManager();
+				// ValueSetConfig valueSetConfig = ValueSetConfig.builder()
+				// .withProjectFolder(this.dstFilePath)
+				// .withSourceFormatType(SourceFormatType.JSON)
+				// .withSourceSystemType(SourceSystemType.ARTDECOR_FHIR)
+				// .withSourceUrl(sourceUrl).build();
+				// ValueSet valueSet = null;
+				// try {
+				// valueSet = valueSetManager.downloadValueSet(valueSetConfig);
+				// } catch (IOException | ParserConfigurationException |
+				// SAXException
+				// | InitializationException e) {
+				// throw new RuntimeException("valueSet (" + valueSetId
+				// + ") cannot be downloaded: " + e.getMessage());
+				// }
+				// if (valueSet != null) {
+				// valueSetConfig.setClassName(packageName + ".enums."
+				// + JavaCodeGenerator.toPascalCase(valueSet.getName()));
+				// String baseJavaFolder = valueSetConfig.getProjectFolder();
+				// String fullyQualifiedclassName =
+				// valueSetConfig.getClassName();
+				// // delete existing class file
+				// ValueSetUtil.getSourceFileName(baseJavaFolder,
+				// fullyQualifiedclassName)
+				// .delete();
+				//
+				// // create the class file
+				// try {
+				// UpdateValueSets.createEnumClassFromTemplate(baseJavaFolder,
+				// fullyQualifiedclassName);
+				// File classFile = UpdateValueSets.updateEnumClass(
+				// valueSet.getIdentificator().getRoot(),
+				// valueSet.getName(),
+				// baseJavaFolder, valueSetConfig.getClassName(),
+				// valueSet);
+				// } catch (IOException e) {
+				// throw new RuntimeException("valueSet (" + valueSetId
+				// + ") cannot be created as Java enum file: " +
+				// e.getMessage());
+				// }
+				//
+				// }
+				// System.out.print("done.\n");
+			}
 			if (currentCdaElement == null)
 				throw new RuntimeException("vocab for templates not handled, yet.");
 			else
@@ -1662,6 +1759,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	@Override
 	public void exitElement(Hl7ItsParser.ElementContext ctx) {
+		currentCdaAttribute = null;
 		processingElement--;
 	}
 

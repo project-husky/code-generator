@@ -26,6 +26,8 @@ public class CdaAttribute {
 
 	private String value;
 
+	private String valueSetId;
+
 	private CdaElement cdaElement;
 
 	public CdaAttribute() {
@@ -69,6 +71,14 @@ public class CdaAttribute {
 
 	public void setValue(String value) {
 		this.value = value;
+	}
+
+	public String getValueSetId() {
+		return valueSetId;
+	}
+
+	public void setValueSetId(String valueSetId) {
+		this.valueSetId = valueSetId;
 	}
 
 }
