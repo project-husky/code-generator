@@ -392,7 +392,7 @@ public class UpdateValueSets {
 				.loadValueSetPackageConfig(fnPackageConfig);
 
 		ValueSetManager valueSetManager = new ValueSetManager();
-		for (ValueSetConfig valueSetConfig : valueSetPackageConfig.listValueSetConfigs()) {
+		for (ValueSetConfig valueSetConfig : valueSetPackageConfig.getValueSetConfigList()) {
 			System.out.print("Processing enum: " + valueSetConfig.getClassName() + "\n");
 
 			// This is for debug purposes, only:
@@ -440,7 +440,7 @@ public class UpdateValueSets {
 		FileUtils.deleteDirectory(tempWorkspacePath);
 
 		System.out.println(
-				"Processed " + valueSetPackageConfig.listValueSetConfigs().size() + " enums.");
+				"Processed " + valueSetPackageConfig.getValueSetConfigList().size() + " enums.");
 
 	}
 
