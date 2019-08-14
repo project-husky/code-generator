@@ -22,6 +22,7 @@ import static com.github.javaparser.ast.Modifier.staticModifier;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -46,6 +47,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsLexer;
@@ -64,9 +66,18 @@ import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.ValueSetAttrCo
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParserBaseListener;
 import org.ehealth_connector.codegenerator.cda.xslt.Hl7Its2EhcTransformer;
 import org.ehealth_connector.codegenerator.java.JavaCodeGenerator;
+import org.ehealth_connector.codegenerator.valuesets.UpdateValueSets;
+import org.ehealth_connector.codegenerator.valuesets.ValueSetUtil;
 import org.ehealth_connector.common.hl7cdar2.ObjectFactory;
 import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.Util;
+import org.ehealth_connector.valueset.api.ValueSetManager;
+import org.ehealth_connector.valueset.config.ValueSetConfig;
+import org.ehealth_connector.valueset.enums.SourceFormatType;
+import org.ehealth_connector.valueset.enums.SourceSystemType;
+import org.ehealth_connector.valueset.exceptions.InitializationException;
+import org.ehealth_connector.valueset.model.ValueSet;
+import org.xml.sax.SAXException;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
@@ -117,11 +128,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			Class memberType = getFieldDatatype(cdaElement.getParentCdaElement().getDataType(),
 					name);
 			boolean isField = (memberType != null);
-			boolean isMethod = false;
 			if (!isField) {
 				memberType = getMethodDatatype(cdaElement.getParentCdaElement().getDataType(),
 						name);
-				isMethod = (memberType != null);
 			}
 			body.addStatement("return retVal;");
 		}
@@ -150,18 +159,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		method.addAndGetParameter(cdaElement.getDataType(), "value");
 
 		String name = cdaElement.getXmlName().replace("hl7:", "");
-		String genericType = getGenericFieldType(cdaElement.getParentCdaElement().getDataType(),
-				name);
+		@SuppressWarnings("rawtypes")
 		Class memberType = getFieldDatatype(cdaElement.getParentCdaElement().getDataType(), name);
 		boolean isField = (memberType != null);
-		boolean isMethod = false;
 		if (!isField) {
 			memberType = getMethodDatatype(cdaElement.getParentCdaElement().getDataType(), name);
-			isMethod = (memberType != null);
 		}
-		// if (!(isField || isMethod))
-		// throw new RuntimeException(
-		// name + " is neither an accesible field nor an accessible getter");
 
 		BlockStmt body = method.createBody();
 		if (isClassCollection(memberType)) {
@@ -198,18 +201,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			throw new NotImplementedException("Type undefined for " + cdaElement.getJavaName());
 
 		String name = cdaElement.getXmlName().replace("hl7:", "");
-		String genericType = getGenericFieldType(cdaElement.getParentCdaElement().getDataType(),
-				name);
+		@SuppressWarnings("rawtypes")
 		Class memberType = getFieldDatatype(cdaElement.getParentCdaElement().getDataType(), name);
 		boolean isField = (memberType != null);
-		boolean isMethod = false;
 		if (!isField) {
 			memberType = getMethodDatatype(cdaElement.getParentCdaElement().getDataType(), name);
-			isMethod = (memberType != null);
 		}
-		// if (!(isField || isMethod))
-		// throw new RuntimeException(
-		// name + " is neither an accesible field nor an accessible getter");
 
 		if (isClassCollection(memberType)) {
 			MethodDeclaration method;
@@ -479,7 +476,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		MethodDeclaration method;
 		BlockStmt body;
-		String comment;
 
 		// initFirstVersion
 		method = myClass.addMethod("initFirstVersion", publicModifier().getKeyword());
@@ -827,7 +823,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		return retVal;
 	}
 
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static String getGenericFieldType(String className, String memberName) {
 		String retVal = "";
 
@@ -868,7 +864,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		return retVal;
 	}
 
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static Class getMethodDatatype(String className, String memberName) {
 		Class retVal = null;
 
@@ -892,6 +888,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		return retVal;
 	}
 
+	@SuppressWarnings("rawtypes")
 	public static boolean isClassCollection(Class c) {
 		if (c == null)
 			return false;
@@ -1083,12 +1080,14 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	private HashMap<String, String> templateIndex = null;
 
+	private HashMap<String, String> valueSetIndex = null;
+
 	private ArrayList<CdaTemplate> templateList = null;
 
 	public ArtDecor2JavaGenerator(CdaElement callingCdaElement,
-			HashMap<String, String> templateIndex, ArrayList<CdaTemplate> templateList,
-			String srcFilePath, String dstFilePath, String packageName, String fileHeader,
-			String artDecorPrefix) throws IOException {
+			HashMap<String, String> templateIndex, HashMap<String, String> valueSetIndex,
+			ArrayList<CdaTemplate> templateList, String srcFilePath, String dstFilePath,
+			String packageName, String fileHeader, String artDecorPrefix) throws IOException {
 		this.callingCdaElement = callingCdaElement;
 		this.artDecorPrefix = artDecorPrefix;
 
@@ -1096,6 +1095,11 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			this.templateIndex = new HashMap<String, String>();
 		else
 			this.templateIndex = templateIndex;
+
+		if (valueSetIndex == null)
+			this.valueSetIndex = new HashMap<String, String>();
+		else
+			this.valueSetIndex = valueSetIndex;
 
 		if (templateList == null)
 			this.templateList = new ArrayList<CdaTemplate>();
@@ -1555,8 +1559,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				if (parentForContains == null)
 					throw new RuntimeException("parent is null for contains " + contains);
 				ArtDecor2JavaGenerator artDecor2JavaGenerator = new ArtDecor2JavaGenerator(
-						parentForContains, templateIndex, templateList, srcFilePath, dstFilePath,
-						packageName, fileHeader, artDecorPrefix);
+						parentForContains, templateIndex, valueSetIndex, templateList, srcFilePath,
+						dstFilePath, packageName, fileHeader, artDecorPrefix);
 				artDecor2JavaGenerator.doOneTemplate(contains);
 			} catch (SaxonApiException | IOException | JAXBException | ClassNotFoundException
 					| IllegalAccessException | IllegalArgumentException | InvocationTargetException
@@ -1588,7 +1592,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		RefAttrContext refAttrCtx = ctx.refAttr();
 		String ref = "";
-		String dataType = null;
 		if (refAttrCtx != null) {
 			ref = refAttrCtx.AttrValue().getText().replace("\"", "");
 			if (printParsingDebugInformation)
@@ -1596,14 +1599,14 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 					System.out.println("Include: " + ref);
 			try {
 				ArtDecor2JavaGenerator artDecor2JavaGenerator = new ArtDecor2JavaGenerator(
-						parentForIncludes, templateIndex, templateList, srcFilePath, dstFilePath,
-						packageName, fileHeader, artDecorPrefix);
-				dataType = artDecor2JavaGenerator.doOneTemplate(ref);
+						parentForIncludes, templateIndex, valueSetIndex, templateList, srcFilePath,
+						dstFilePath, packageName, fileHeader, artDecorPrefix);
+				artDecor2JavaGenerator.doOneTemplate(ref);
 			} catch (SaxonApiException | IOException | JAXBException | ClassNotFoundException
 					| IllegalAccessException | IllegalArgumentException | InvocationTargetException
 					| InstantiationException | NoSuchFieldException | SecurityException e) {
-				dataType = "includeDataTypeFAILURE";
-				e.printStackTrace();
+				throw new RuntimeException(
+						"Code generation of include (" + ref + " failed:" + e.getMessage());
 			}
 		}
 
@@ -1679,66 +1682,62 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 					currentCdaAttribute.setName("valueSet");
 				currentCdaAttribute.setValueSetId(valueSetId);
 
-				// Create Enum from ValueSet
-				// TODO in eigene Methode auslagern und von UpdateValueSets
-				// einsetzen
-				// System.out.print("- downloading ValueSet...");
-				// String sourceUrl =
-				// "http://art-decor.org/decor/services/RetrieveValueSet?prefix="
-				// + artDecorPrefix + "&id=" + valueSetId + "&format=json";
-				// if (!"dynamic".equals(flexibility) && flexibility != null)
-				// try {
-				// System.out.println("Stop here");
-				// sourceUrl += "&effectiveDate=" +
-				// java.net.URLEncoder.encode(flexibility,
-				// Charsets.UTF_8.toString());
-				// } catch (UnsupportedEncodingException e) {
-				// throw new RuntimeException("flexibility (" + flexibility
-				// + ") cannot be URL encoded: " + e.getMessage());
-				// }
-				// ValueSetManager valueSetManager = new ValueSetManager();
-				// ValueSetConfig valueSetConfig = ValueSetConfig.builder()
-				// .withProjectFolder(this.dstFilePath)
-				// .withSourceFormatType(SourceFormatType.JSON)
-				// .withSourceSystemType(SourceSystemType.ARTDECOR_FHIR)
-				// .withSourceUrl(sourceUrl).build();
-				// ValueSet valueSet = null;
-				// try {
-				// valueSet = valueSetManager.downloadValueSet(valueSetConfig);
-				// } catch (IOException | ParserConfigurationException |
-				// SAXException
-				// | InitializationException e) {
-				// throw new RuntimeException("valueSet (" + valueSetId
-				// + ") cannot be downloaded: " + e.getMessage());
-				// }
-				// if (valueSet != null) {
-				// valueSetConfig.setClassName(packageName + ".enums."
-				// + JavaCodeGenerator.toPascalCase(valueSet.getName()));
-				// String baseJavaFolder = valueSetConfig.getProjectFolder();
-				// String fullyQualifiedclassName =
-				// valueSetConfig.getClassName();
-				// // delete existing class file
-				// ValueSetUtil.getSourceFileName(baseJavaFolder,
-				// fullyQualifiedclassName)
-				// .delete();
-				//
-				// // create the class file
-				// try {
-				// UpdateValueSets.createEnumClassFromTemplate(baseJavaFolder,
-				// fullyQualifiedclassName);
-				// File classFile = UpdateValueSets.updateEnumClass(
-				// valueSet.getIdentificator().getRoot(),
-				// valueSet.getName(),
-				// baseJavaFolder, valueSetConfig.getClassName(),
-				// valueSet);
-				// } catch (IOException e) {
-				// throw new RuntimeException("valueSet (" + valueSetId
-				// + ") cannot be created as Java enum file: " +
-				// e.getMessage());
-				// }
-				//
-				// }
-				// System.out.print("done.\n");
+				if (!valueSetIndex.containsKey(valueSetId)) {
+					// Create Enum from ValueSet
+					// TODO in eigene Methode auslagern und von UpdateValueSets
+					// einsetzen
+					System.out.print("- downloading ValueSet " + valueSetId + " ...");
+					String sourceUrl = "http://art-decor.org/decor/services/RetrieveValueSet?prefix="
+							+ artDecorPrefix + "&id=" + valueSetId + "&format=json";
+					if (!"dynamic".equals(flexibility) && flexibility != null)
+						try {
+							System.out.println("Stop here");
+							sourceUrl += "&effectiveDate=" + java.net.URLEncoder.encode(flexibility,
+									Charsets.UTF_8.toString());
+						} catch (UnsupportedEncodingException e) {
+							throw new RuntimeException("flexibility (" + flexibility
+									+ ") cannot be URL encoded: " + e.getMessage());
+						}
+					ValueSetManager valueSetManager = new ValueSetManager();
+					ValueSetConfig valueSetConfig = ValueSetConfig.builder()
+							.withProjectFolder(this.dstFilePath)
+							.withSourceFormatType(SourceFormatType.JSON)
+							.withSourceSystemType(SourceSystemType.ARTDECOR_FHIR)
+							.withSourceUrl(sourceUrl).build();
+					ValueSet valueSet = null;
+					try {
+						valueSet = valueSetManager.downloadValueSet(valueSetConfig);
+					} catch (IOException | ParserConfigurationException | SAXException
+							| InitializationException e) {
+						throw new RuntimeException("valueSet (" + valueSetId
+								+ ") cannot be downloaded: " + e.getMessage());
+					}
+					if (valueSet != null) {
+						String fullValueSetClassName = packageName + ".enums."
+								+ JavaCodeGenerator.toPascalCase(valueSet.getName());
+						valueSetIndex.put(valueSetId, fullValueSetClassName);
+						valueSetConfig.setClassName(fullValueSetClassName);
+						String baseJavaFolder = valueSetConfig.getProjectFolder();
+						String fullyQualifiedclassName = valueSetConfig.getClassName();
+						// delete existing class file
+						ValueSetUtil.getSourceFileName(baseJavaFolder, fullyQualifiedclassName)
+								.delete();
+
+						// create the class file
+						try {
+							UpdateValueSets.createEnumClassFromTemplate(baseJavaFolder,
+									fullyQualifiedclassName);
+							UpdateValueSets.updateEnumClass(valueSet.getIdentificator().getRoot(),
+									valueSet.getName(), baseJavaFolder,
+									valueSetConfig.getClassName(), valueSet);
+						} catch (IOException e) {
+							throw new RuntimeException("valueSet (" + valueSetId
+									+ ") cannot be created as Java enum file: " + e.getMessage());
+						}
+
+					}
+					System.out.print("done.\n");
+				}
 			}
 			if (currentCdaElement == null)
 				throw new RuntimeException("vocab for templates not handled, yet.");
