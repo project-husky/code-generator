@@ -17,12 +17,17 @@
 package org.ehealth_connector.codegenerator.cda;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+
+import org.ehealth_connector.codegenerator.cda.enums.ProcessModes;
 
 public class CdaElement {
 
 	private ArrayList<CdaAttribute> cdaAttributeList = new ArrayList<CdaAttribute>();
 
 	private ArrayList<CdaElement> childrenCdaElementList = new ArrayList<CdaElement>();
+
+	private HashMap<CdaTemplate, ProcessModes> cdaTemplateList = new HashMap<CdaTemplate, ProcessModes>();
 
 	private String dataType;
 
@@ -50,6 +55,10 @@ public class CdaElement {
 		cdaAttributeList.add(cdaAttribute);
 	}
 
+	public void addCdaTemplate(CdaTemplate cdaTemplate, ProcessModes processMode) {
+		cdaTemplateList.put(cdaTemplate, processMode);
+	}
+
 	public void addChild(CdaElement cdaElement) {
 		if (cdaElement != null)
 			childrenCdaElementList.add(cdaElement);
@@ -57,6 +66,10 @@ public class CdaElement {
 
 	public ArrayList<CdaAttribute> getCdaAttributeList() {
 		return cdaAttributeList;
+	}
+
+	public HashMap<CdaTemplate, ProcessModes> getCdaTemplateList() {
+		return cdaTemplateList;
 	}
 
 	public ArrayList<CdaElement> getChildrenCdaElementList() {
@@ -111,6 +124,10 @@ public class CdaElement {
 		return targetXmlElement;
 	}
 
+	public CdaTemplate getTemplate() {
+		return template;
+	}
+
 	public String getXmlName() {
 		return xmlName;
 	}
@@ -151,16 +168,11 @@ public class CdaElement {
 		this.targetXmlElement = targetXmlElement;
 	}
 
-	public void setXmlName(String xmlName) {
-		this.xmlName = xmlName;
-	}
-
-	public CdaTemplate getTemplate() {
-		return template;
-	}
-
 	public void setTemplate(CdaTemplate template) {
 		this.template = template;
 	}
 
+	public void setXmlName(String xmlName) {
+		this.xmlName = xmlName;
+	}
 }

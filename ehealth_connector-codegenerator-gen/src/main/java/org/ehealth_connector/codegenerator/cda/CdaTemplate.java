@@ -17,12 +17,17 @@
 package org.ehealth_connector.codegenerator.cda;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+
+import org.ehealth_connector.codegenerator.cda.enums.ProcessModes;
 
 public class CdaTemplate {
 
 	private ArrayList<CdaAttribute> cdaAttributeList = new ArrayList<CdaAttribute>();
 
 	private ArrayList<CdaElement> cdaElementList = new ArrayList<CdaElement>();
+
+	private HashMap<CdaTemplate, ProcessModes> cdaTemplateList = new HashMap<CdaTemplate, ProcessModes>();
 
 	private String dataType;
 
@@ -32,18 +37,22 @@ public class CdaTemplate {
 
 	private String name;
 
-	private CdaElement rootCdaElement;
+	// private CdaElement rootCdaElement;
 
-	public void addAttribute(CdaAttribute cdaAttribute) {
+	public void addCdaAttribute(CdaAttribute cdaAttribute) {
 		cdaAttributeList.add(cdaAttribute);
 	}
 
 	public void addCdaElement(CdaElement cdaElement) {
 		if (cdaElementList == null) {
 			cdaElementList = new ArrayList<CdaElement>();
-			rootCdaElement = cdaElement;
+			// rootCdaElement = cdaElement;
 		}
 		cdaElementList.add(cdaElement);
+	}
+
+	public void addCdaTemplate(CdaTemplate cdaTemplate, ProcessModes processMode) {
+		cdaTemplateList.put(cdaTemplate, processMode);
 	}
 
 	public ArrayList<CdaAttribute> getCdaAttributeList() {
@@ -52,6 +61,10 @@ public class CdaTemplate {
 
 	public ArrayList<CdaElement> getCdaElementList() {
 		return cdaElementList;
+	}
+
+	public HashMap<CdaTemplate, ProcessModes> getCdaTemplateList() {
+		return cdaTemplateList;
 	}
 
 	public String getDataType() {
@@ -70,9 +83,9 @@ public class CdaTemplate {
 		return name;
 	}
 
-	public CdaElement getRootCdaElement() {
-		return rootCdaElement;
-	}
+	// public CdaElement getRootCdaElement() {
+	// return rootCdaElement;
+	// }
 
 	public void setCdaAttributeList(ArrayList<CdaAttribute> cdaAttributeList) {
 		this.cdaAttributeList = cdaAttributeList;
@@ -93,4 +106,5 @@ public class CdaTemplate {
 	public void setName(String name) {
 		this.name = name;
 	}
+
 }
