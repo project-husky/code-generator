@@ -22,7 +22,7 @@ public class CdaTemplate {
 
 	private ArrayList<CdaAttribute> cdaAttributeList = new ArrayList<CdaAttribute>();
 
-	private ArrayList<CdaElement> cdaElementList;
+	private ArrayList<CdaElement> cdaElementList = new ArrayList<CdaElement>();
 
 	private String dataType;
 

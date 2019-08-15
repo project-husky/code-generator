@@ -26,6 +26,7 @@ import javax.xml.bind.JAXBException;
 import org.ehealth_connector.codegenerator.java.JavaCodeGenerator;
 import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.Util;
+import org.junit.Test;
 
 import net.sf.saxon.s9api.SaxonApiException;
 
@@ -171,7 +172,6 @@ public class ArtDecor2JavaGeneratorTest {
 			InstantiationException, NoSuchFieldException, SecurityException {
 
 		String templateId = "2.16.756.5.30.1.1.10.1.10";
-		// String packageName = "org.ehealth_connector.testonly.cda.ch.lrep";
 		String packageName = "org.ehealth_connector.cda.ch.lrep.v133";
 
 		HashMap<String, String> templateIndex = new HashMap<String, String>();
@@ -181,12 +181,7 @@ public class ArtDecor2JavaGeneratorTest {
 		String srcFilePath = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator()
 				+ "test" + FileUtil.getPlatformSpecificPathSeparator() + templateId
 				+ FileUtil.getPlatformSpecificPathSeparator();
-		// String dstFilePath = Util.getTempDirectory() +
-		// FileUtil.getPlatformSpecificPathSeparator()
-		// + "lrep" + FileUtil.getPlatformSpecificPathSeparator();
 		String dstFilePath = "C:\\src\\git\\eHC-AD2J\\api-java\\ehealth_connector-cda\\ehealth_connector-cda-ch";
-		// String dstFilePath =
-		// "C:\\src\\git\\eHC-AD2J\\api-java\\ehealth_connector-cda\\ehealth_connector-cda-ch\\src\\main\\java\\org\\ehealth_connector\\cda\\ch\\lrep";
 
 		String fileHeader = JavaCodeGenerator.getFileHeader();
 

@@ -38,6 +38,8 @@ public class CdaElement {
 
 	private CdaElement parentCdaElement;
 
+	private CdaTemplate template;
+
 	private String targetXmlElement;
 
 	public CdaElement(CdaElement parentCdaElement) {
@@ -151,6 +153,14 @@ public class CdaElement {
 
 	public void setXmlName(String xmlName) {
 		this.xmlName = xmlName;
+	}
+
+	public CdaTemplate getTemplate() {
+		return template;
+	}
+
+	public void setTemplate(CdaTemplate template) {
+		this.template = template;
 	}
 
 }
