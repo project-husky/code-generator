@@ -141,15 +141,16 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		if (bodyOpt.isPresent()) {
 			BlockStmt body = bodyOpt.get();
 
-			String name = cdaElement.getXmlName().replace("hl7:", "");
-			@SuppressWarnings("rawtypes")
-			Class memberType = getFieldDatatype(cdaElement.getParentCdaElement().getDataType(),
-					name);
-			boolean isField = (memberType != null);
-			if (!isField) {
-				memberType = getMethodDatatype(cdaElement.getParentCdaElement().getDataType(),
-						name);
+			// remove probably earlier added statements
+			ArrayList<Statement> statements = new ArrayList<Statement>();
+			for (Statement stmt : body.getStatements()) {
+				if ("return retVal;".equals(stmt.toString()))
+					statements.add(stmt);
 			}
+			for (Statement statement2 : statements) {
+				body.getStatements().remove(statement2);
+			}
+
 			body.addStatement("return retVal;");
 		}
 	}
@@ -335,200 +336,14 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		} else
 			field = myClass.addPrivateField(dataType, name);
 
+		// We do not want to have this member serialized!
+		addImport(compilationUnit, "javax.xml.bind.annotation.XmlTransient");
+		field.addAnnotation(createXmlTransientAnnotation());
+
 		String comment = cdaElement.getDescription();
 		if (comment == null)
 			comment = "No description available in the ART-DECOR model for this field.";
 		field.setJavadocComment(comment);
-	}
-
-	private static void createFixedAttributeValues(CompilationUnit compilationUnit,
-			ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
-		if (cdaElement.getCdaAttributeList() != null) {
-
-			ConstructorDeclaration constructor = null;
-			MethodDeclaration creatorForFixedContentsMethod = null;
-			StringBuilder sb = new StringBuilder();
-
-			for (CdaAttribute cdaAttribute : cdaElement.getCdaAttributeList()) {
-				Optional<ConstructorDeclaration> constructorOpt = myClass
-						.getConstructorByParameterTypes(new String[] {});
-				boolean constructorExist = constructorOpt.isPresent();
-				if (!constructorExist) {
-					constructor = createDefaultConstructor(compilationUnit, myClass);
-				} else
-					constructor = constructorOpt.get();
-
-				if (cdaAttribute.getValue() != null) {
-					if (cdaElement.getJavaName() == null)
-						cdaElement.setJavaName(
-								JavaCodeGenerator.toCamelCase(cdaElement.getXmlName()));
-
-					String creatorForFixedContentsName = "create"
-							+ JavaCodeGenerator.toPascalCase(cdaElement.getJavaName())
-							+ "FixedValue";
-					List<MethodDeclaration> creatorForFixedContentsMethodList = myClass
-							.getMethodsByName(creatorForFixedContentsName);
-
-					boolean creatorForFixedContentsExist = (creatorForFixedContentsMethodList
-							.size() > 0);
-					if (!creatorForFixedContentsExist) {
-						creatorForFixedContentsMethod = createCreatorForFixedContents(
-								compilationUnit, myClass, cdaElement, creatorForFixedContentsName);
-					} else
-						creatorForFixedContentsMethod = creatorForFixedContentsMethodList.get(0);
-
-					updateCreatorForFixedContentsMethod(compilationUnit,
-							creatorForFixedContentsMethod, cdaElement, cdaAttribute);
-
-					if (sb.length() != 0)
-						sb.append(", ");
-					sb.append("\"" + cdaAttribute.getValue() + "\"");
-
-				} else if (cdaAttribute.getValueSetId() != null) {
-					System.out.println("Stop here, there is a attribute containing a value set: "
-							+ cdaAttribute.getValueSetId());
-				}
-
-				String templateClassName = JavaCodeGenerator
-						.toPascalCase(cdaElement.getTemplate().getName());
-				if (templateClassName.contentEquals(myClass.getNameAsString())) {
-					if (cdaAttribute.getValue() != null)
-						addBodyComment(constructor,
-								cdaElement.getTemplate().getName() + "/" + cdaElement.getXmlName()
-										+ ":" + cdaAttribute.getDataType() + " "
-										+ cdaAttribute.getName() + " = \"" + cdaAttribute.getValue()
-										+ "\";");
-					if (cdaAttribute.getValueSetId() != null)
-						addBodyComment(constructor,
-								cdaElement.getTemplate().getName() + "/" + cdaElement.getXmlName()
-										+ ":" + cdaAttribute.getDataType() + " "
-										+ cdaAttribute.getName() + " = valueSet(\""
-										+ cdaAttribute.getValueSetId() + "\");");
-				}
-			}
-			if (creatorForFixedContentsMethod != null) {
-				if (!isCompleteCreatorForFixedContentsMethod(creatorForFixedContentsMethod))
-					completeCreatorForFixedContentsMethod(creatorForFixedContentsMethod,
-							cdaElement);
-			}
-		}
-	}
-
-	private static void createFixedAttributeValuesOld(CompilationUnit compilationUnit,
-			ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
-		MethodDeclaration creatorForFixedContentsMethod = null;
-		ConstructorDeclaration constructor = null;
-		StringBuilder sb = new StringBuilder();
-		for (CdaAttribute cdaAttribute : cdaElement.getCdaAttributeList()) {
-			Optional<ConstructorDeclaration> constructorOpt = myClass
-					.getConstructorByParameterTypes(new String[] {});
-			boolean constructorExist = constructorOpt.isPresent();
-			if (!constructorExist) {
-				constructor = createDefaultConstructor(compilationUnit, myClass);
-			} else
-				constructor = constructorOpt.get();
-
-			if (cdaAttribute.getValue() != null) {
-				if (cdaElement.getJavaName() == null)
-					cdaElement.setJavaName(JavaCodeGenerator.toCamelCase(cdaElement.getXmlName()));
-
-				String creatorForFixedContentsName = "create"
-						+ JavaCodeGenerator.toPascalCase(cdaElement.getJavaName()) + "FixedValue";
-				List<MethodDeclaration> creatorForFixedContentsMethodList = myClass
-						.getMethodsByName(creatorForFixedContentsName);
-
-				boolean creatorForFixedContentsExist = (creatorForFixedContentsMethodList
-						.size() > 0);
-				if (!creatorForFixedContentsExist) {
-					creatorForFixedContentsMethod = createCreatorForFixedContents(compilationUnit,
-							myClass, cdaElement, creatorForFixedContentsName);
-				} else
-					creatorForFixedContentsMethod = creatorForFixedContentsMethodList.get(0);
-
-				updateCreatorForFixedContentsMethod(compilationUnit, creatorForFixedContentsMethod,
-						cdaElement, cdaAttribute);
-
-				if (sb.length() != 0)
-					sb.append(", ");
-				sb.append("\"" + cdaAttribute.getValue() + "\"");
-
-			} else if (cdaAttribute.getValueSetId() != null) {
-				System.out.println("Stop here, there is a attribute containing a value set: "
-						+ cdaAttribute.getValueSetId());
-			}
-		}
-		if (creatorForFixedContentsMethod != null) {
-			int argCountMethod = creatorForFixedContentsMethod.getParameters().size();
-			// fix for setHl7EntryRelationshipFixedValue: sometimes in the first
-			// occurrence, there is no inversionInd in the ART-DECOR model
-			if ("createHl7EntryRelationshipFixedValue"
-					.contentEquals(creatorForFixedContentsMethod.getNameAsString())) {
-				if (argCountMethod == 1) {
-					CdaAttribute attr = new CdaAttribute();
-					attr.setCdaElement(cdaElement);
-					attr.setName("inversionInd");
-					updateCreatorForFixedContentsMethod(compilationUnit,
-							creatorForFixedContentsMethod, cdaElement, attr);
-
-				}
-				argCountMethod = 2;
-			}
-			// end of fix
-
-			if (!isCompleteCreatorForFixedContentsMethod(creatorForFixedContentsMethod))
-				completeCreatorForFixedContentsMethod(creatorForFixedContentsMethod, cdaElement);
-
-			int argCountGiven = org.apache.commons.lang3.StringUtils.countMatches(sb.toString(),
-					",") + 1;
-
-			while (argCountGiven < argCountMethod) {
-				sb.append(", ");
-				sb.append("null");
-				argCountGiven = org.apache.commons.lang3.StringUtils.countMatches(sb.toString(),
-						",") + 1;
-			}
-
-			String name = cdaElement.getXmlName().replace("hl7:", "");
-			boolean createElement = false;
-			createElement = ("templateId".equals(name) || "typeId".equals(name));
-			boolean preserveElement = false;
-			preserveElement = ("code".equals(name) || "realmCode".equals(name)
-					|| "translation".equals(name));
-
-			@SuppressWarnings("rawtypes")
-			Class memberType = getDeclaredFieldDatatype(
-					cdaElement.getParentCdaElement().getDataType(), name);
-			String statement = "";
-			String creator = creatorForFixedContentsMethod.getNameAsString() + "(" + sb.toString()
-					+ ")";
-
-			if (createElement) {
-				if (isClassCollection(memberType)) {
-					statement = "super.get"
-							+ toUpperFirstChar(cdaElement.getXmlName().replace("hl7:", ""))
-							+ "().add(" + creator + ");";
-				} else {
-					statement = "super.set"
-							+ toUpperFirstChar(cdaElement.getXmlName().replace("hl7:", "")) + "("
-							+ creator + ");";
-				}
-
-				addBodyStatement(constructor, statement);
-			} else if (preserveElement) {
-				if (isClassCollection(memberType) && !"realmCode".equals(name)) {
-					throw new RuntimeException("Lists not supported, yet for preserve elements");
-				} else {
-					statement = name + "FixedValue = " + creator + ";";
-				}
-				createMemberAndGetter(compilationUnit, myClass,
-						creatorForFixedContentsMethod.getType().toString(), name + "FixedValue",
-						createGetterNamePascalCase(name + "FixedValue"));
-				statement = name + "FixedValue = " + creator + ";";
-				addBodyStatement(constructor, statement);
-			} else {
-				System.out.println("stop here - " + creator + " not applied, yet.");
-			}
-		}
 	}
 
 	private static void createGetter(CompilationUnit compilationUnit,
@@ -541,9 +356,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		method = myClass.addMethod(createGetterNamePascalCase(cdaElement.getJavaName()),
 				publicModifier().getKeyword());
-
-		if ("hl7:externalDocument".contentEquals(cdaElement.getXmlName()))
-			System.out.println("Stop here");
 
 		String dataType = cdaElement.getDataType();
 		if ("hl7:typeId".contentEquals(cdaElement.getXmlName())) {
@@ -705,7 +517,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			ClassOrInterfaceDeclaration myClass, String dataType, String memberName,
 			String methodName) {
 
-		myClass.addField(dataType, memberName, privateModifier().getKeyword());
+		FieldDeclaration field = myClass.addField(dataType, memberName,
+				privateModifier().getKeyword());
+
+		// We do not want to have this member serialized!
+		addImport(compilationUnit, "javax.xml.bind.annotation.XmlTransient");
+		field.addAnnotation(createXmlTransientAnnotation());
 
 		MethodDeclaration method;
 		method = myClass.addMethod(methodName, publicModifier().getKeyword());
@@ -933,6 +750,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		return retVal;
 	}
 
+	public static NormalAnnotationExpr createXmlTransientAnnotation() {
+		NormalAnnotationExpr retVal = new NormalAnnotationExpr();
+		retVal.setName(new Name("XmlTransient"));
+		return retVal;
+	}
+
 	@SuppressWarnings("rawtypes")
 	public static Class getClass(String className) {
 		Class retVal = null;
@@ -1117,10 +940,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		Optional<Parameter> params = setterForFixedContentsMethod
 				.getParameterByName(cdaAttribute.getName());
 
-		if ("createHl7ExternalDocumentFixedValue"
-				.contentEquals(setterForFixedContentsMethod.getNameAsString()))
-			System.out.println("Stop here");
-
 		if (!params.isPresent()) {
 			setterForFixedContentsMethod.addAndGetParameter("String", cdaAttribute.getName());
 			Optional<Javadoc> javaDocOpt = setterForFixedContentsMethod.getJavadoc();
@@ -1159,10 +978,15 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 						body.addStatement("retVal.get" + toUpperFirstChar(cdaAttribute.getName())
 								+ "().add(" + cdaAttribute.getName() + ");");
 					} else {
+
 						if ("java.lang.String".contentEquals(memberType.getName()))
 							body.addStatement(
 									"retVal.set" + toUpperFirstChar(cdaAttribute.getName()) + "("
 											+ cdaAttribute.getName() + ");");
+						else if ("java.lang.Boolean".contentEquals(memberType.getName()))
+							body.addStatement("retVal.set"
+									+ toUpperFirstChar(cdaAttribute.getName())
+									+ "(Boolean.parseBoolean(" + cdaAttribute.getName() + "));");
 						else
 							body.addStatement(
 									"retVal.set" + toUpperFirstChar(cdaAttribute.getName()) + "("
@@ -1222,20 +1046,16 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	private ArrayList<CdaTemplate> templateList = null;
 
-	private boolean skipValueSetGeneration = true;
+	private boolean skipValueSetGeneration = false;
 
 	private CdaTemplate runningTemplate;
-
-	// private ProcessModes processMode;
 
 	public ArtDecor2JavaGenerator(CdaElement callingCdaElement,
 			HashMap<String, CdaTemplate> templateIndex, HashMap<String, String> valueSetIndex,
 			ArrayList<CdaTemplate> templateList, String srcFilePath, String dstFilePath,
-			String packageName, String fileHeader, String artDecorPrefix, ProcessModes processMode)
-			throws IOException {
+			String packageName, String fileHeader, String artDecorPrefix) throws IOException {
 		this.callingCdaElement = callingCdaElement;
 		this.artDecorPrefix = artDecorPrefix;
-		// this.processMode = processMode;
 
 		if (templateIndex == null)
 			this.templateIndex = new HashMap<String, CdaTemplate>();
@@ -1303,6 +1123,253 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		return retVal;
 	}
 
+	private void createFixedAttributeValues(CompilationUnit compilationUnit,
+			ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
+		if (cdaElement.getCdaAttributeList() != null) {
+
+			ConstructorDeclaration constructor = null;
+			MethodDeclaration creatorForFixedContentsMethod = null;
+			StringBuilder sb = new StringBuilder();
+
+			for (CdaAttribute cdaAttribute : cdaElement.getCdaAttributeList()) {
+				Optional<ConstructorDeclaration> constructorOpt = myClass
+						.getConstructorByParameterTypes(new String[] {});
+				boolean constructorExist = constructorOpt.isPresent();
+				if (!constructorExist) {
+					constructor = createDefaultConstructor(compilationUnit, myClass);
+				} else
+					constructor = constructorOpt.get();
+
+				if (cdaAttribute.getValue() != null) {
+					if (cdaElement.getJavaName() == null)
+						cdaElement.setJavaName(
+								JavaCodeGenerator.toCamelCase(cdaElement.getXmlName()));
+
+					String creatorForFixedContentsName = "create"
+							+ JavaCodeGenerator.toPascalCase(cdaElement.getJavaName())
+							+ "FixedValue";
+					List<MethodDeclaration> creatorForFixedContentsMethodList = myClass
+							.getMethodsByName(creatorForFixedContentsName);
+
+					boolean creatorForFixedContentsExist = (creatorForFixedContentsMethodList
+							.size() > 0);
+					if (!creatorForFixedContentsExist) {
+						creatorForFixedContentsMethod = createCreatorForFixedContents(
+								compilationUnit, myClass, cdaElement, creatorForFixedContentsName);
+					} else
+						creatorForFixedContentsMethod = creatorForFixedContentsMethodList.get(0);
+
+					updateCreatorForFixedContentsMethod(compilationUnit,
+							creatorForFixedContentsMethod, cdaElement, cdaAttribute);
+
+					if (sb.length() != 0)
+						sb.append(", ");
+					sb.append("\"" + cdaAttribute.getValue() + "\"");
+
+				} else if (cdaAttribute.getValueSetId() != null) {
+					String vs = valueSetIndex.get(cdaAttribute.getValueSetId());
+					System.out.println("Stop here, there is a attribute containing a value set: "
+							+ cdaAttribute.getValueSetId() + " / " + vs);
+				}
+
+				String templateClassName = JavaCodeGenerator
+						.toPascalCase(cdaElement.getTemplate().getName());
+				if (templateClassName.contentEquals(myClass.getNameAsString())) {
+					if (cdaAttribute.getValue() != null)
+						addBodyComment(constructor,
+								cdaElement.getTemplate().getName() + "/" + cdaElement.getXmlName()
+										+ ":" + cdaAttribute.getDataType() + " "
+										+ cdaAttribute.getName() + " = \"" + cdaAttribute.getValue()
+										+ "\";");
+					if (cdaAttribute.getValueSetId() != null)
+						addBodyComment(constructor,
+								cdaElement.getTemplate().getName() + "/" + cdaElement.getXmlName()
+										+ ":" + cdaAttribute.getDataType() + " "
+										+ cdaAttribute.getName() + " = valueSet(\""
+										+ cdaAttribute.getValueSetId() + "\");");
+				}
+			}
+			if (creatorForFixedContentsMethod != null) {
+				if (!isCompleteCreatorForFixedContentsMethod(creatorForFixedContentsMethod))
+					completeCreatorForFixedContentsMethod(creatorForFixedContentsMethod,
+							cdaElement);
+
+				String name = cdaElement.getXmlName().replace("hl7:", "");
+				boolean createElement = false;
+				createElement = ("templateId".equals(name) || "typeId".equals(name));
+				boolean preserveElement = false;
+				preserveElement = ("code".equals(name) || "realmCode".equals(name)
+						|| "translation".equals(name));
+
+				@SuppressWarnings("rawtypes")
+				Class memberType = getDeclaredFieldDatatype(
+						cdaElement.getParentCdaElement().getDataType(), name);
+				String statement = "";
+
+				String creator = creatorForFixedContentsMethod.getNameAsString() + "("
+						+ sb.toString() + ")";
+
+				boolean isLocalField = (myClass.getExtendedTypes().size() == 0);
+				if (createElement) {
+					if (isClassCollection(memberType)) {
+						if (isLocalField) {
+							statement = cdaElement.getXmlName().replace("hl7:", "") + ".add("
+									+ creator + ");";
+						} else {
+							statement = "super.get"
+									+ toUpperFirstChar(cdaElement.getXmlName().replace("hl7:", ""))
+									+ "().add(" + creator + ");";
+						}
+					} else {
+						statement = "super.set"
+								+ toUpperFirstChar(cdaElement.getXmlName().replace("hl7:", ""))
+								+ "(" + creator + ");";
+					}
+
+					addBodyStatement(constructor, statement);
+				} else if (preserveElement) {
+					if (isClassCollection(memberType) && !"realmCode".equals(name)) {
+						System.out.println(
+								"Stop here: Lists not supported, yet for preserve elements");
+					} else {
+						statement = name + "FixedValue = " + creator + ";";
+					}
+					createMemberAndGetter(compilationUnit, myClass,
+							creatorForFixedContentsMethod.getType().toString(), name + "FixedValue",
+							createGetterNamePascalCase(name + "FixedValue"));
+					statement = name + "FixedValue = " + creator + ";";
+					addBodyStatement(constructor, statement);
+				} else {
+					System.out.println("stop here - " + creator + " not applied, yet.");
+				}
+			}
+		}
+	}
+
+	private void createFixedAttributeValuesOld(CompilationUnit compilationUnit,
+			ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
+		MethodDeclaration creatorForFixedContentsMethod = null;
+		ConstructorDeclaration constructor = null;
+		StringBuilder sb = new StringBuilder();
+		for (CdaAttribute cdaAttribute : cdaElement.getCdaAttributeList()) {
+			Optional<ConstructorDeclaration> constructorOpt = myClass
+					.getConstructorByParameterTypes(new String[] {});
+			boolean constructorExist = constructorOpt.isPresent();
+			if (!constructorExist) {
+				constructor = createDefaultConstructor(compilationUnit, myClass);
+			} else
+				constructor = constructorOpt.get();
+
+			if (cdaAttribute.getValue() != null) {
+				if (cdaElement.getJavaName() == null)
+					cdaElement.setJavaName(JavaCodeGenerator.toCamelCase(cdaElement.getXmlName()));
+
+				String creatorForFixedContentsName = "create"
+						+ JavaCodeGenerator.toPascalCase(cdaElement.getJavaName()) + "FixedValue";
+				List<MethodDeclaration> creatorForFixedContentsMethodList = myClass
+						.getMethodsByName(creatorForFixedContentsName);
+
+				boolean creatorForFixedContentsExist = (creatorForFixedContentsMethodList
+						.size() > 0);
+				if (!creatorForFixedContentsExist) {
+					creatorForFixedContentsMethod = createCreatorForFixedContents(compilationUnit,
+							myClass, cdaElement, creatorForFixedContentsName);
+				} else
+					creatorForFixedContentsMethod = creatorForFixedContentsMethodList.get(0);
+
+				updateCreatorForFixedContentsMethod(compilationUnit, creatorForFixedContentsMethod,
+						cdaElement, cdaAttribute);
+
+				if (sb.length() != 0)
+					sb.append(", ");
+				sb.append("\"" + cdaAttribute.getValue() + "\"");
+
+			} else if (cdaAttribute.getValueSetId() != null) {
+				System.out.println("Stop here, there is a attribute containing a value set: "
+						+ cdaAttribute.getValueSetId());
+			}
+		}
+		if (creatorForFixedContentsMethod != null) {
+			int argCountMethod = creatorForFixedContentsMethod.getParameters().size();
+			// fix for setHl7EntryRelationshipFixedValue: sometimes in the first
+			// occurrence, there is no inversionInd in the ART-DECOR model
+			if ("createHl7EntryRelationshipFixedValue"
+					.contentEquals(creatorForFixedContentsMethod.getNameAsString())) {
+				if (argCountMethod == 1) {
+					CdaAttribute attr = new CdaAttribute();
+					attr.setCdaElement(cdaElement);
+					attr.setName("inversionInd");
+					updateCreatorForFixedContentsMethod(compilationUnit,
+							creatorForFixedContentsMethod, cdaElement, attr);
+
+				}
+				argCountMethod = 2;
+			}
+			// end of fix
+
+			if (!isCompleteCreatorForFixedContentsMethod(creatorForFixedContentsMethod))
+				completeCreatorForFixedContentsMethod(creatorForFixedContentsMethod, cdaElement);
+
+			int argCountGiven = org.apache.commons.lang3.StringUtils.countMatches(sb.toString(),
+					",") + 1;
+
+			while (argCountGiven < argCountMethod) {
+				sb.append(", ");
+				sb.append("null");
+				argCountGiven = org.apache.commons.lang3.StringUtils.countMatches(sb.toString(),
+						",") + 1;
+			}
+
+			// String name = cdaElement.getXmlName().replace("hl7:", "");
+			// boolean createElement = false;
+			// createElement = ("templateId".equals(name) ||
+			// "typeId".equals(name));
+			// boolean preserveElement = false;
+			// preserveElement = ("code".equals(name) ||
+			// "realmCode".equals(name)
+			// || "translation".equals(name));
+			//
+			// @SuppressWarnings("rawtypes")
+			// Class memberType = getDeclaredFieldDatatype(
+			// cdaElement.getParentCdaElement().getDataType(), name);
+			// String statement = "";
+			// String creator = creatorForFixedContentsMethod.getNameAsString()
+			// + "(" + sb.toString()
+			// + ")";
+			//
+			// if (createElement) {
+			// if (isClassCollection(memberType)) {
+			// statement = "super.get"
+			// + toUpperFirstChar(cdaElement.getXmlName().replace("hl7:", ""))
+			// + "().add(" + creator + ");";
+			// } else {
+			// statement = "super.set"
+			// + toUpperFirstChar(cdaElement.getXmlName().replace("hl7:", "")) +
+			// "("
+			// + creator + ");";
+			// }
+			//
+			// addBodyStatement(constructor, statement);
+			// } else if (preserveElement) {
+			// if (isClassCollection(memberType) && !"realmCode".equals(name)) {
+			// throw new RuntimeException("Lists not supported, yet for preserve
+			// elements");
+			// } else {
+			// statement = name + "FixedValue = " + creator + ";";
+			// }
+			// createMemberAndGetter(compilationUnit, myClass,
+			// creatorForFixedContentsMethod.getType().toString(), name +
+			// "FixedValue",
+			// createGetterNamePascalCase(name + "FixedValue"));
+			// statement = name + "FixedValue = " + creator + ";";
+			// addBodyStatement(constructor, statement);
+			// } else {
+			// System.out.println("stop here - " + creator + " not applied,
+			// yet.");
+			// }
+		}
+	}
+
 	private void createJavaClassFile(CdaTemplate cdaTemplate, String packageName,
 			String dstFilePath) throws IOException {
 
@@ -1311,8 +1378,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		compilationUnit.setPackageDeclaration(packageName);
 
 		String className = JavaCodeGenerator.toPascalCase(cdaTemplate.getName());
-		if ("CdachOtherAddressInformationCompilationECh0010".contentEquals(className))
-			System.out.println("Stop here");
 
 		boolean isSingleElementTemplate = (cdaTemplate.getCdaElementList().size() == 1);
 
@@ -1357,19 +1422,14 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				myClass.setExtendedTypes(new NodeList<ClassOrInterfaceType>(
 						new ClassOrInterfaceType(null, inheritenceOf)));
 
-			if ("CdachlrepHeaderTemplateIdsCdaChLrepV1".contentEquals(myClass.getNameAsString()))
-				System.out.println("Stop here");
-
 			if (isSingleElementTemplate) {
 				for (CdaElement cdaElement1 : cdaElement.getChildrenCdaElementList()) {
 					createMembers(compilationUnit, myClass, cdaElement1, (inheritenceOf == null));
-					// createFixedAttributeValues(compilationUnit, myClass,
-					// cdaElement1);
+					createFixedAttributeValues(compilationUnit, myClass, cdaElement1);
 				}
 			} else {
 				createMembers(compilationUnit, myClass, cdaElement, (inheritenceOf == null));
-				// createFixedAttributeValues(compilationUnit, myClass,
-				// cdaElement);
+				createFixedAttributeValues(compilationUnit, myClass, cdaElement);
 			}
 
 			if ("org.ehealth_connector.common.hl7cdar2.POCDMT000040ClinicalDocument"
@@ -1736,10 +1796,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		currentCdaElement = cdaElement;
 
-		if ("cdach_header_DocumentSetIdAndVersionNumber"
-				.contentEquals(currentCdaTemplate.getName()))
-			System.out.println("Stop here");
-
 		boolean isCdaRootElement = "org.ehealth_connector.common.hl7cdar2.POCDMT000040ClinicalDocument"
 				.equals(cdaElement.getDataType());
 		if (!(isCdaRootElement) && currentCdaTemplate.getCdaElementList().size() > 1)
@@ -1757,8 +1813,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				// Process contains
 				ArtDecor2JavaGenerator artDecor2JavaGenerator = new ArtDecor2JavaGenerator(
 						parentForContains, templateIndex, valueSetIndex, templateList, srcFilePath,
-						dstFilePath, packageName, fileHeader, artDecorPrefix,
-						ProcessModes.CONTAINS);
+						dstFilePath, packageName, fileHeader, artDecorPrefix);
 				CdaTemplate template = artDecor2JavaGenerator.doOneTemplate(ref);
 				currentCdaElement.addCdaTemplate(template, ProcessModes.CONTAINS);
 
@@ -1786,8 +1841,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		String ref = "";
 		if (refAttrCtx != null) {
 			ref = refAttrCtx.AttrValue().getText().replace("\"", "");
-			if ("2.16.756.5.30.1.1.10.9.49".contentEquals(ref))
-				System.out.println("Stop here");
 			boolean isParentElement = (processingElement < processingElementPrev);
 			int levels = 0;
 			if (isParentElement) {
@@ -1801,14 +1854,10 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				if (printParsingDebugInformation)
 					System.out.println("Include: " + ref);
 			try {
-				if ("cdachvacd_entry_GestationalAgeAtBirth"
-						.contentEquals(currentCdaTemplate.getName()))
-					System.out.println("Stop here");
-
 				// Process includes
 				ArtDecor2JavaGenerator artDecor2JavaGenerator = new ArtDecor2JavaGenerator(
 						parentForIncludes, templateIndex, valueSetIndex, templateList, srcFilePath,
-						dstFilePath, packageName, fileHeader, artDecorPrefix, ProcessModes.INCLUDE);
+						dstFilePath, packageName, fileHeader, artDecorPrefix);
 				CdaTemplate template = artDecor2JavaGenerator.doOneTemplate(ref);
 
 				boolean isChildElement = (processingElement > processingElementPrev);
@@ -1820,7 +1869,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 					currentCdaElement.getParentCdaElement().addCdaTemplate(template,
 							ProcessModes.INCLUDE);
 				else if (isParentElement2)
-					System.out.println("Stop here");
+					currentCdaElement.getParentCdaElement().getParentCdaElement()
+							.addCdaTemplate(template, ProcessModes.INCLUDE);
 				else
 					System.out.println("Stop here");
 
@@ -1850,9 +1900,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		NameAttrContext nameAttrCtx = ctx.nameAttr();
 		if (nameAttrCtx != null)
 			name = nameAttrCtx.AttrValue().getText().replace("\"", "");
-
-		if ("cdach_header_DocumentSetIdAndVersionNumber".contentEquals(name))
-			System.out.println("Stop here");
 
 		if ((id == null) && (name == null))
 			throw new RuntimeException(
@@ -1938,6 +1985,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 								+ ") cannot be downloaded: " + e.getMessage());
 					}
 					if (valueSet != null) {
+						System.out.print(" creating class file ...");
 						String fullValueSetClassName = packageName + ".enums."
 								+ JavaCodeGenerator.toPascalCase(valueSet.getName());
 						valueSetIndex.put(valueSetId, fullValueSetClassName);
@@ -2172,8 +2220,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	private void regroupTemplateElements(ArrayList<CdaTemplate> myTemplateList) {
 		for (CdaTemplate cdaTemplate : myTemplateList) {
-			if ("cdachvacd_entry_GestationalAgeAtBirth".contentEquals(cdaTemplate.getName()))
-				System.out.println("Stop here");
 			System.out.println("Procesing " + cdaTemplate.getName());
 			for (CdaElement cdaElement : cdaTemplate.getCdaElementList()) {
 				System.out.println("  " + cdaElement.getXmlName());
