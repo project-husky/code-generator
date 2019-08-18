@@ -13,13 +13,17 @@
 		<version>1.7-SNAPSHOT</version>
 	</parent>
 
+	<properties>
+		<ehc.version>1.7-SNAPSHOT</ehc.version>
+	</properties>
+
 	<scm>
 		<connection>scm:git:https://gitlab.com/ehealth-connector/codegenerator.git</connection>
 		<developerConnection>scm:git:git@gitlab.com:ehealth-connector/codegenerator.git</developerConnection>
 		<url>https://gitlab.com/ehealth-connector/codegenerator/tree/master</url>
 		<tag>HEAD</tag>
 	</scm>
-	
+
 	<repositories>
 		<repository>
 			<id>projects.suisse-open-exchange.healthcare-sna</id>
