@@ -3,6 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.ehealth_connector.codegenerator</groupId>
 	<artifactId>ehealth_connector-codegenerator</artifactId>
+	<version>1.7-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>eHealth Connector project Code Generator</name>
 	<description>The Code Generator produces Java Classes for the eHealth Connector Convenience API.</description>
@@ -23,6 +24,21 @@
 		<url>https://gitlab.com/ehealth-connector/codegenerator/tree/master</url>
 		<tag>HEAD</tag>
 	</scm>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.ehealth_connector.common</groupId>
+				<artifactId>ehealth_connector-common-gen</artifactId>
+				<version>${ehc.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ehealth_connector.valueset</groupId>
+				<artifactId>ehealth_connector-valueset-gen</artifactId>
+				<version>${ehc.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<repositories>
 		<repository>
