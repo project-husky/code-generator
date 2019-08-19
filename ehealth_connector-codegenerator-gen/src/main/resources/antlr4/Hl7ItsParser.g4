@@ -16,7 +16,7 @@
  
 parser grammar Hl7ItsParser;
 
-@parser::header {
+@header {
 package org.ehealth_connector.codegenerator.cda.antlr;
 }
 

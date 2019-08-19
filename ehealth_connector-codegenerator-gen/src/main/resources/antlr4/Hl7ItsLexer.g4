@@ -16,7 +16,7 @@
  
 lexer grammar Hl7ItsLexer;
 
-@lexer::header {
+@header {
 package org.ehealth_connector.codegenerator.cda.antlr;
 }
 
