@@ -14,10 +14,6 @@
 		<version>1.7-SNAPSHOT</version>
 	</parent>
 
-	<properties>
-		<ehc.version>1.7-SNAPSHOT</ehc.version>
-	</properties>
-
 	<scm>
 		<connection>scm:git:https://gitlab.com/ehealth-connector/codegenerator.git</connection>
 		<developerConnection>scm:git:git@gitlab.com:ehealth-connector/codegenerator.git</developerConnection>
@@ -30,12 +26,12 @@
 			<dependency>
 				<groupId>org.ehealth_connector.common</groupId>
 				<artifactId>ehealth_connector-common-gen</artifactId>
-				<version>${ehc.version}</version>
+				<version>1.7-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ehealth_connector.valueset</groupId>
 				<artifactId>ehealth_connector-valueset-gen</artifactId>
-				<version>${ehc.version}</version>
+				<version>1.7-SNAPSHOT</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
