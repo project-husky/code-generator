@@ -26,6 +26,7 @@ import javax.xml.bind.JAXBException;
 import org.ehealth_connector.codegenerator.java.JavaCodeGenerator;
 import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.Util;
+import org.junit.Test;
 
 import net.sf.saxon.s9api.SaxonApiException;
 
@@ -180,7 +181,7 @@ public class ArtDecor2JavaGeneratorTest {
 		String srcFilePath = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator()
 				+ "test" + FileUtil.getPlatformSpecificPathSeparator() + templateId
 				+ FileUtil.getPlatformSpecificPathSeparator();
-		String dstFilePath = "C:\\src\\git\\eHC-AD2J\\api-java\\ehealth_connector-cda\\ehealth_connector-cda-ch";
+		String dstFilePath = "C:\\src\\git\\eHC_AD2J\\api-java\\ehealth_connector-cda\\ehealth_connector-cda-ch";
 
 		String fileHeader = JavaCodeGenerator.getFileHeader();
 

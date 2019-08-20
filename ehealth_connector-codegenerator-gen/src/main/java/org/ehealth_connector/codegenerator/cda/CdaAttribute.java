@@ -30,11 +30,17 @@ public class CdaAttribute {
 
 	private CdaElement cdaElement;
 
+	private CdaTemplate cdaTemplate;
+
 	public CdaAttribute() {
 	}
 
 	public CdaElement getCdaElement() {
 		return cdaElement;
+	}
+
+	public CdaTemplate getCdaTemplate() {
+		return cdaTemplate;
 	}
 
 	public String getDataType() {
@@ -53,8 +59,16 @@ public class CdaAttribute {
 		return value;
 	}
 
+	public String getValueSetId() {
+		return valueSetId;
+	}
+
 	public void setCdaElement(CdaElement cdaElement) {
 		this.cdaElement = cdaElement;
+	}
+
+	public void setCdaTemplate(CdaTemplate cdaTemplate) {
+		this.cdaTemplate = cdaTemplate;
 	}
 
 	public void setDataType(String dataType) {
@@ -71,10 +85,6 @@ public class CdaAttribute {
 
 	public void setValue(String value) {
 		this.value = value;
-	}
-
-	public String getValueSetId() {
-		return valueSetId;
 	}
 
 	public void setValueSetId(String valueSetId) {
