@@ -10,6 +10,7 @@
  * 2019.07.23: Tony Schaller, medshare GmbH: Implementation of the ANTLR4 module for ART-DECOR to Java code generator.
  * 2019.07.25: Tony Schaller, medshare GmbH: Adding strength attribute to element
  * 2019.07.26: Tony Schaller, medshare GmbH: Adding flexibility attribute to element and new vocabulary element
+ * 2019.08.22: Tony Schaller, medshare GmbH: Adding codeSystem attribute to vocabulary element
  * 
  * ******************************************************************************
  */
@@ -48,6 +49,7 @@ ASSERT : 'assert';
 ATTRIBUTE : 'attribute';
 CHOICE : 'choice';
 CODEATTR : 'code=';
+CODESYSTEMATTR : 'codeSystem=';
 CONFATTR : 'conformance=';
 FLEXIBILITYATTR : 'flexibility=';
 CONTAINSATTR : 'contains=';

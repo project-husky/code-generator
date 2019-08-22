@@ -54,6 +54,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsLexer;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.CodeAttrContext;
+import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.CodeSystemAttrContext;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.ConformanceAttrContext;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.ContainsAttrContext;
 import org.ehealth_connector.codegenerator.cda.antlr.Hl7ItsParser.DataTypeAttrContext;
@@ -71,6 +72,8 @@ import org.ehealth_connector.codegenerator.cda.xslt.Hl7Its2EhcTransformer;
 import org.ehealth_connector.codegenerator.java.JavaCodeGenerator;
 import org.ehealth_connector.codegenerator.valuesets.UpdateValueSets;
 import org.ehealth_connector.codegenerator.valuesets.ValueSetUtil;
+import org.ehealth_connector.common.Code;
+import org.ehealth_connector.common.basetypes.CodeBaseType;
 import org.ehealth_connector.common.hl7cdar2.ObjectFactory;
 import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.Util;
@@ -90,6 +93,7 @@ import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
@@ -176,7 +180,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		method.addAndGetParameter(cdaElement.getDataType(), "value");
 
-		String name = cdaElement.getXmlName().replace("hl7:", "");
+		String name = cdaElement.getXmlName().replace("hl7:", "").replace("pharm:", "")
+				.replace("xsi:", "");
 		@SuppressWarnings("rawtypes")
 		Class memberType = getFieldDatatype(cdaElement.getParentCdaElement().getDataType(), name);
 		boolean isField = (memberType != null);
@@ -196,7 +201,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			}
 		} else {
 			if (cdaElement.getDataType().endsWith(".ENXP")) {
-				String enPartL = cdaElement.getXmlName().replace("hl7:", "");
+				String enPartL = cdaElement.getXmlName().replace("hl7:", "").replace("pharm:", "")
+						.replace("xsi:", "");
 				String enPartU = toUpperFirstChar(enPartL);
 
 				addImport(compilationUnit, "javax.xml.namespace.QName");
@@ -209,7 +215,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 						+ ">(new QName(\"hl7:" + enPartL + "\"), En" + enPartU + ".class, obj));");
 			} else {
 				System.out.println("\nWARNING: " + cdaElement.getFullXmlName()
-						+ " is declared as list, but parent hosts it as single field. It is strongly recommended to correct the ART-DECOR model!");
+						+ " is declared as list, but the XML Schema hosts it as single field. It is strongly recommended to correct the ART-DECOR model!");
 				body.addStatement(name + "= value;");
 			}
 		}
@@ -225,7 +231,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		if (cdaElement.getDataType() == null)
 			throw new NotImplementedException("Type undefined for " + cdaElement.getJavaName());
 
-		String name = cdaElement.getXmlName().replace("hl7:", "");
+		String name = cdaElement.getXmlName().replace("hl7:", "").replace("pharm:", "")
+				.replace("xsi:", "");
 		@SuppressWarnings("rawtypes")
 		Class memberType = getFieldDatatype(cdaElement.getParentCdaElement().getDataType(), name);
 		boolean isField = (memberType != null);
@@ -273,7 +280,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		if (cdaElement.getDataType() == null)
 			throw new NotImplementedException("Type undefined for " + cdaElement.getJavaName());
 
-		String name = cdaElement.getXmlName().replace("hl7:", "");
+		String name = cdaElement.getXmlName().replace("hl7:", "").replace("pharm:", "")
+				.replace("xsi:", "");
 		String dataType = cdaElement.getDataType();
 		if ("hl7:typeId".contentEquals(cdaElement.getXmlName())) {
 			dataType = "org.ehealth_connector.common.hl7cdar2.POCDMT000040InfrastructureRootTypeId";
@@ -282,19 +290,33 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		Class memberType = getDeclaredFieldDatatype(cdaElement.getParentCdaElement().getDataType(),
 				name);
 
-		FieldDeclaration field;
-		if (isClassCollection(memberType)) {
-			addImport(compilationUnit, "java.util.ArrayList");
-			field = myClass.addPrivateField("ArrayList<" + dataType + ">", name);
-			field.getVariable(0).setInitializer("new ArrayList<" + dataType + ">()");
-		} else
-			field = myClass.addPrivateField(dataType, name);
+		Optional<FieldDeclaration> fieldOpt = myClass.getFieldByName(name);
+		FieldDeclaration field = null;
+		if (fieldOpt.isPresent())
+			field = fieldOpt.get();
+		else {
+			if (isClassCollection(memberType)) {
+				addImport(compilationUnit, "java.util.ArrayList");
+				field = myClass.addPrivateField("ArrayList<" + dataType + ">", name);
+				field.getVariable(0).setInitializer("new ArrayList<" + dataType + ">()");
+			} else
+				field = myClass.addPrivateField(dataType, name);
 
-		// We do not want to have this member serialized!
-		addImport(compilationUnit, "javax.xml.bind.annotation.XmlTransient");
-		field.addAnnotation(createXmlTransientAnnotation());
+			// We do not want to have this member serialized!
+			addImport(compilationUnit, "javax.xml.bind.annotation.XmlTransient");
+			field.addAnnotation(createXmlTransientAnnotation());
+		}
+		String comment = null;
+		Optional<JavadocComment> jdocOpt = field.getJavadocComment();
+		if (jdocOpt.isPresent())
+			comment = jdocOpt.get().getContent();
 
-		String comment = cdaElement.getDescription();
+		String desc = cdaElement.getDescription();
+		if (desc != null)
+			if (comment == null)
+				comment = desc;
+			else
+				comment = desc + Util.getPlatformSpecificLineBreak() + comment;
 		if (comment == null)
 			comment = "No description available in the ART-DECOR model for this field.";
 		field.setJavadocComment(comment);
@@ -325,7 +347,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		method.setJavadocComment(comment);
 
 		BlockStmt body = method.createBody();
-		String name = cdaElement.getXmlName().replace("hl7:", "");
+		String name = cdaElement.getXmlName().replace("hl7:", "").replace("pharm:", "")
+				.replace("xsi:", "");
 
 		CdaElement elForType = cdaElement.getParentCdaElement();
 		if (elForType == null)
@@ -350,8 +373,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			if (isClassCollection(memberType)) {
 				if (isMethod)
 					temp = createGetterNameUpperFirstChar(name) + "()";
-				// temp = "super." + temp;
 				if (genericType.endsWith(".ANY>"))
+					doCast = true;
+				if (cdaElement.getDataType().endsWith(".IVLTS"))
 					doCast = true;
 
 				if (doCast)
@@ -590,6 +614,10 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				publicModifier().getKeyword());
 
 		String dataType = cdaElement.getDataType();
+		// fix for CDA-CH-EMED
+		if ("hl7:routeCode".equals(cdaElement.getXmlName()))
+			dataType = dataType.replace(".CD", ".CE");
+		// End of fix
 		if ("hl7:typeId".contentEquals(cdaElement.getXmlName())) {
 			dataType = "org.ehealth_connector.common.hl7cdar2.POCDMT000040InfrastructureRootTypeId";
 		}
@@ -604,7 +632,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		method.addAndGetParameter(dataType, "value");
 
 		BlockStmt body = method.createBody();
-		String name = cdaElement.getXmlName().replace("hl7:", "");
+		String name = cdaElement.getXmlName().replace("hl7:", "").replace("pharm:", "")
+				.replace("xsi:", "");
 
 		CdaElement elForType = cdaElement.getParentCdaElement();
 		if (elForType == null)
@@ -637,9 +666,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 				if (doCast)
 					cast = "(" + memberType.getName() + ")";
-				// temp = "super." + temp;
 
-				if (memberType.getName().endsWith(".IVLTS") && (!dataType.endsWith(".IVLTS"))) {
+				if (memberType.getName().endsWith(".IVLTS") && !(dataType.endsWith(".IVLTS"))) {
 					if (memberType.getName().endsWith(".IVLTS") && (dataType.endsWith(".TS"))) {
 						// Create Interval from single TimeStamp
 						addImport(compilationUnit, "org.ehealth_connector.common.hl7cdar2.IVLTS");
@@ -939,6 +967,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	private CdaTemplate runningTemplate;
 
+	private boolean processingRootInclude = false;
+
 	public ArtDecor2JavaGenerator(CdaElement callingCdaElement,
 			HashMap<String, CdaTemplate> templateIndex, HashMap<String, String> valueSetIndex,
 			ArrayList<CdaTemplate> templateList, String srcFilePath, String dstFilePath,
@@ -994,7 +1024,11 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			if (retVal.endsWith("running"))
 				retVal = null;
 			else {
-				if (retVal.startsWith("IVL_TS."))
+				if (retVal.startsWith("IVL_PQ"))
+					retVal = "IVLPQ";
+				if (retVal.startsWith("EIVL_TS"))
+					retVal = "IVLTS";
+				if (retVal.startsWith("IVL_TS"))
 					retVal = "IVLTS";
 				if (retVal.startsWith("TS."))
 					retVal = "TS";
@@ -1027,9 +1061,10 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			dataType = "String";
 		}
 
-		String memberName = "my" + JavaCodeGenerator.toPascalCase(cdaAttribute.getName());
-		String methodName = "getPredefined"
-				+ JavaCodeGenerator.toPascalCase(cdaAttribute.getName());
+		String attrName = cdaAttribute.getName().replace("hl7:", "").replace("pharm:", "")
+				.replace("xsi:", "");
+		String memberName = "my" + JavaCodeGenerator.toPascalCase(attrName);
+		String methodName = "getPredefined" + JavaCodeGenerator.toPascalCase(attrName);
 		createMemberAndGetter(compilationUnit, myClass, dataType, memberName, methodName);
 
 		method.addAndGetParameter(dataType, "value");
@@ -1054,9 +1089,14 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		BlockStmt body = method.createBody();
 
-		String dataType = cdaElement.getDataType();
+		String dataType = adjustDataType(cdaElement.getDataType());
+		// fix for CDA-CH-EMED
+		if ("hl7:routeCode".equals(cdaElement.getXmlName()))
+			dataType = dataType.replace(".CD", ".CE");
+		// End of fix
 
-		String name = cdaElement.getXmlName().replace("hl7:", "");
+		String name = cdaElement.getXmlName().replace("hl7:", "").replace("pharm:", "")
+				.replace("xsi:", "");
 		@SuppressWarnings("rawtypes")
 		Class memberType = getFieldDatatype(cdaElement.getParentCdaElement().getDataType(), name);
 		boolean isField = (memberType != null);
@@ -1103,7 +1143,10 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				isAttributeOfTemplateRootElement = (cdaElement
 						.equals(cdaElement.getTemplate().getCdaElementList().get(0)));
 
+			int i = 0;
 			for (CdaAttribute cdaAttribute : cdaElement.getCdaAttributeList()) {
+				String attrName = cdaAttribute.getName().replace("hl7:", "").replace("pharm:", "")
+						.replace("xsi:", "");
 				Optional<ConstructorDeclaration> constructorOpt = myClass
 						.getConstructorByParameterTypes(new String[] {});
 				boolean constructorExist = constructorOpt.isPresent();
@@ -1120,8 +1163,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 					String creatorForFixedContentsName;
 					if (isAttributeOfTemplateRootElement) {
 						creatorForFixedContentsName = "create"
-								+ JavaCodeGenerator.toPascalCase(cdaAttribute.getName())
-								+ "FixedValue";
+								+ JavaCodeGenerator.toPascalCase(attrName) + "FixedValue";
 
 					} else {
 						creatorForFixedContentsName = "create"
@@ -1146,13 +1188,42 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 						creatorForFixedContentsMethod = creatorForFixedContentsMethodList.get(0);
 
 					if (cdaAttribute.getValue() != null) {
-						if (!isAttributeOfTemplateRootElement)
-							updateCreatorForFixedContentsMethod(compilationUnit,
-									creatorForFixedContentsMethod, cdaElement, cdaAttribute);
+						boolean ignoreAttr = false;
+						// fix for createHl7EffectiveTimeFixedValue: there is no
+						// type in the ART-DECOR model
+						if ("createHl7EffectiveTimeFixedValue"
+								.equals(creatorForFixedContentsMethod.getNameAsString())) {
+							ignoreAttr = ("xsi:type".contentEquals(cdaAttribute.getName()));
+						}
+						// end of fix
 
-						if (sb.length() != 0)
-							sb.append(", ");
-						sb.append("\"" + cdaAttribute.getValue() + "\"");
+						if (!ignoreAttr) {
+							if (!isAttributeOfTemplateRootElement)
+								updateCreatorForFixedContentsMethod(compilationUnit,
+										creatorForFixedContentsMethod, cdaElement, cdaAttribute);
+
+							if (cdaAttribute.isVocab()) {
+								if (cdaAttribute.getCode() != null)
+									addBodyComment(constructor,
+											"Vocab not supported, yet. Should add a code:"
+													+ cdaAttribute.getCode());
+								else if (cdaAttribute.getValue() != null)
+									addBodyComment(constructor,
+											"Vocab not supported, yet. Should add a value:"
+													+ cdaAttribute.getValue());
+								else if (cdaAttribute.getValueSetId() != null)
+									addBodyComment(constructor,
+											"Vocab not supported, yet. Should add a value set:"
+													+ cdaAttribute.getValueSetId());
+							}
+							// Condition is not final, yet.
+							if (i < creatorForFixedContentsMethod.getParameters().size()) {
+								i++;
+								if (sb.length() != 0)
+									sb.append(", ");
+								sb.append("\"" + cdaAttribute.getValue() + "\"");
+							}
+						}
 					}
 				}
 
@@ -1160,11 +1231,13 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 						.toPascalCase(cdaElement.getTemplate().getName());
 				if (templateClassName.contentEquals(myClass.getNameAsString())) {
 					if (cdaAttribute.getValue() != null) {
+						String vocabString = "";
+						if (cdaAttribute.isVocab())
+							vocabString = " (isVocab)";
 						addBodyComment(constructor,
 								cdaElement.getTemplate().getName() + "/" + cdaElement.getXmlName()
-										+ ":" + cdaAttribute.getDataType() + " "
-										+ cdaAttribute.getName() + " = \"" + cdaAttribute.getValue()
-										+ "\";");
+										+ ":" + cdaAttribute.getDataType() + " " + attrName
+										+ " = \"" + cdaAttribute.getValue() + "\";" + vocabString);
 						boolean isTemp = false;
 						if (cdaElement.getTemplate().getCdaElementList().size() == 1)
 							isTemp = (cdaElement
@@ -1172,35 +1245,33 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 						if (isTemp) {
 							@SuppressWarnings("rawtypes")
 							Class memberType = getDeclaredFieldDatatype(cdaElement.getDataType(),
-									cdaAttribute.getName());
+									attrName);
 							String statement = "";
 
 							boolean isLocalField = (myClass.getExtendedTypes().size() == 0);
 							if (isClassCollection(memberType)) {
 								if (isLocalField) {
-									statement = cdaAttribute.getName() + ".add(" + "\""
-											+ cdaAttribute.getValue() + "\"" + ");";
+									statement = attrName + ".add(" + "\"" + cdaAttribute.getValue()
+											+ "\"" + ");";
 								} else {
-									statement = "super.get"
-											+ toUpperFirstChar(cdaAttribute.getName()) + "().add("
+									statement = "super.get" + toUpperFirstChar(attrName) + "().add("
 											+ "\"" + cdaAttribute.getValue() + "\"" + ");";
 								}
 							} else {
 								if (isLocalField) {
-									statement = "this." + cdaAttribute.getName() + " = " + "\""
+									statement = "this." + attrName + " = " + "\""
 											+ cdaAttribute.getValue() + "\"" + ";";
 								} else {
-									if ("typeCode".contentEquals(cdaAttribute.getName()))
-										System.out.println("Stop here");
 									String dataType = null;
 									try {
-										dataType = getDataType(cdaElement.getDataType(),
-												cdaAttribute.getName());
+										dataType = getDataType(cdaElement.getDataType(), attrName);
 									} catch (InstantiationException | IllegalAccessException
 											| ClassNotFoundException | NoSuchFieldException
 											| SecurityException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
+										throw new RuntimeException(
+												"Unhandled exception while getting Datatype for "
+														+ attrName + "("
+														+ cdaElement.getFullXmlName() + ")");
 									}
 
 									boolean isEnum = false;
@@ -1208,59 +1279,23 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 										isEnum = (!"java.lang.String".contentEquals(dataType));
 									if (isEnum) {
 										String enumName = memberType.getName();
-										// if (valueSetId != null) {
-										// enumName =
-										// valueSetIndex.get(valueSetId);
-										// addBodyComment(setterForFixedContentsMethod,
-										// "TODO: Contents shall be taken from
-										// enum: " + enumName);
-										// } else {
-										statement = "super.set"
-												+ toUpperFirstChar(cdaAttribute.getName()) + "("
+										statement = "super.set" + toUpperFirstChar(attrName) + "("
 												+ enumName + ".fromValue(" + "\""
 												+ cdaAttribute.getValue() + "\"" + "));";
-										// }
-									} else if ("bl".contentEquals(cdaAttribute.getDataType()))
-										statement = "super.set"
-												+ toUpperFirstChar(cdaAttribute.getName()) + "("
-												+ cdaAttribute.getValue() + ");";
-									else {
-										statement = "super.set"
-												+ toUpperFirstChar(cdaAttribute.getName()) + "("
+									} else {
+										statement = "super.set" + toUpperFirstChar(attrName) + "("
 												+ "\"" + cdaAttribute.getValue() + "\"" + ");";
 									}
-									// statement = "super.set"
-									// +
-									// toUpperFirstChar(cdaAttribute.getName())
-									// + "("
-									// + "\"" + cdaAttribute.getValue() + "\"" +
-									// ");";
 								}
 							}
-							// String creator =
-							// creatorForFixedContentsMethod.getNameAsString() +
-							// "("
-							// + "\"" + cdaAttribute.getValue() + "\")";
-							// String statement = "this." +
-							// cdaAttribute.getName() + " = " + "\""
-							// + cdaAttribute.getValue() + "\"" + ";";
-							// String statement = "this." +
-							// cdaAttribute.getName() + " = " + creator
-							// + ";";
-							// String statement = "my"
-							// +
-							// JavaCodeGenerator.toPascalCase(cdaAttribute.getName())
-							// + " = "
-							// + "\"" + cdaAttribute.getValue() + "\")" + ";";
 							addBodyStatement(constructor, statement);
 						}
 					}
 					if (cdaAttribute.getValueSetId() != null)
 						addBodyComment(constructor,
 								cdaElement.getTemplate().getName() + "/" + cdaElement.getXmlName()
-										+ ":" + cdaAttribute.getDataType() + " "
-										+ cdaAttribute.getName() + " = valueSet(\""
-										+ cdaAttribute.getValueSetId() + "\");");
+										+ ":" + cdaAttribute.getDataType() + " " + attrName
+										+ " = valueSet(\"" + cdaAttribute.getValueSetId() + "\");");
 				}
 			}
 			if ((creatorForFixedContentsMethod != null)) {
@@ -1271,10 +1306,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 					int argCountMethod = creatorForFixedContentsMethod.getParameters().size();
 					// fix for setHl7EntryRelationshipFixedValue: sometimes in
-					// the
-					// first
-					// occurrence, there is no inversionInd in the ART-DECOR
-					// model
+					// the first occurrence, there is no inversionInd in the
+					// ART-DECOR model
 					if ("createHl7EntryRelationshipFixedValue"
 							.contentEquals(creatorForFixedContentsMethod.getNameAsString())) {
 						if (argCountMethod == 1) {
@@ -1296,16 +1329,10 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 						argCountGiven = org.apache.commons.lang3.StringUtils
 								.countMatches(sb.toString(), ",") + 1;
 					}
-					// end of fix
+					// end of fixes
 
-					String name = cdaElement.getXmlName().replace("hl7:", "");
-					// boolean createElement = false;
-					// createElement = ("templateId".equals(name) ||
-					// "typeId".equals(name));
-					// boolean preserveElement = false;
-					// preserveElement = ("code".equals(name) ||
-					// "realmCode".equals(name)
-					// || "translation".equals(name));
+					String name = cdaElement.getXmlName().replace("hl7:", "").replace("pharm:", "")
+							.replace("xsi:", "");
 
 					@SuppressWarnings("rawtypes")
 					Class memberType = getDeclaredFieldDatatype(
@@ -1316,74 +1343,42 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 							+ sb.toString() + ")";
 
 					boolean isLocalField = (myClass.getExtendedTypes().size() == 0);
-					// boolean isTemp = false;
-					// if (cdaElement.getTemplate().getCdaElementList().size()
-					// == 1)
-					// isTemp = (cdaElement
-					// .equals(cdaElement.getTemplate().getCdaElementList().get(0)));
-					// if (!isTemp) {
 					if (isClassCollection(memberType)) {
 						if (isLocalField) {
-							statement = cdaElement.getXmlName().replace("hl7:", "") + ".add("
-									+ creator + ");";
+							statement = cdaElement.getXmlName().replace("hl7:", "")
+									.replace("pharm:", "") + ".add(" + creator + ");";
 						} else {
 							statement = "super.get"
-									+ toUpperFirstChar(cdaElement.getXmlName().replace("hl7:", ""))
+									+ toUpperFirstChar(cdaElement.getXmlName().replace("hl7:", "")
+											.replace("pharm:", "").replace("xsi:", ""))
 									+ "().add(" + creator + ");";
 						}
 					} else {
 						if (isLocalField) {
 							statement = "this." + cdaElement.getXmlName().replace("hl7:", "")
-									+ " = " + creator + ";";
+									.replace("pharm:", "") + " = " + creator + ";";
 						} else {
 							statement = "super.set"
-									+ toUpperFirstChar(cdaElement.getXmlName().replace("hl7:", ""))
+									+ toUpperFirstChar(cdaElement.getXmlName().replace("hl7:", "")
+											.replace("pharm:", "").replace("xsi:", ""))
 									+ "(" + creator + ");";
 						}
 					}
 
 					addBodyStatement(constructor, statement);
-					// } else if (preserveElement) {
-					// createMemberAndGetter(compilationUnit, myClass,
-					// creatorForFixedContentsMethod.getType().toString(),
-					// name + "FixedValue",
-					// createGetterNamePascalCase(name + "FixedValue"));
-					// statement = name + "FixedValue = " + creator + ";";
-					// addBodyStatement(constructor, statement);
-					// } else {
-					// String nameBase = JavaCodeGenerator.toPascalCase(name);
-					// String memberName = "my" + nameBase;
-					//
-					// Optional<FieldDeclaration> memberOpt =
-					// myClass.getFieldByName(memberName);
-					// int i = 1;
-					// while (memberOpt.isPresent()) {
-					// nameBase = JavaCodeGenerator.toPascalCase(name) +
-					// Integer.toString(i++);
-					// memberName = "my" + nameBase;
-					// memberOpt = myClass.getFieldByName(memberName);
-					// }
-					// String methodName = "getPredefined" + nameBase;
-					//
-					// String dataType = memberType.getName();
-					// try {
-					// dataType =
-					// getDataType(cdaElement.getParentCdaElement().getDataType(),
-					// cdaElement.getXmlName());
-					// } catch (InstantiationException | IllegalAccessException
-					// | ClassNotFoundException | NoSuchFieldException
-					// | SecurityException e) {
-					// // DO nothing (currently...)
-					// }
-					//
-					// createMemberAndGetter(compilationUnit, myClass, dataType,
-					// memberName,
-					// methodName);
-					// statement = "this." + memberName + " = " + creator + ";";
-					// addBodyStatement(constructor, statement);
 				}
 			}
 		}
+	}
+
+	public void createJavaClasses() throws IOException {
+		regroupTemplateElements(templateList);
+		System.out.println("Writing Java Class files:");
+		for (CdaTemplate cdaTemplate : templateList) {
+			System.out.println("- " + cdaTemplate.getName());
+			createJavaClassFile(cdaTemplate, packageName, fullDstFilePath);
+		}
+		System.out.println(" done.");
 	}
 
 	private void createJavaClassFile(CdaTemplate cdaTemplate, String packageName,
@@ -1398,7 +1393,13 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		boolean isSingleElementTemplate = (cdaTemplate.getCdaElementList().size() == 1);
 
 		for (CdaElement cdaElement : cdaTemplate.getCdaElementList()) {
+
 			String dataType = adjustDataType(cdaElement.getDataType());
+			// fix for CDA-CH-EMED
+			if ("hl7:routeCode".equals(cdaElement.getXmlName()))
+				dataType = dataType.replace(".CD", ".CE");
+			// End of fix
+
 			cdaElement.setDataType(dataType);
 
 			ClassOrInterfaceDeclaration myClass = null;
@@ -1577,16 +1578,16 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				}
 			}
 
-			// Create the Java Classes
-			if (initialRun) {
-				regroupTemplateElements(templateList);
-				System.out.print("Writing Java Class files");
-				for (CdaTemplate cdaTemplate : templateList) {
-					System.out.print(".");
-					createJavaClassFile(cdaTemplate, packageName, fullDstFilePath);
-				}
-				System.out.println(" done.");
-			}
+			// // Create the Java Classes
+			// if (initialRun) {
+			// regroupTemplateElements(templateList);
+			// System.out.println("Writing Java Class files:");
+			// for (CdaTemplate cdaTemplate : templateList) {
+			// System.out.println("- " + cdaTemplate.getName());
+			// createJavaClassFile(cdaTemplate, packageName, fullDstFilePath);
+			// }
+			// System.out.println(" done.");
+			// }
 		}
 
 		if (initialRun)
@@ -1682,8 +1683,15 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		dataType = adjustDataType(dataType);
 
+		// XPath contitions in the name is not useful for our purposes. Thus we
+		// cut it,
+		// here...
+		if (name.contains("["))
+			name = name.substring(0, name.indexOf("["));
+
 		CdaElement cdaElement = new CdaElement(null);
 		cdaElement.setTemplate(currentCdaTemplate);
+
 		cdaElement.setXmlName(name);
 		cdaElement.setDataType(dataType);
 		if (maxOccursStr != null) {
@@ -1779,6 +1787,11 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				throw new RuntimeException(
 						"element '" + name + "' is neither child, sibling, parent");
 
+			if (parentCdaElement == null) {
+				parentCdaElement = callingCdaElement;
+				if (parentCdaElement != currentCdaElement)
+					currentCdaElement.setParentCdaElement(parentCdaElement);
+			}
 			if (parentCdaElement == null)
 				throw new RuntimeException("Parent CDA element is null for " + name);
 
@@ -1858,6 +1871,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		if (refAttrCtx != null) {
 			ref = refAttrCtx.AttrValue().getText().replace("\"", "");
 			boolean isParentElement = (processingElement < processingElementPrev);
+			boolean isChildElement = (processingElement > processingElementPrev);
+			boolean isSiblingElement = (processingElement == processingElementPrev);
 			int levels = 0;
 			if (isParentElement) {
 				levels = processingElementPrev - processingElement;
@@ -1865,7 +1880,14 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				for (int i = 0; i < levels; i++) {
 					parentForIncludes = parentForIncludes.getParentCdaElement();
 				}
+			} else if (isSiblingElement && (callingCdaElement != null)) {
+				if (processingElement == 0) {
+					processingRootInclude = true;
+					parentForIncludes = callingCdaElement;
+					currentCdaElement = new CdaElement(callingCdaElement);
+				}
 			}
+
 			if (printParsingDebugInformation)
 				if (printParsingDebugInformation)
 					System.out.println("Include: " + ref);
@@ -1876,15 +1898,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 						dstFilePath, packageName, fileHeader, artDecorPrefix);
 				CdaTemplate template = artDecor2JavaGenerator.doOneTemplate(ref);
 
-				boolean isChildElement = (processingElement > processingElementPrev);
-				boolean isSiblingElement = (processingElement == processingElementPrev);
-				boolean isParentElement2 = (processingElement < processingElementPrev);
 				if (isChildElement)
 					currentCdaElement.addCdaTemplate(template, ProcessModes.INCLUDE);
 				else if (isSiblingElement)
 					currentCdaElement.getParentCdaElement().addCdaTemplate(template,
 							ProcessModes.INCLUDE);
-				else if (isParentElement2)
+				else if (isParentElement)
 					currentCdaElement.getParentCdaElement().getParentCdaElement()
 							.addCdaTemplate(template, ProcessModes.INCLUDE);
 				else
@@ -1948,6 +1967,11 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		if (codeAttrCtx != null)
 			code = codeAttrCtx.AttrValue().getText().replace("\"", "");
 
+		String codeSystem = null;
+		CodeSystemAttrContext codeSystemAttrCtx = ctx.codeSystemAttr();
+		if (codeSystemAttrCtx != null)
+			codeSystem = codeSystemAttrCtx.AttrValue().getText().replace("\"", "");
+
 		String valueSetId = null;
 		ValueSetAttrContext valueSetAttrCtx = ctx.valueSetAttr();
 		if (valueSetAttrCtx != null)
@@ -1957,12 +1981,18 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		FlexibilityAttrContext flexibilityAttrCtx = ctx.flexibilityAttr();
 		if (flexibilityAttrCtx != null)
 			flexibility = flexibilityAttrCtx.AttrValue().getText().replace("\"", "");
-		if ((code != null) || (valueSetId != null)) {
+		if ((code != null) || (codeSystem != null) || (valueSetId != null)) {
 			if (currentCdaAttribute == null) {
 				currentCdaAttribute = new CdaAttribute();
 				currentCdaAttribute.setCdaElement(currentCdaElement);
 				currentCdaAttribute.setDataType("cs");
 			}
+			currentCdaAttribute.setVocab(true);
+			CodeBaseType codeBt = new CodeBaseType();
+			codeBt.setCode(code);
+			codeBt.setCodeSystem(codeSystem);
+			currentCdaAttribute.setCode(new Code(codeBt));
+
 			if (code != null) {
 				if (currentCdaAttribute.getName() == null)
 					currentCdaAttribute.setName("code");
@@ -1975,6 +2005,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 				if (!skipValueSetGeneration && !valueSetIndex.containsKey(valueSetId)) {
 					System.out.print("- downloading ValueSet " + valueSetId + " ...");
+
 					String sourceUrl = "http://art-decor.org/decor/services/RetrieveValueSet?prefix="
 							+ artDecorPrefix + "&id=" + valueSetId + "&format=json";
 					if (!"dynamic".equals(flexibility) && flexibility != null)
@@ -2029,7 +2060,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				}
 			}
 			if (currentCdaElement == null)
-				throw new RuntimeException("vocab for templates not handled, yet.");
+				// an attribute on top level of a template without root element
+				// belongs to the calling element
+				callingCdaElement.addAttribute(currentCdaAttribute);
 			else
 				currentCdaElement.addAttribute(currentCdaAttribute);
 
@@ -2052,6 +2085,15 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	@Override
+	public void exitInclude(Hl7ItsParser.IncludeContext ctx) {
+		if (processingRootInclude) {
+			parentForIncludes = null;
+			currentCdaElement = currentCdaElement.getParentCdaElement();
+		}
+		processingRootInclude = false;
+	}
+
+	@Override
 	public void exitTemplate(Hl7ItsParser.TemplateContext ctx) {
 		processingTemplate--;
 	}
@@ -2063,6 +2105,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		if (cdaElement != null) {
 			if (dataTypeIndex == null)
 				dataTypeIndex = loadDataTypeIndex();
+
 			String dataType = cdaElement.getDataType();
 			if (dataType != null)
 				if ("running".equals(dataType))
@@ -2072,9 +2115,11 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				cdaElement.setDataType(dataType);
 			}
 			if (printDataTypeDebugInformation)
-				System.out.println("Datatype for "
-						+ cdaElement.getFullXmlName().replace("hl7:", "").replace("pharm:", "")
-						+ " --> " + dataType);
+				System.out
+						.println("Datatype for "
+								+ cdaElement.getFullXmlName().replace("hl7:", "")
+										.replace("pharm:", "").replace("xsi:", "")
+								+ " --> " + dataType);
 			for (CdaElement item : cdaElement.getChildrenCdaElementList()) {
 				fillDatatypesRecursive(item);
 			}
@@ -2087,7 +2132,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			IllegalArgumentException, InvocationTargetException, NoSuchFieldException,
 			SecurityException, IOException {
 		String retVal = null;
-		String cdaElementName = cdaElement.getXmlName().replace("hl7:", "").replace("pharm:", "");
+		String cdaElementName = cdaElement.getXmlName().replace("hl7:", "").replace("pharm:", "")
+				.replace("xsi:", "");
 
 		if (retVal == null) {
 			ArrayList<String> candidates = new ArrayList<String>();
@@ -2129,7 +2175,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			retVal = getDataType(parentDataType, cdaElementName);
 			if (retVal == null) {
 				String parentType = getParentDataType(parentDataType);
-				while ((retVal == null) && (parentType != null)) {
+				while ((retVal == null) && (parentType != null)
+						&& (!"java.lang.Object".equals(parentType))) {
 					retVal = getDataType(parentType, cdaElementName);
 					parentType = getParentDataType(parentType);
 				}
@@ -2154,11 +2201,14 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		XmlType xmlType = (XmlType) cl.getAnnotation(XmlType.class);
 		if (xmlType != null) {
 			for (String prop : xmlType.propOrder()) {
-				if (prop.equals(cdaElementName.replace("hl7:", "").replace("pharm:", ""))) {
+				if (prop.equals(cdaElementName.replace("hl7:", "").replace("pharm:", "")
+						.replace("xsi:", ""))) {
 					String expectedMethodName = createGetterNamePascalCase(prop);
 					for (Method method : cl.getMethods()) {
 						if (method.getName().equals(expectedMethodName)) {
-							if ("java.util.List".equals(method.getReturnType().getName())) {
+							String returnType = method.getReturnType().getName();
+							if ("java.util.List".equals(returnType)
+									|| "javax.xml.bind.JAXBElement".equals(returnType)) {
 								Field field = cl.getDeclaredField(prop);
 								Type type = field.getGenericType();
 								if (type instanceof ParameterizedType) {
@@ -2245,6 +2295,19 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		return retVal;
 	}
 
+	public void prepareForAnotherTemplate(String srcFilePath) {
+		this.callingCdaElement = null;
+		this.currentCdaAttribute = null;
+		this.currentCdaElement = null;
+		this.currentCdaTemplate = null;
+		this.mainCdaTemplate = null;
+		this.parentForContains = null;
+		this.parentForIncludes = null;
+
+		this.srcFilePath = srcFilePath;
+
+	}
+
 	private void regroupTemplateElements(ArrayList<CdaTemplate> myTemplateList) {
 		for (CdaTemplate cdaTemplate : myTemplateList) {
 			// System.out.println("Processing " + cdaTemplate.getName());
@@ -2271,11 +2334,13 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			MethodDeclaration setterForFixedContentsMethod, CdaElement cdaElement,
 			CdaAttribute cdaAttribute) {
 
-		Optional<Parameter> params = setterForFixedContentsMethod
-				.getParameterByName(cdaAttribute.getName());
+		String attrName = cdaAttribute.getName().replace("hl7:", "").replace("pharm:", "")
+				.replace("xsi:", "");
+
+		Optional<Parameter> params = setterForFixedContentsMethod.getParameterByName(attrName);
 
 		if (!params.isPresent()) {
-			setterForFixedContentsMethod.addAndGetParameter("String", cdaAttribute.getName());
+			setterForFixedContentsMethod.addAndGetParameter("String", attrName);
 			Optional<Javadoc> javaDocOpt = setterForFixedContentsMethod.getJavadoc();
 			Javadoc javadoc = javaDocOpt.get();
 			javadoc.addBlockTag("param",
@@ -2286,11 +2351,11 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			if (bodyOpt.isPresent()) {
 				BlockStmt body = bodyOpt.get();
 
-				String name = cdaElement.getXmlName().replace("hl7:", "");
+				String name = cdaElement.getXmlName().replace("hl7:", "").replace("pharm:", "")
+						.replace("xsi:", "");
 
 				@SuppressWarnings("rawtypes")
-				Class memberType = getDeclaredFieldDatatype(cdaElement.getDataType(),
-						cdaAttribute.getName());
+				Class memberType = getDeclaredFieldDatatype(cdaElement.getDataType(), attrName);
 				if (memberType == null)
 					memberType = getDeclaredFieldDatatype(
 							cdaElement.getParentCdaElement().getDataType(), name);
@@ -2304,30 +2369,30 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 				if ((memberType == null) && (!"translation".equals(name))) {
 					if (cdaElement.getDataType().endsWith(".ENXP")) {
-						String enPartL = cdaAttribute.getName();
+						String enPartL = attrName;
 						String enPartU = toUpperFirstChar(enPartL);
 						body.addStatement("retVal.get" + enPartU + "().add(" + enPartL + ");");
 					} else
 						throw new RuntimeException(
 								name + " is neither an accesible field nor an accessible getter");
 				} else {
-					if ("nullFlavor".equals(cdaAttribute.getName())) {
+					if ("nullFlavor".equals(attrName)) {
 						addImport(compilationUnit, "java.util.ArrayList");
 						body.addStatement("retVal.nullFlavor = new ArrayList<String>();");
 						body.addStatement("retVal.nullFlavor.add(nullFlavor);");
 					} else if (isClassCollection(memberType)) {
-						body.addStatement("retVal.get" + toUpperFirstChar(cdaAttribute.getName())
-								+ "().add(" + cdaAttribute.getName() + ");");
+						String temp = cdaAttribute.getName().replace("hl7:", "")
+								.replace("pharm:", "").replace("xsi:", "");
+						body.addStatement(
+								"retVal.get" + toUpperFirstChar(temp) + "().add(" + temp + ");");
 					} else {
 
 						if ("java.lang.String".contentEquals(memberType.getName()))
-							body.addStatement(
-									"retVal.set" + toUpperFirstChar(cdaAttribute.getName()) + "("
-											+ cdaAttribute.getName() + ");");
+							body.addStatement("retVal.set" + toUpperFirstChar(attrName) + "("
+									+ attrName + ");");
 						else if ("java.lang.Boolean".contentEquals(memberType.getName()))
-							body.addStatement("retVal.set"
-									+ toUpperFirstChar(cdaAttribute.getName())
-									+ "(Boolean.parseBoolean(" + cdaAttribute.getName() + "));");
+							body.addStatement("retVal.set" + toUpperFirstChar(attrName)
+									+ "(Boolean.parseBoolean(" + attrName + "));");
 						else {
 							String enumName = memberType.getName();
 							if (valueSetId != null) {
@@ -2335,9 +2400,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 								addBodyComment(setterForFixedContentsMethod,
 										"TODO: Contents shall be taken from enum: " + enumName);
 							} else {
-								body.addStatement("retVal.set"
-										+ toUpperFirstChar(cdaAttribute.getName()) + "(" + enumName
-										+ ".fromValue(" + cdaAttribute.getName() + "));");
+								body.addStatement("retVal.set" + toUpperFirstChar(attrName) + "("
+										+ enumName + ".fromValue(" + attrName + "));");
 
 							}
 						}

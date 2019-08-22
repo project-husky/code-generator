@@ -10,6 +10,7 @@
  * 2019.07.23: Tony Schaller, medshare GmbH: Implementation of the ANTLR4 module for ART-DECOR to Java code generator.
  * 2019.07.25: Tony Schaller, medshare GmbH: Adding strength attribute to element
  * 2019.07.26: Tony Schaller, medshare GmbH: Adding flexibility attribute to element and new vocabulary element
+ * 2019.08.22: Tony Schaller, medshare GmbH: Adding codeSystem attribute to vocabulary element
  * 
  * ******************************************************************************
  */
@@ -39,8 +40,8 @@ choice : '<' CHOICE attr* maxOccursAttr? minOccursAttr? '>' content '<' '/' CHOI
 include : '<' INCLUDE attr* conformanceAttr? flexibilityAttr? idAttr? isMandatoryAttr? maxOccursAttr? minOccursAttr? refAttr? attr* '/>' | 
           '<' INCLUDE attr* conformanceAttr? flexibilityAttr? idAttr? isMandatoryAttr? maxOccursAttr? minOccursAttr? refAttr? attr* '>' content '<' '/' INCLUDE '>';
           
-vocab : '<' VOCAB attr* codeAttr? flexibilityAttr? valueSetAttr? attr* '/>' | 
-        '<' VOCAB attr* codeAttr? flexibilityAttr? valueSetAttr? attr* '>' content '<' '/' VOCAB '>';
+vocab : '<' VOCAB attr* codeAttr? codeSystemAttr? flexibilityAttr? valueSetAttr? attr* '/>' | 
+        '<' VOCAB attr* codeAttr? codeSystemAttr? flexibilityAttr? valueSetAttr? attr* '>' content '<' '/' VOCAB '>';
 
 
 letter : '<' LET nameAttr? valueAttr? '/>' | 
@@ -67,6 +68,7 @@ attr : Name '=' AttrValue ;
 conformanceAttr : CONFATTR AttrValue ;
 flexibilityAttr : FLEXIBILITYATTR AttrValue ;
 codeAttr : CODEATTR AttrValue ;
+codeSystemAttr : CODESYSTEMATTR AttrValue ;
 containsAttr : CONTAINSATTR AttrValue ;
 dataTypeAttr : TYPEATTR AttrValue ;
 idAttr : IDATTR AttrValue ;

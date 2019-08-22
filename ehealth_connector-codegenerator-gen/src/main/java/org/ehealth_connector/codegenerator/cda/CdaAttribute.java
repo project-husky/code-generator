@@ -16,6 +16,8 @@
  */
 package org.ehealth_connector.codegenerator.cda;
 
+import org.ehealth_connector.common.Code;
+
 public class CdaAttribute {
 
 	private String dataType;
@@ -28,9 +30,13 @@ public class CdaAttribute {
 
 	private String valueSetId;
 
+	private Code code;
+
 	private CdaElement cdaElement;
 
 	private CdaTemplate cdaTemplate;
+
+	private boolean isVocab;
 
 	public CdaAttribute() {
 	}
@@ -41,6 +47,10 @@ public class CdaAttribute {
 
 	public CdaTemplate getCdaTemplate() {
 		return cdaTemplate;
+	}
+
+	public Code getCode() {
+		return code;
 	}
 
 	public String getDataType() {
@@ -63,12 +73,20 @@ public class CdaAttribute {
 		return valueSetId;
 	}
 
+	public boolean isVocab() {
+		return isVocab;
+	}
+
 	public void setCdaElement(CdaElement cdaElement) {
 		this.cdaElement = cdaElement;
 	}
 
 	public void setCdaTemplate(CdaTemplate cdaTemplate) {
 		this.cdaTemplate = cdaTemplate;
+	}
+
+	public void setCode(Code code) {
+		this.code = code;
 	}
 
 	public void setDataType(String dataType) {
@@ -89,6 +107,10 @@ public class CdaAttribute {
 
 	public void setValueSetId(String valueSetId) {
 		this.valueSetId = valueSetId;
+	}
+
+	public void setVocab(boolean isVocab) {
+		this.isVocab = isVocab;
 	}
 
 }

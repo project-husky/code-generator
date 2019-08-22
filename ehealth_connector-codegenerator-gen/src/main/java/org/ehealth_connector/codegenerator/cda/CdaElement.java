@@ -162,6 +162,8 @@ public class CdaElement {
 
 	public void setParentCdaElement(CdaElement parentCdaElement) {
 		this.parentCdaElement = parentCdaElement;
+		if (parentCdaElement == this)
+			System.out.println("Stop here");
 	}
 
 	public void setTargetXmlElement(String targetXmlElement) {
