@@ -21,6 +21,7 @@ import static com.github.javaparser.ast.Modifier.publicModifier;
 import static com.github.javaparser.ast.Modifier.staticModifier;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
@@ -428,6 +429,20 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		body.addStatement("super.setId(docId.getHl7CdaR2Ii());");
 		body.addStatement("setVersion(docId, 1);");
 
+		// initNextVersion
+		method = myClass.addMethod("initNextVersion", publicModifier().getKeyword());
+		method.setJavadocComment(
+				"Increases the version number by one and makes sure the setId remains the same as previously.\n@param newDocId the new doc id");
+		method.addAndGetParameter("Identificator", "newDocId");
+
+		body = method.createBody();
+		body.addStatement("org.ehealth_connector.common.hl7cdar2.II setId = getSetId();");
+		body.addStatement("if (setId == null) setId = getId();");
+		body.addStatement("if (setId == null) setId = newDocId.getHl7CdaR2Ii();");
+		body.addStatement("Integer version = CdaUtil.getInt(getVersionNumber());");
+		body.addStatement("setId(newDocId.getHl7CdaR2Ii());");
+		body.addStatement("setVersion(new Identificator(setId), version + 1);");
+
 		// setVersion
 		method = myClass.addMethod("setVersion", publicModifier().getKeyword());
 		method.setJavadocComment(
@@ -534,11 +549,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		// The one with the file name as parameter
 		method = myClass.addMethod("saveToFile", publicModifier().getKeyword());
 		method.setJavadocComment(comment
-				+ "\n@param outputFileName the full path and filename of the destination file.\n@throws JAXBException the JAXB exception\n@throws ParserConfigurationException the parser configuration exception\n@throws TransformerException the transformer exception");
+				+ "\n@param outputFileName the full path and filename of the destination file.\n@throws JAXBException the JAXB exception\n@throws ParserConfigurationException the parser configuration exception\n@throws TransformerException the transformer exception\n@throws FileNotFoundException the file not found exception");
 		method.addAndGetParameter("String", "outputFileName");
 		method.addThrownException(JAXBException.class);
 		method.addThrownException(ParserConfigurationException.class);
 		method.addThrownException(TransformerException.class);
+		method.addThrownException(FileNotFoundException.class);
 
 		body = method.createBody();
 		body.addStatement("saveToFile(new File(outputFileName), null, null);");
@@ -546,11 +562,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		// The one with the file name as parameter
 		method = myClass.addMethod("saveToFile", publicModifier().getKeyword());
 		method.setJavadocComment(comment
-				+ "\n@param outputFile the destination file.\n@throws JAXBException the JAXB exception\n@throws ParserConfigurationException the parser configuration exception\n@throws TransformerException the transformer exception");
+				+ "\n@param outputFile the destination file.\n@throws JAXBException the JAXB exception\n@throws ParserConfigurationException the parser configuration exception\n@throws TransformerException the transformer exception\n@throws FileNotFoundException the file not found exception");
 		method.addAndGetParameter("File", "outputFile");
 		method.addThrownException(JAXBException.class);
 		method.addThrownException(ParserConfigurationException.class);
 		method.addThrownException(TransformerException.class);
+		method.addThrownException(FileNotFoundException.class);
 
 		body = method.createBody();
 		body.addStatement("saveToFile(outputFile, null, null);");
@@ -558,13 +575,14 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		// The one with the file name and xsl, css as parameter
 		method = myClass.addMethod("saveToFile", publicModifier().getKeyword());
 		method.setJavadocComment(comment
-				+ "\n@param outputFileName the full path and filename of the destination file.\n@param xsl the path and filename or url to the rendering stylesheet\n@param css the path and filename or url to the rendering css\n@throws JAXBException the JAXB exception\n@throws ParserConfigurationException the parser configuration exception\n@throws TransformerException the transformer exception");
+				+ "\n@param outputFileName the full path and filename of the destination file.\n@param xsl the path and filename or url to the rendering stylesheet\n@param css the path and filename or url to the rendering css\n@throws JAXBException the JAXB exception\n@throws ParserConfigurationException the parser configuration exception\n@throws TransformerException the transformer exception\\n@throws FileNotFoundException the file not found exception");
 		method.addAndGetParameter("String", "outputFileName");
 		method.addAndGetParameter("String", "xsl");
 		method.addAndGetParameter("String", "css");
 		method.addThrownException(JAXBException.class);
 		method.addThrownException(ParserConfigurationException.class);
 		method.addThrownException(TransformerException.class);
+		method.addThrownException(FileNotFoundException.class);
 
 		body = method.createBody();
 		body.addStatement("saveToFile(new File(outputFileName), xsl, css);");
@@ -572,33 +590,17 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		// The one with the file as parameter
 		method = myClass.addMethod("saveToFile", publicModifier().getKeyword());
 		method.setJavadocComment(comment
-				+ "\n@param outputFile the destination file.\n@param xsl the path and filename or url to the rendering stylesheet\n@param css the path and filename or url to the rendering css\n@throws JAXBException the JAXB exception\n@throws ParserConfigurationException the parser configuration exception\n@throws TransformerException the transformer exception");
+				+ "\n@param outputFile the destination file.\n@param xsl the path and filename or url to the rendering stylesheet\n@param css the path and filename or url to the rendering css\n@throws JAXBException the JAXB exception\n@throws ParserConfigurationException the parser configuration exception\n@throws TransformerException the transformer exception\\n@throws FileNotFoundException the file not found exception");
 		method.addAndGetParameter("File", "outputFile");
 		method.addAndGetParameter("String", "xsl");
 		method.addAndGetParameter("String", "css");
 		method.addThrownException(JAXBException.class);
 		method.addThrownException(ParserConfigurationException.class);
 		method.addThrownException(TransformerException.class);
+		method.addThrownException(FileNotFoundException.class);
 
 		body = method.createBody();
 		body.addStatement("CdaUtil.saveJaxbObjectToFile(this, outputFile, xsl, css);");
-		// body.addStatement("JAXBContext context =
-		// JAXBContext.newInstance(this.getClass());");
-		// body.addStatement("Marshaller mar = context.createMarshaller();");
-		// body.addStatement(
-		// "mar.setProperty(\"com.sun.xml.bind.namespacePrefixMapper\", new
-		// CdaNamespacePrefixMapper());");
-		// body.addStatement("mar.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT,
-		// Boolean.TRUE);");
-		//
-		// body.addStatement("mar.setProperty(\"com.sun.xml.bind.xmlDeclaration\",
-		// Boolean.FALSE);");
-		// body.addStatement(
-		// "mar.setProperty(\"com.sun.xml.bind.xmlHeaders\", \"<?xml
-		// version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\");");
-		//
-		// body.addStatement("mar.marshal(this, outputFile);");
-
 	}
 
 	private static void createSetter(CompilationUnit compilationUnit,
@@ -1078,16 +1080,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				.replace("xsi:", "");
 		String memberName = "my" + JavaCodeGenerator.toPascalCase(attrName);
 
-		if ("myCode".equals(memberName))
-			System.out.println("Stop here");
-		if ("myCodeSystemName".equals(memberName))
-			System.out.println("Stop here");
-		if ("myValueSet".equals(memberName))
-			System.out.println("Stop here");
-		if ("myTypeCode".equals(memberName))
-			System.out.println("Stop here");
-		if ("myDisplayName".equals(memberName))
-			System.out.println("Stop here");
 		String methodName = "getPredefined" + JavaCodeGenerator.toPascalCase(attrName);
 		createMemberAndGetter(compilationUnit, myClass, dataType, memberName, methodName);
 
@@ -1226,6 +1218,21 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 								updateCreatorForFixedContentsMethod(compilationUnit,
 										creatorForFixedContentsMethod, cdaElement, cdaAttribute);
 
+							// if (cdaAttribute.isVocab()) {
+							// if (cdaAttribute.getCode() != null)
+							// addBodyComment(constructor,
+							// "Vocab not supported, yet. Should add a code:"
+							// + cdaAttribute.getCode());
+							// else if (cdaAttribute.getValue() != null)
+							// addBodyComment(constructor,
+							// "Vocab not supported, yet. Should add a value:"
+							// + cdaAttribute.getValue());
+							// else if (cdaAttribute.getValueSetId() != null)
+							// addBodyComment(constructor,
+							// "Vocab not supported, yet. Should add a value
+							// set:"
+							// + cdaAttribute.getValueSetId());
+							// }
 							// Condition is not final, yet.
 							if (i < creatorForFixedContentsMethod.getParameters().size()) {
 								i++;
@@ -2021,9 +2028,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 				if (!skipValueSetGeneration && !valueSetIndex.containsKey(valueSetId)) {
 					System.out.print("- downloading ValueSet " + valueSetId + " ...");
-
-					if ("2.16.840.1.113883.1.11.19366".equals(valueSetId))
-						System.out.println("Stop here");
 
 					String sourceUrl = "http://art-decor.org/decor/services/RetrieveValueSet?prefix="
 							+ artDecorPrefix + "&id=" + valueSetId + "&format=json";
