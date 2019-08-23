@@ -614,7 +614,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				publicModifier().getKeyword());
 
 		String dataType = cdaElement.getDataType();
-		// fix for CDA-CH-EMED
+		// TODO: This is a quick fix for CDA-CH-EMED
 		if ("hl7:routeCode".equals(cdaElement.getXmlName()))
 			dataType = dataType.replace(".CD", ".CE");
 		// End of fix
@@ -1047,6 +1047,21 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		return retVal;
 	}
 
+	private String adjustValueSet(String value) {
+		String retVal = value;
+		String testEnum = value.replace(packageName + ".enums",
+				"org.ehealth_connector.common.hl7cdar2");
+		try {
+			Class cl = Class.forName(adjustDataType(testEnum));
+			if (cl != null)
+				retVal = cl.getName();
+		} catch (ClassNotFoundException e) {
+			// Do nothing
+		}
+
+		return retVal;
+	}
+
 	private MethodDeclaration createCreatorForFixedContentsAttribute(
 			CompilationUnit compilationUnit, ClassOrInterfaceDeclaration myClass,
 			CdaAttribute cdaAttribute, String setterForFixedContentsName) {
@@ -1056,7 +1071,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		String dataType = null;
 		if (cdaAttribute.getValueSetId() != null) {
-			dataType = valueSetIndex.get(cdaAttribute.getValueSetId());
+			dataType = adjustValueSet(valueSetIndex.get(cdaAttribute.getValueSetId()));
 		} else {
 			dataType = "String";
 		}
@@ -1064,6 +1079,17 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		String attrName = cdaAttribute.getName().replace("hl7:", "").replace("pharm:", "")
 				.replace("xsi:", "");
 		String memberName = "my" + JavaCodeGenerator.toPascalCase(attrName);
+
+		if ("myCode".equals(memberName))
+			System.out.println("Stop here");
+		if ("myCodeSystemName".equals(memberName))
+			System.out.println("Stop here");
+		if ("myValueSet".equals(memberName))
+			System.out.println("Stop here");
+		if ("myTypeCode".equals(memberName))
+			System.out.println("Stop here");
+		if ("myDisplayName".equals(memberName))
+			System.out.println("Stop here");
 		String methodName = "getPredefined" + JavaCodeGenerator.toPascalCase(attrName);
 		createMemberAndGetter(compilationUnit, myClass, dataType, memberName, methodName);
 
@@ -1090,7 +1116,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		BlockStmt body = method.createBody();
 
 		String dataType = adjustDataType(cdaElement.getDataType());
-		// fix for CDA-CH-EMED
+		// TODO: This is a quick fix for CDA-CH-EMED
 		if ("hl7:routeCode".equals(cdaElement.getXmlName()))
 			dataType = dataType.replace(".CD", ".CE");
 		// End of fix
@@ -1291,11 +1317,15 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 							addBodyStatement(constructor, statement);
 						}
 					}
-					if (cdaAttribute.getValueSetId() != null)
+					if (cdaAttribute.getValueSetId() != null) {
+						String enumName = adjustValueSet(
+								valueSetIndex.get(cdaAttribute.getValueSetId()));
 						addBodyComment(constructor,
 								cdaElement.getTemplate().getName() + "/" + cdaElement.getXmlName()
 										+ ":" + cdaAttribute.getDataType() + " " + attrName
-										+ " = valueSet(\"" + cdaAttribute.getValueSetId() + "\");");
+										+ " = valueSet(\"" + cdaAttribute.getValueSetId()
+										+ "\"); --> " + enumName);
+					}
 				}
 			}
 			if ((creatorForFixedContentsMethod != null)) {
@@ -1395,7 +1425,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		for (CdaElement cdaElement : cdaTemplate.getCdaElementList()) {
 
 			String dataType = adjustDataType(cdaElement.getDataType());
-			// fix for CDA-CH-EMED
+			// TODO: This is a quick fix for CDA-CH-EMED
 			if ("hl7:routeCode".equals(cdaElement.getXmlName()))
 				dataType = dataType.replace(".CD", ".CE");
 			// End of fix
@@ -1988,10 +2018,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				currentCdaAttribute.setDataType("cs");
 			}
 			currentCdaAttribute.setVocab(true);
-			CodeBaseType codeBt = new CodeBaseType();
-			codeBt.setCode(code);
-			codeBt.setCodeSystem(codeSystem);
-			currentCdaAttribute.setCode(new Code(codeBt));
+			if (code != null || codeSystem != null) {
+				CodeBaseType codeBt = new CodeBaseType();
+				codeBt.setCode(code);
+				codeBt.setCodeSystem(codeSystem);
+				currentCdaAttribute.setCode(new Code(codeBt));
+			}
 
 			if (code != null) {
 				if (currentCdaAttribute.getName() == null)
@@ -2005,6 +2037,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 				if (!skipValueSetGeneration && !valueSetIndex.containsKey(valueSetId)) {
 					System.out.print("- downloading ValueSet " + valueSetId + " ...");
+
+					if ("2.16.840.1.113883.1.11.19366".equals(valueSetId))
+						System.out.println("Stop here");
 
 					String sourceUrl = "http://art-decor.org/decor/services/RetrieveValueSet?prefix="
 							+ artDecorPrefix + "&id=" + valueSetId + "&format=json";
@@ -2396,7 +2431,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 						else {
 							String enumName = memberType.getName();
 							if (valueSetId != null) {
-								enumName = valueSetIndex.get(valueSetId);
+								enumName = adjustValueSet(valueSetIndex.get(valueSetId));
 								addBodyComment(setterForFixedContentsMethod,
 										"TODO: Contents shall be taken from enum: " + enumName);
 							} else {
