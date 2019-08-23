@@ -392,7 +392,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				if (doCast)
 					cast = "(" + cdaElement.getDataType() + ")";
 
-				// temp = "super." + temp;
 				body.addStatement("return " + cast + temp + ";");
 			}
 		} else
@@ -657,7 +656,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			if (isClassCollection(memberType)) {
 				if (isMethod)
 					temp = createGetterNameUpperFirstChar(name) + "()";
-				// temp = "super." + temp;
 				body.addStatement(temp + ".clear();");
 				body.addStatement(temp + ".add(value);");
 			} else {
@@ -1228,20 +1226,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 								updateCreatorForFixedContentsMethod(compilationUnit,
 										creatorForFixedContentsMethod, cdaElement, cdaAttribute);
 
-							if (cdaAttribute.isVocab()) {
-								if (cdaAttribute.getCode() != null)
-									addBodyComment(constructor,
-											"Vocab not supported, yet. Should add a code:"
-													+ cdaAttribute.getCode());
-								else if (cdaAttribute.getValue() != null)
-									addBodyComment(constructor,
-											"Vocab not supported, yet. Should add a value:"
-													+ cdaAttribute.getValue());
-								else if (cdaAttribute.getValueSetId() != null)
-									addBodyComment(constructor,
-											"Vocab not supported, yet. Should add a value set:"
-													+ cdaAttribute.getValueSetId());
-							}
 							// Condition is not final, yet.
 							if (i < creatorForFixedContentsMethod.getParameters().size()) {
 								i++;
