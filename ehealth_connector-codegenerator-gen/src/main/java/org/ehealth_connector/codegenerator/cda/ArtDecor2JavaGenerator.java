@@ -94,6 +94,7 @@ import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.expr.Name;
@@ -108,6 +109,10 @@ import net.sf.saxon.s9api.SaxonApiException;
 public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	private static HashMap<String, String> dataTypeIndex = null;
+
+	private static String PENDING_ACTIONS = "Pending actions:";
+
+	private static String PENDING_ACTIONS_ADJUST_NAME = "Adjust name: ";
 
 	private static void addBodyComment(ConstructorDeclaration constructor, String comment) {
 		BlockStmt body = constructor.getBody();
@@ -331,30 +336,17 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		MethodDeclaration method;
 
-		method = myClass.addMethod(createGetterNamePascalCase(cdaElement.getJavaName()),
-				publicModifier().getKeyword());
-
 		String dataType = cdaElement.getDataType();
-		if ("hl7:typeId".contentEquals(cdaElement.getXmlName())) {
+		if ("hl7:typeId".equals(cdaElement.getXmlName())) {
 			dataType = "org.ehealth_connector.common.hl7cdar2.POCDMT000040InfrastructureRootTypeId";
 		}
-		method.setType(dataType);
 
-		String comment = "Gets the " + cdaElement.getJavaName();
-		String desc = cdaElement.getDescription();
-		if (desc != null)
-			comment += Util.getPlatformSpecificLineBreak() + desc;
-
-		method.setJavadocComment(comment);
-
-		BlockStmt body = method.createBody();
 		String name = cdaElement.getXmlName().replace("hl7:", "").replace("pharm:", "")
 				.replace("xsi:", "");
 
 		CdaElement elForType = cdaElement.getParentCdaElement();
 		if (elForType == null)
 			elForType = cdaElement;
-		String genericType = getGenericFieldType(elForType.getDataType(), name);
 		@SuppressWarnings("rawtypes")
 		Class memberType = getFieldDatatype(elForType.getDataType(), name);
 		boolean isMethod = false;
@@ -365,38 +357,92 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		if (memberType == null && cdaElement.getDataType().endsWith(".ADXP")) {
 			memberType = getClass(cdaElement.getDataType());
 		}
-		if (myClass.getExtendedTypes().size() == 0)
-			isMethod = false;
-		if (memberType != null) {
-			String temp = name;
-			String cast = "";
-			boolean doCast = false;
-			if (isClassCollection(memberType)) {
-				if (isMethod)
-					temp = createGetterNameUpperFirstChar(name) + "()";
-				if (genericType.endsWith(".ANY>"))
-					doCast = true;
-				if (cdaElement.getDataType().endsWith(".IVLTS"))
-					doCast = true;
+		if (isClassCollection(memberType)) {
 
-				if (doCast)
-					cast = "(" + cdaElement.getDataType() + ")";
+			boolean isLocalField = (myClass.getExtendedTypes().size() == 0);
 
-				body.addStatement(cdaElement.getDataType() + " retVal = null;");
-				body.addStatement("if (" + temp + " != null) if (" + temp
-						+ ".size() > 0)  retVal = " + cast + temp + ".get(0);");
-				body.addStatement("return retVal;");
-			} else {
-				if (genericType.endsWith(".CD") && cdaElement.getDataType().endsWith(".CE"))
-					doCast = true;
-
-				if (doCast)
-					cast = "(" + cdaElement.getDataType() + ")";
-
-				body.addStatement("return " + cast + temp + ";");
+			if ("effectiveTime".equals(name) && !isLocalField) {
+				dataType = "org.ehealth_connector.common.hl7cdar2.SXCMTS";
 			}
-		} else
-			body.addStatement("return this;");
+			if ("value".equals(name)) {
+				dataType = "org.ehealth_connector.common.hl7cdar2.ANY";
+			}
+			addImport(compilationUnit, "java.util.List");
+			dataType = "java.util.List<" + dataType + ">";
+		}
+
+		String baseName = cdaElement.getJavaName();
+		// List<MethodDeclaration> existingMethods = myClass
+		// .getMethodsByName(createGetterNamePascalCase(baseName));
+		// if (existingMethods.size() > 0) {
+		// String methodName = existingMethods.get(0).getNameAsString();
+		// String methodDataType = existingMethods.get(0).getType().asString();
+		// methodName = methodName
+		// +
+		// JavaCodeGenerator.toPascalCase(getClassWithoutPackage(methodDataType));
+		// // prepare adjust name of first method
+		// if (!existBodyComment(existingMethods.get(0), PENDING_ACTIONS)) {
+		// addBodyComment(existingMethods.get(0), PENDING_ACTIONS);
+		// addBodyComment(existingMethods.get(0), PENDING_ACTIONS_ADJUST_NAME +
+		// methodName);
+		// }
+		//
+		// // adjust name of new method
+		// baseName = baseName +
+		// JavaCodeGenerator.toPascalCase(getClassWithoutPackage(dataType));
+		// }
+
+		List<MethodDeclaration> existingMethods = myClass
+				.getMethodsByName(createGetterNamePascalCase(baseName));
+		if (existingMethods.size() == 0) {
+			method = myClass.addMethod(createGetterNamePascalCase(baseName),
+					publicModifier().getKeyword());
+			method.setType(dataType);
+
+			String comment = "Gets the " + cdaElement.getJavaName();
+			String desc = cdaElement.getDescription();
+			if (desc != null)
+				comment += Util.getPlatformSpecificLineBreak() + desc;
+
+			method.setJavadocComment(comment);
+
+			BlockStmt body = method.createBody();
+			String genericType = getGenericFieldType(elForType.getDataType(), name);
+			if (myClass.getExtendedTypes().size() == 0)
+				isMethod = false;
+			if (memberType != null) {
+				String temp = name;
+				String cast = "";
+				boolean doCast = false;
+				if (isClassCollection(memberType)) {
+					if (isMethod)
+						temp = createGetterNameUpperFirstChar(name) + "()";
+					if (genericType.endsWith(".ANY>"))
+						doCast = true;
+					if (cdaElement.getDataType().endsWith(".IVLTS"))
+						doCast = true;
+
+					if (doCast)
+						cast = "(" + cdaElement.getDataType() + ")";
+
+					// body.addStatement(cdaElement.getDataType() + " retVal =
+					// null;");
+					// body.addStatement("if (" + temp + " != null) if (" + temp
+					// + ".size() > 0) retVal = " + cast + temp + ".get(0);");
+					// body.addStatement("return retVal;");
+					body.addStatement("return " + name + ";");
+				} else {
+					if (genericType.endsWith(".CD") && cdaElement.getDataType().endsWith(".CE"))
+						doCast = true;
+
+					if (doCast)
+						cast = "(" + cdaElement.getDataType() + ")";
+
+					body.addStatement("return " + cast + temp + ";");
+				}
+			} else
+				body.addStatement("return this;");
+		}
 	}
 
 	private static String createGetterNamePascalCase(String name) {
@@ -619,10 +665,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		if ("hl7:routeCode".equals(cdaElement.getXmlName()))
 			dataType = dataType.replace(".CD", ".CE");
 		// End of fix
-		if ("hl7:typeId".contentEquals(cdaElement.getXmlName())) {
+		if ("hl7:typeId".equals(cdaElement.getXmlName())) {
 			dataType = "org.ehealth_connector.common.hl7cdar2.POCDMT000040InfrastructureRootTypeId";
 		}
-
 		String comment = "Sets the " + cdaElement.getJavaName();
 		String desc = cdaElement.getDescription();
 		if (desc != null)
@@ -738,6 +783,19 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		return retVal;
 	}
 
+	private static boolean existBodyComment(MethodDeclaration method, String comment) {
+		boolean retVal = false;
+		Optional<BlockStmt> bodyOpt = method.getBody();
+		if (bodyOpt.isPresent()) {
+			for (Comment c : bodyOpt.get().getOrphanComments()) {
+				retVal = (c.asLineComment().getContent().equals(comment));
+				if (retVal)
+					break;
+			}
+		}
+		return retVal;
+	}
+
 	@SuppressWarnings("rawtypes")
 	public static Class getClass(String className) {
 		Class retVal = null;
@@ -749,6 +807,14 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			// Do nothing
 		}
 
+		return retVal;
+	}
+
+	private static String getClassWithoutPackage(String dataType) {
+		String retVal = dataType;
+		while (retVal.contains(".")) {
+			retVal = retVal.substring(retVal.indexOf(".") + 1, retVal.length());
+		}
 		return retVal;
 	}
 
@@ -1478,6 +1544,27 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				createInitVersionMethods(compilationUnit, myClass);
 			}
 
+			// complete pending actions
+			for (MethodDeclaration method : myClass.getMethods()) {
+				if (existBodyComment(method, PENDING_ACTIONS)) {
+					Optional<BlockStmt> bodyOpt = method.getBody();
+					if (bodyOpt.isPresent()) {
+						for (Comment c : bodyOpt.get().getOrphanComments()) {
+							if (c.asLineComment().getContent().equals(PENDING_ACTIONS))
+								bodyOpt.get().removeOrphanComment(c);
+							if (c.asLineComment().getContent()
+									.startsWith(PENDING_ACTIONS_ADJUST_NAME)) {
+								bodyOpt.get().removeOrphanComment(c);
+								String methodName = c.getContent().substring(
+										PENDING_ACTIONS_ADJUST_NAME.length(),
+										c.getContent().length());
+								method.setName(methodName);
+							}
+						}
+					}
+				}
+			}
+
 			File outFile = new File(fullDstFilePath + className + ".java");
 			JavaCodeGenerator.completeAndSave(compilationUnit, outFile);
 		}
@@ -1497,9 +1584,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		String javaName = JavaCodeGenerator.toCamelCase(xmlName);
 		cdaElement.setJavaName(javaName);
 
-		boolean elementExist = !(myClass.getMethodsByName(createAdderNamePascalCase(javaName))
-				.isEmpty()
-				&& myClass.getMethodsByName(createGetterNamePascalCase(javaName)).isEmpty());
+		boolean elementExist = existAdderOrSetter(myClass, cdaElement);
 
 		if (!elementExist) {
 			if (createOwnProperty)
@@ -2096,6 +2181,55 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		}
 	}
 
+	private boolean existAdderOrSetter(ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
+		boolean retVal = false;
+		String xmlName = cdaElement.getXmlName();
+		String javaName = JavaCodeGenerator.toCamelCase(xmlName);
+		cdaElement.setJavaName(javaName);
+
+		List<MethodDeclaration> setterList = myClass
+				.getMethodsByName(createSetterNamePascalCase(javaName));
+		List<MethodDeclaration> adderList = myClass
+				.getMethodsByName(createAdderNamePascalCase(javaName));
+
+		if (!setterList.isEmpty() || !adderList.isEmpty()) {
+			String name = cdaElement.getXmlName().replace("hl7:", "").replace("pharm:", "")
+					.replace("xsi:", "");
+
+			String dataType = null;
+			CdaElement elForType = cdaElement.getParentCdaElement();
+			if (elForType == null)
+				elForType = cdaElement;
+			try {
+				dataType = getDataType(elForType.getDataType(), name);
+			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException
+					| NoSuchFieldException | SecurityException e) {
+				// Do nothing
+			}
+			if ("effectiveTime".equals(name)) {
+				dataType = "org.ehealth_connector.common.hl7cdar2.IVLTS";
+			}
+			if (!retVal) {
+				for (MethodDeclaration methodDeclaration : setterList) {
+					if (methodDeclaration.getParameterByType(dataType).isPresent()) {
+						retVal = true;
+						break;
+					}
+				}
+			}
+			if (!retVal) {
+				for (MethodDeclaration methodDeclaration : adderList) {
+					if (methodDeclaration.getParameterByType(dataType).isPresent()) {
+						retVal = true;
+						break;
+					}
+				}
+			}
+		}
+
+		return retVal;
+	}
+
 	@Override
 	public void exitAttribute(Hl7ItsParser.AttributeContext ctx) {
 		processingAttribute--;
@@ -2261,6 +2395,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				}
 			}
 		}
+
+		if (retVal == null) {
+			if (parentClassName.endsWith(".AD"))
+				retVal = "org.ehealth_connector.common.hl7cdar2.ADXP";
+		}
+
 		return retVal;
 	}
 
