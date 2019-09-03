@@ -11,15 +11,17 @@
  * Accompanying materials are made available under the terms of the Creative Commons
  * Attribution-ShareAlike 4.0 License.
  *
- * This line is intended for UTF-8 encoding checks, do not modify/delete: Ã¤Ã¶Ã¼Ã©Ã¨
+ * This line is intended for UTF-8 encoding checks, do not modify/delete: äöüéè
  *
  */
 package org.ehealth_connector.codegenerator.cda.config;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.net.MalformedURLException;
 
+import org.ehealth_connector.codegenerator.cda.ArtDecor2JavaManager;
 import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.Util;
 import org.junit.Test;
@@ -47,13 +49,19 @@ public class ContentProfileConfigTest {
 				+ "test";
 
 		ContentProfileConfig contentProfileConfig = ContentProfileConfig.builder()
-				.withArtDecorBaseUrl(artDecorBaseUrl)
-				.withArtDecorDocTemplateId(artDecorDocTemplateId).withArtDecorPrefix(artDecorPrefix)
-				.withTargetDir(targetDir).withTargetNamespace(targetNamespace).build();
+				.withArtDecorBaseUrl(artDecorBaseUrl).withTargetDir(targetDir)
+				.withTargetNamespace(targetNamespace).build();
+
+		contentProfileConfig.addTemplateId(artDecorDocTemplateId, "dynamic");
+		contentProfileConfig.addProject(artDecorPrefix,
+				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
 
 		assertTrue(artDecorBaseUrl.toString().equals(contentProfileConfig.getArtDecorBaseUrl()));
-		assertTrue(artDecorPrefix.equals(contentProfileConfig.getArtDecorPrefix()));
-		assertTrue(artDecorDocTemplateId.equals(contentProfileConfig.getArtDecorDocTemplateId()));
+		assertTrue(artDecorPrefix
+				.equals(contentProfileConfig.getArtDecorProjectMap().keySet().toArray()[0]));
+		assertEquals(1, contentProfileConfig.getArtDecorDocTemplateMap().size());
+		assertTrue(artDecorDocTemplateId
+				.equals(contentProfileConfig.getArtDecorDocTemplateMap().keySet().toArray()[0]));
 		assertTrue(targetNamespace.equals(contentProfileConfig.getTargetNamespace()));
 		assertTrue(targetDir.equals(contentProfileConfig.getTargetDir()));
 

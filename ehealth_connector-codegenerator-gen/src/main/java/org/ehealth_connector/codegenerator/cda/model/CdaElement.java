@@ -14,7 +14,7 @@
  * This line is intended for UTF-8 encoding checks, do not modify/delete: äöüéè
  *
  */
-package org.ehealth_connector.codegenerator.cda;
+package org.ehealth_connector.codegenerator.cda.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;

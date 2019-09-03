@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.HashMap;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -68,23 +69,25 @@ public class ArtDecorRestClientTest {
 
 		String dir = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
 				+ FileUtil.getPlatformSpecificPathSeparator();
-		ArtDecorRestClient artDecorRestClient = new ArtDecorRestClient(
-				new URL("https://art-decor.org/decor/services/"), dir);
 
-		artDecorRestClient.addArtDecorProject("cdachemed-");
-		artDecorRestClient.addArtDecorProject("ad1bbr-");
-		artDecorRestClient.addArtDecorProject("ad2bbr-");
-		artDecorRestClient.addArtDecorProject("ch-epr-");
-		artDecorRestClient.addArtDecorProject("ch-pharm-");
-		artDecorRestClient.addArtDecorProject("ch-pcc-");
-		artDecorRestClient.addArtDecorProject("hl7chcda-");
+		HashMap<String, String> artDecorProjectMap = new HashMap<String, String>();
+		artDecorProjectMap.put("cdachemed-", "https://art-decor.org/decor/services/");
+		artDecorProjectMap.put("ad1bbr-", "https://art-decor.org/decor/services/");
+		artDecorProjectMap.put("ad2bbr-", "https://art-decor.org/decor/services/");
+		artDecorProjectMap.put("ch-epr-", "https://art-decor.org/decor/services/");
+		artDecorProjectMap.put("ch-pharm-", "https://art-decor.org/decor/services/");
+		artDecorProjectMap.put("ch-pcc-", "https://art-decor.org/decor/services/");
+		artDecorProjectMap.put("hl7chcda-", "https://art-decor.org/decor/services/");
+		artDecorProjectMap.put("IHE-PCC-", "https://art-decor.ihe-europe.net/decor/services/");
+
+		ArtDecorRestClient artDecorRestClient = new ArtDecorRestClient(artDecorProjectMap, dir);
 
 		File dest;
 
 		// MedicationCardDocument
 		String templateId;
 		templateId = "2.16.756.5.30.1.1.10.1.3";
-		artDecorRestClient.downloadTemplateRecursive("cdachemed-", templateId, "dynamic");
+		artDecorRestClient.downloadTemplateRecursive(templateId, "dynamic");
 		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId);
 		assertTrue(dest.listFiles().length == 2);
 		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId
@@ -93,7 +96,7 @@ public class ArtDecorRestClientTest {
 
 		// MedicationDispenseDocument
 		templateId = "2.16.756.5.30.1.1.10.1.5";
-		artDecorRestClient.downloadTemplateRecursive("cdachemed-", templateId, "dynamic");
+		artDecorRestClient.downloadTemplateRecursive(templateId, "dynamic");
 		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId);
 		assertTrue(dest.listFiles().length == 2);
 		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId
@@ -102,7 +105,7 @@ public class ArtDecorRestClientTest {
 
 		// MedicationListDocument
 		templateId = "2.16.756.5.30.1.1.10.1.13";
-		artDecorRestClient.downloadTemplateRecursive("cdachemed-", templateId, "dynamic");
+		artDecorRestClient.downloadTemplateRecursive(templateId, "dynamic");
 		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId);
 		assertTrue(dest.listFiles().length == 2);
 		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId
@@ -111,7 +114,7 @@ public class ArtDecorRestClientTest {
 
 		// MedicationPrescriptionDocument
 		templateId = "2.16.756.5.30.1.1.10.1.4";
-		artDecorRestClient.downloadTemplateRecursive("cdachemed-", templateId, "dynamic");
+		artDecorRestClient.downloadTemplateRecursive(templateId, "dynamic");
 		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId);
 		assertTrue(dest.listFiles().length == 2);
 		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId
@@ -120,7 +123,7 @@ public class ArtDecorRestClientTest {
 
 		// MedicationTreatmentPlanDocument
 		templateId = "2.16.756.5.30.1.1.10.1.7";
-		artDecorRestClient.downloadTemplateRecursive("cdachemed-", templateId, "dynamic");
+		artDecorRestClient.downloadTemplateRecursive(templateId, "dynamic");
 		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId);
 		assertTrue(dest.listFiles().length == 2);
 		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId
@@ -129,7 +132,7 @@ public class ArtDecorRestClientTest {
 
 		// PharmaceuticalAdviceDocument
 		templateId = "2.16.756.5.30.1.1.10.1.6";
-		artDecorRestClient.downloadTemplateRecursive("cdachemed-", templateId, "dynamic");
+		artDecorRestClient.downloadTemplateRecursive(templateId, "dynamic");
 		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId);
 		assertTrue(dest.listFiles().length == 2);
 		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId
@@ -152,20 +155,19 @@ public class ArtDecorRestClientTest {
 
 		String dir = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
 				+ FileUtil.getPlatformSpecificPathSeparator();
-		ArtDecorRestClient artDecorRestClient = new ArtDecorRestClient(
-				new URL("https://art-decor.org/decor/services/"), dir);
 
-		artDecorRestClient.addArtDecorProject("cdachlrep-");
-		artDecorRestClient.addArtDecorProject("hl7chcda-");
-		artDecorRestClient.addArtDecorProject("ch-epr-");
-		artDecorRestClient.addArtDecorProject("ch-palm-");
-		artDecorRestClient.addArtDecorProject("ch-pcc-");
-		artDecorRestClient.addArtDecorProject("ch-pharm-");
-
+		HashMap<String, String> artDecorProjectMap = new HashMap<String, String>();
+		artDecorProjectMap.put("cdachlrep-", "https://art-decor.org/decor/services/");
+		artDecorProjectMap.put("hl7chcda-", "https://art-decor.org/decor/services/");
+		artDecorProjectMap.put("ch-epr-", "https://art-decor.org/decor/services/");
+		artDecorProjectMap.put("ch-palm-", "https://art-decor.org/decor/services/");
+		artDecorProjectMap.put("ch-pcc-", "https://art-decor.org/decor/services/");
 		// for Other Relevant Observations Section - coded
-		artDecorRestClient.addArtDecorProject("cdachvacd-");
+		artDecorProjectMap.put("cdachvacd-", "https://art-decor.org/decor/services/");
 
-		artDecorRestClient.downloadTemplateRecursive("cdachlrep-", "2.16.756.5.30.1.1.10.1.10",
+		ArtDecorRestClient artDecorRestClient = new ArtDecorRestClient(artDecorProjectMap, dir);
+
+		artDecorRestClient.downloadTemplateRecursive("2.16.756.5.30.1.1.10.1.10",
 				"2019-07-30T18:01:10");
 
 		File dest;
@@ -178,32 +180,4 @@ public class ArtDecorRestClientTest {
 		assertTrue(dest.listFiles().length > 1);
 	}
 
-	/**
-	 * Test a single template download from ART-DECOR.
-	 *
-	 * @throws ClientProtocolException
-	 *             the client protocol exception
-	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
-	 */
-	@Test
-	public void templateTestSingle() throws ClientProtocolException, IOException {
-
-		String content = "";
-		InputStream is = ArtDecorRestClient.getArtDecorTemplate(
-				new URL("https://art-decor.org/decor/services/"), "cdachlrep-",
-				"2.16.756.5.30.1.1.10.1.10", "2018-04-19T00:00:00");
-		content = IOUtils.toString(is, Charsets.UTF_8).replace("\r\n", "\n");
-
-		// This is just to write down the expected content. Do not commit with
-		// the following line enabled!
-		// FileUtils.writeStringToFile(expectedFile, content, Charsets.UTF_8);
-
-		String expectedContent = IOUtils
-				.toString(getClass().getResourceAsStream("/2.16.756.5.30.1.1.10.1.10.xml"),
-						Charsets.UTF_8)
-				.replace("\r\n", "\n");
-
-		assertTrue(expectedContent.equals(content));
-	}
 }

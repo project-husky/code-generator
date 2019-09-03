@@ -65,6 +65,8 @@ public class Hl7Its2EhcTransformer {
 	 *             the saxon api exception
 	 */
 	public static void transform(File inputFile, File outputFile) throws SaxonApiException {
+
+		System.out.print("Transforming " + inputFile.getName() + "...");
 		Processor processor = new Processor(false);
 		XsltCompiler compiler = processor.newXsltCompiler();
 		XsltExecutable xsl = compiler
@@ -83,6 +85,7 @@ public class Hl7Its2EhcTransformer {
 		transformer.setDestination(out);
 
 		transformer.transform();
+		System.out.println("done.");
 
 	}
 

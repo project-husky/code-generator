@@ -18,6 +18,7 @@ package org.ehealth_connector.codegenerator.cda.config;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 
 import javax.annotation.Generated;
 
@@ -42,8 +43,8 @@ public class ContentProfileConfig {
 	@Generated("SparkTools")
 	public static final class Builder {
 		private String artDecorBaseUrl;
-		private String artDecorDocTemplateId;
-		private String artDecorPrefix;
+		private HashMap<String, String> artDecorDocTemplateMap;
+		private HashMap<String, String> artDecorProjectMap;
 		private String targetDir;
 		private String targetNamespace;
 
@@ -59,13 +60,13 @@ public class ContentProfileConfig {
 			return this;
 		}
 
-		public Builder withArtDecorDocTemplateId(String artDecorDocTemplateId) {
-			this.artDecorDocTemplateId = artDecorDocTemplateId;
+		public Builder withArtDecorDocTemplateMap(HashMap<String, String> artDecorDocTemplateMap) {
+			this.artDecorDocTemplateMap = artDecorDocTemplateMap;
 			return this;
 		}
 
-		public Builder withArtDecorPrefix(String artDecorPrefix) {
-			this.artDecorPrefix = artDecorPrefix;
+		public Builder withArtDecorProjectMap(HashMap<String, String> artDecorProjectMap) {
+			this.artDecorProjectMap = artDecorProjectMap;
 			return this;
 		}
 
@@ -93,11 +94,17 @@ public class ContentProfileConfig {
 	/** The art decor base url. */
 	private String artDecorBaseUrl;
 
-	/** The art decor doc template id. */
-	private String artDecorDocTemplateId;
+	/** The art decor doc template id list. */
+	private HashMap<String, String> artDecorDocTemplateMap;
 
-	/** The art decor prefix. */
-	private String artDecorPrefix;
+	/** The art decor project references. */
+	private HashMap<String, String> artDecorProjectMap;
+
+	/** The art decor main prefix. */
+	private String artDecorMainPrefix;
+
+	/** The art decor main base url. */
+	private String artDecorMainBaseUrl;
 
 	/** The target dir. */
 	private String targetDir = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator()
@@ -110,13 +117,18 @@ public class ContentProfileConfig {
 	 * Instantiates a new content profile config. Default constructor.
 	 */
 	public ContentProfileConfig() {
+		if (this.artDecorDocTemplateMap == null)
+			this.artDecorDocTemplateMap = new HashMap<String, String>();
+		if (this.artDecorProjectMap == null)
+			this.artDecorProjectMap = new HashMap<String, String>();
+
 	}
 
 	@Generated("SparkTools")
 	private ContentProfileConfig(Builder builder) {
 		this.artDecorBaseUrl = builder.artDecorBaseUrl;
-		this.artDecorDocTemplateId = builder.artDecorDocTemplateId;
-		this.artDecorPrefix = builder.artDecorPrefix;
+		this.artDecorDocTemplateMap = builder.artDecorDocTemplateMap;
+		this.artDecorProjectMap = builder.artDecorProjectMap;
 		this.targetDir = builder.targetDir;
 		this.targetNamespace = builder.targetNamespace;
 	}
@@ -126,22 +138,68 @@ public class ContentProfileConfig {
 	 *
 	 * @param artDecorBaseUrl
 	 *            the art decor base url
-	 * @param artDecorPrefix
-	 *            the art decor prefix
-	 * @param artDecorDocTemplateId
-	 *            the art decor doc template id
 	 * @param targetNamespace
 	 *            the target namespace
 	 * @param targetDir
 	 *            the target dir
 	 */
-	public ContentProfileConfig(URL artDecorBaseUrl, String artDecorPrefix,
-			String artDecorDocTemplateId, String targetNamespace, String targetDir) {
+	public ContentProfileConfig(URL artDecorBaseUrl, String targetNamespace, String targetDir) {
+		if (this.artDecorDocTemplateMap == null)
+			this.artDecorDocTemplateMap = new HashMap<String, String>();
+		if (this.artDecorProjectMap == null)
+			this.artDecorProjectMap = new HashMap<String, String>();
+
 		this.artDecorBaseUrl = artDecorBaseUrl.toString();
-		this.artDecorPrefix = artDecorPrefix;
-		this.artDecorDocTemplateId = artDecorDocTemplateId;
 		this.targetNamespace = targetNamespace;
 		this.targetDir = targetDir;
+	}
+
+	/**
+	 * Adds a project to the list.
+	 *
+	 * @param prefix
+	 *            the ART-DECOR prefix
+	 * @param url
+	 *            the ART-DECOR base url
+	 * @throws MalformedURLException
+	 *             the malformed URL exception
+	 */
+	public void addProject(String prefix, String url) throws MalformedURLException {
+		if (this.artDecorProjectMap == null)
+			this.artDecorProjectMap = new HashMap<String, String>();
+		addProject(prefix, new URL(url));
+	}
+
+	/**
+	 * Adds a project to the list. You are required to add the main ART-DECOR
+	 * project first! (The main ART-DECOR project is the where the document
+	 * template(s) are located).
+	 *
+	 * @param prefix
+	 *            the ART-DECOR prefix
+	 * @param url
+	 *            the ART-DECOR base url
+	 */
+	public void addProject(String prefix, URL url) {
+		if (this.artDecorProjectMap == null)
+			this.artDecorProjectMap = new HashMap<String, String>();
+		artDecorProjectMap.put(prefix, url.toString());
+		if (artDecorMainPrefix == null)
+			artDecorMainPrefix = prefix;
+		if (artDecorMainBaseUrl == null)
+			artDecorMainBaseUrl = url.toString();
+	}
+
+	/**
+	 * Adds a template Id to the list.
+	 *
+	 * @param value
+	 *            the value
+	 */
+	public void addTemplateId(String templateId, String effectiveTime) {
+		if (this.artDecorDocTemplateMap == null)
+			this.artDecorDocTemplateMap = new HashMap<String, String>();
+		artDecorDocTemplateMap.put(templateId, effectiveTime);
 	}
 
 	/**
@@ -182,26 +240,49 @@ public class ContentProfileConfig {
 	}
 
 	/**
-	 * <div class="en">Gets the ART-DECOR document template id.</div>
+	 * <div class="en">Gets the ART-DECOR document template id list.</div>
 	 *
-	 * <div class="de">Ruft die ART-DECOR document template ID ab.</div>
+	 * <div class="de">Ruft die Liste der ART-DECOR document template IDs
+	 * ab.</div>
 	 *
 	 *
 	 * @return the art decor doc template id
 	 */
-	public String getArtDecorDocTemplateId() {
-		return artDecorDocTemplateId;
+	public HashMap<String, String> getArtDecorDocTemplateMap() {
+		if (this.artDecorDocTemplateMap == null)
+			this.artDecorDocTemplateMap = new HashMap<String, String>();
+		return artDecorDocTemplateMap;
 	}
 
 	/**
-	 * <div class="en">Gets the ART-DECOR prefix.</div>
+	 * Gets the art decor main base url.
 	 *
-	 * <div class="de">Ruft den ART-DECOR Präfix ab.</div>
-	 *
-	 * @return the art decor prefix
+	 * @return the art decor main base url
 	 */
-	public String getArtDecorPrefix() {
-		return artDecorPrefix;
+	public String getArtDecorMainBaseUrl() {
+		return artDecorMainBaseUrl;
+	}
+
+	/**
+	 * Gets the art decor main prefix.
+	 *
+	 * @return the art decor main prefix
+	 */
+	public String getArtDecorMainPrefix() {
+		return artDecorMainPrefix;
+	}
+
+	/**
+	 * <div class="en">Gets the ART-DECOR project list.</div>
+	 *
+	 * <div class="de">Ruft die Liste der ART-DECOR Projekte ab.</div>
+	 *
+	 * @return the art decor project list
+	 */
+	public HashMap<String, String> getArtDecorProjectMap() {
+		if (this.artDecorProjectMap == null)
+			this.artDecorProjectMap = new HashMap<String, String>();
+		return artDecorProjectMap;
 	}
 
 	/**
@@ -268,28 +349,37 @@ public class ContentProfileConfig {
 	}
 
 	/**
-	 * <div class="en">Sets the ART-DECOR document template id.</div>
+	 * Sets the art decor doc template map.
 	 *
-	 * <div class="de">Legt die ART-DECOR document template ID fest.</div>
-	 *
-	 * @param artDecorDocTemplateId
-	 *            the new art decor doc template id
+	 * @param artDecorDocTemplateMap
+	 *            the art decor doc template map
 	 */
-	public void setArtDecorDocTemplateId(String artDecorDocTemplateId) {
-		this.artDecorDocTemplateId = artDecorDocTemplateId;
+	public void setArtDecorDocTemplateMap(HashMap<String, String> artDecorDocTemplateMap) {
+		if (this.artDecorDocTemplateMap == null)
+			this.artDecorDocTemplateMap = new HashMap<String, String>();
+		this.artDecorDocTemplateMap = artDecorDocTemplateMap;
+	}
+
+	public void setArtDecorMainBaseUrl(String artDecorMainBaseUrl) {
+		this.artDecorMainBaseUrl = artDecorMainBaseUrl;
+	}
+
+	public void setArtDecorMainPrefix(String artDecorMainPrefix) {
+		this.artDecorMainPrefix = artDecorMainPrefix;
 	}
 
 	/**
-	 * <div class="en">Sets the ART-DECOR prefix.</div>
+	 * <div class="en">Sets the ART-DECOR project list.</div>
 	 *
-	 * <div class="de">Legt den ART-DECOR Präfix fest.</div>
+	 * <div class="de">Legt die Liste der ART-DECOR Projekte fest.</div>
 	 *
-	 *
-	 * @param artDecorPrefix
-	 *            the new art decor prefix
+	 * @param artDecorProjectMap
+	 *            the art decor project map
 	 */
-	public void setArtDecorPrefix(String artDecorPrefix) {
-		this.artDecorPrefix = artDecorPrefix;
+	public void setArtDecorProjectMap(HashMap<String, String> artDecorProjectMap) {
+		if (this.artDecorProjectMap == null)
+			this.artDecorProjectMap = new HashMap<String, String>();
+		this.artDecorProjectMap = artDecorProjectMap;
 	}
 
 	/**

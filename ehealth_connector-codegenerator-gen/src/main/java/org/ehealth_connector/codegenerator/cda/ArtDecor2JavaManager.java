@@ -43,16 +43,6 @@ public class ArtDecor2JavaManager {
 
 	public final static String ART_DECOR_MAIN_SERVER_BASE_URL = "https://art-decor.org/decor/services/";
 
-	public final static void main(String[] args) {
-		// args: at least the base URL to ART-DECOR, the ART-DECOR prefix for
-		// the desired project and the template id of the desired Document
-		// Template. These args are handover to the following method.
-	}
-
-	public void generateArtDecorDocumentTemplate(String baseUrl, String prefix, String templateId) {
-
-	}
-
 	/**
 	 * <div class="en">Loads a content profile configuration from the given
 	 * file.</div>

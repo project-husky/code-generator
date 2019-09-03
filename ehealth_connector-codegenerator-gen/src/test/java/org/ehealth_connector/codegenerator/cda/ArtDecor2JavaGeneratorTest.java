@@ -18,11 +18,13 @@ package org.ehealth_connector.codegenerator.cda;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.xml.bind.JAXBException;
 
+import org.ehealth_connector.codegenerator.cda.model.CdaTemplate;
 import org.ehealth_connector.codegenerator.java.JavaCodeGenerator;
 import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.Util;
@@ -76,7 +78,7 @@ public class ArtDecor2JavaGeneratorTest {
 
 		// Common properties
 		String prefix = "cdachemed-";
-		String packageName = "org.ehealth_connector.cda.ch.emed.v0953";
+		String packageName = "org.ehealth_connector.cda.ch.emed.v0954";
 		String dstFilePath = "C:\\src\\git\\eHC_AD2J\\api-java\\ehealth_connector-cda\\ehealth_connector-cda-ch";
 		String fileHeader = JavaCodeGenerator.getFileHeader();
 
@@ -86,7 +88,8 @@ public class ArtDecor2JavaGeneratorTest {
 				+ FileUtil.getPlatformSpecificPathSeparator() + templateId
 				+ FileUtil.getPlatformSpecificPathSeparator();
 		artDecor2JavaGenerator = new ArtDecor2JavaGenerator(null, templateIndex, valueSetIndex,
-				templateList, srcFilePath, dstFilePath, packageName, fileHeader, prefix);
+				templateList, srcFilePath, dstFilePath, packageName, fileHeader, prefix,
+				new URL(ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL));
 		artDecor2JavaGenerator.doOneTemplate(templateId);
 
 		// MedicationDispenseDocument
@@ -185,7 +188,8 @@ public class ArtDecor2JavaGeneratorTest {
 				+ FileUtil.getPlatformSpecificPathSeparator() + templateId
 				+ FileUtil.getPlatformSpecificPathSeparator();
 		artDecor2JavaGenerator = new ArtDecor2JavaGenerator(null, templateIndex, valueSetIndex,
-				templateList, srcFilePath, dstFilePath, packageName, fileHeader, prefix);
+				templateList, srcFilePath, dstFilePath, packageName, fileHeader, prefix,
+				new URL(ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL));
 		artDecor2JavaGenerator.doOneTemplate(templateId);
 		artDecor2JavaGenerator.createJavaClasses();
 

@@ -11,7 +11,7 @@
  * Accompanying materials are made available under the terms of the Creative Commons
  * Attribution-ShareAlike 4.0 License.
  *
- * This line is intended for UTF-8 encoding checks, do not modify/delete: Ã¤Ã¶Ã¼Ã©Ã¨
+ * This line is intended for UTF-8 encoding checks, do not modify/delete: äöüéè
  *
  */
 package org.ehealth_connector.codegenerator.cda.config;
@@ -48,10 +48,11 @@ public class ContentProfilePackageConfigTest {
 				+ "emed";
 
 		ContentProfileConfig contentProfileConfig1 = ContentProfileConfig.builder()
-				.withArtDecorBaseUrl(artDecorBaseUrl1)
-				.withArtDecorDocTemplateId(artDecorDocTemplateId1)
-				.withArtDecorPrefix(artDecorPrefix1).withTargetDir(targetDir1)
+				.withArtDecorBaseUrl(artDecorBaseUrl1).withTargetDir(targetDir1)
 				.withTargetNamespace(targetNamespace1).build();
+
+		contentProfileConfig1.addTemplateId(artDecorDocTemplateId1, "dynamic");
+		contentProfileConfig1.addProject(artDecorPrefix1, artDecorBaseUrl1);
 
 		String artDecorBaseUrl2 = "https://foo.bar";
 		String artDecorPrefix2 = "cdachlrep-";
@@ -61,10 +62,11 @@ public class ContentProfilePackageConfigTest {
 				+ "lrep";
 
 		ContentProfileConfig contentProfileConfig2 = ContentProfileConfig.builder()
-				.withArtDecorBaseUrl(artDecorBaseUrl2)
-				.withArtDecorDocTemplateId(artDecorDocTemplateId2)
-				.withArtDecorPrefix(artDecorPrefix2).withTargetDir(targetDir2)
+				.withArtDecorBaseUrl(artDecorBaseUrl2).withTargetDir(targetDir2)
 				.withTargetNamespace(targetNamespace2).build();
+
+		contentProfileConfig2.addTemplateId(artDecorDocTemplateId2, "dynamic");
+		contentProfileConfig1.addProject(artDecorPrefix2, artDecorBaseUrl2);
 
 		String description = "This is a test package for multiple content profiles";
 		ContentProfilePackageConfig contentProfilePackageConfig = ContentProfilePackageConfig
@@ -78,9 +80,11 @@ public class ContentProfilePackageConfigTest {
 		assertTrue(artDecorBaseUrl1.toString().equals(contentProfilePackageConfig
 				.getContentProfileConfigList().get(0).getArtDecorBaseUrl()));
 		assertTrue(artDecorPrefix1.equals(contentProfilePackageConfig.getContentProfileConfigList()
-				.get(0).getArtDecorPrefix()));
-		assertTrue(artDecorDocTemplateId1.equals(contentProfilePackageConfig
-				.getContentProfileConfigList().get(0).getArtDecorDocTemplateId()));
+				.get(0).getArtDecorProjectMap().keySet().toArray()[0]));
+
+		assertTrue(artDecorDocTemplateId1
+				.equals(contentProfilePackageConfig.getContentProfileConfigList().get(0)
+						.getArtDecorDocTemplateMap().keySet().toArray()[0]));
 
 		assertTrue(targetNamespace2.equals(contentProfilePackageConfig.getContentProfileConfigList()
 				.get(1).getTargetNamespace()));

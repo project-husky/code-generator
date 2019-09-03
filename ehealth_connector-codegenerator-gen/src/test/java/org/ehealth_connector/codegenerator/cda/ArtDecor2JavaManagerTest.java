@@ -11,7 +11,7 @@
  * Accompanying materials are made available under the terms of the Creative Commons
  * Attribution-ShareAlike 4.0 License.
  *
- * This line is intended for UTF-8 encoding checks, do not modify/delete: Ã¤Ã¶Ã¼Ã©Ã¨
+ * This line is intended for UTF-8 encoding checks, do not modify/delete: äöüéè
  *
  */
 package org.ehealth_connector.codegenerator.cda;
@@ -42,139 +42,67 @@ public class ArtDecor2JavaManagerTest {
 	 * @throws ConfigurationException
 	 */
 	@Test
-	public void saveLoadTestContentProfileConfig() throws IOException, ConfigurationException {
+	public void saveLoadTestContentProfileConfigEmed() throws IOException, ConfigurationException {
+
 		ArtDecor2JavaManager artDecor2JavaManager = new ArtDecor2JavaManager();
-		File configFile = new File(Util.getTempDirectory()
-				+ FileUtil.getPlatformSpecificPathSeparator() + "ContentProfileConfig.yml");
-
-		// Medication Card document
-		String artDecorBaseUrl = ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL;
-		String artDecorDocTemplateId = "2.16.756.5.30.1.1.10.1.3";
-		String artDecorPrefix = "cdachemed-";
-		String targetDir = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator()
-				+ "emed";
-		String targetNamespace = "org.ehealth_connector.cda.ch.emed";
-
-		ContentProfileConfig contentProfileConfig = ContentProfileConfig.builder()
-				.withArtDecorBaseUrl(artDecorBaseUrl)
-				.withArtDecorDocTemplateId(artDecorDocTemplateId).withArtDecorPrefix(artDecorPrefix)
-				.withTargetDir(targetDir).withTargetNamespace(targetNamespace).build();
-
-		// Prepare cleanup
-		configFile.deleteOnExit();
-
-		// Save a content profile config
-		artDecor2JavaManager.saveContentProfileConfig(contentProfileConfig, configFile);
-
-		// load the saved package
-		ArtDecor2JavaManager artDecor2JavaManager2 = new ArtDecor2JavaManager();
-		ContentProfileConfig contentProfileConfig2 = artDecor2JavaManager2
-				.loadContentProfileConfig(configFile);
-
-		assertTrue(artDecorBaseUrl.equals(contentProfileConfig2.getArtDecorBaseUrl()));
-		assertTrue(artDecorPrefix.equals(contentProfileConfig2.getArtDecorPrefix()));
-		assertTrue(artDecorDocTemplateId.equals(contentProfileConfig2.getArtDecorDocTemplateId()));
-		assertTrue(targetNamespace.equals(contentProfileConfig2.getTargetNamespace()));
-		assertTrue(targetDir.equals(contentProfileConfig2.getTargetDir()));
-
-	}
-
-	/**
-	 * Tests for save and load a content profile package configuration on the
-	 * example of CDA-CH-EMED.
-	 *
-	 * @throws IOException
-	 * @throws ConfigurationException
-	 */
-	@Test
-	public void saveLoadTestContentProfilePackageConfig()
-			throws IOException, ConfigurationException {
-		ArtDecor2JavaManager artDecor2JavaManager = new ArtDecor2JavaManager();
-		File configFile = new File(Util.getTempDirectory()
-				+ FileUtil.getPlatformSpecificPathSeparator() + "ContentProfilePackageConfig.yml");
+		File configFile = new File(
+				Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator()
+						+ "ContentProfilePackageConfigCdaChEmedV0954.yml");
 
 		// Create a content profile package config
 		ContentProfilePackageConfig contentProfilePackageConfig = ContentProfilePackageConfig
-				.builder().withDescription("A content profile package").build();
+				.builder()
+				.withDescription(
+						"CDA-CH-EMED - Swiss eMedication, draft version 0.95.4 of august 27, 2019")
+				.build();
+
+		String artDecorBaseUrl = ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL;
+		String artDecorPrefix = "cdachemed-";
+		String targetDir = "api-java/ehealth_connector-cda/ehealth_connector-cda-ch";
+		String targetNamespace = "org.ehealth_connector.cda.ch.emed.v0954";
+		ContentProfileConfig contentProfileConfig = ContentProfileConfig.builder()
+				.withArtDecorBaseUrl(artDecorBaseUrl).withTargetDir(targetDir)
+				.withTargetNamespace(targetNamespace).build();
+
+		// Add the main prefix
+		contentProfileConfig.addProject(artDecorPrefix,
+				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+
+		// Add further prefixes (referenced projects)
+		contentProfileConfig.addProject("ad1bbr-",
+				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+		contentProfileConfig.addProject("ad2bbr-",
+				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+		contentProfileConfig.addProject("ch-epr-",
+				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+		contentProfileConfig.addProject("ch-pharm-",
+				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+		contentProfileConfig.addProject("ch-pcc-",
+				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+		contentProfileConfig.addProject("hl7chcda-",
+				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+		contentProfileConfig.addProject("IHE-PCC-",
+				"https://art-decor.ihe-europe.net/decor/services/");
 
 		// Medication Card document
-		String artDecorBaseUrl = ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL;
-		String artDecorDocTemplateId = "2.16.756.5.30.1.1.10.1.3";
-		String artDecorPrefix = "cdachemed-";
-		String targetDir = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator()
-				+ "emed";
-		String targetNamespace = "org.ehealth_connector.cda.ch.emed";
-
-		ContentProfileConfig contentProfileConfig = ContentProfileConfig.builder()
-				.withArtDecorBaseUrl(artDecorBaseUrl)
-				.withArtDecorDocTemplateId(artDecorDocTemplateId).withArtDecorPrefix(artDecorPrefix)
-				.withTargetDir(targetDir).withTargetNamespace(targetNamespace).build();
-
-		contentProfilePackageConfig.addContentProfileConfig(contentProfileConfig);
+		contentProfileConfig.addTemplateId("2.16.756.5.30.1.1.10.1.3", "2016-05-13T00:00:00");
 
 		// Medication Dispense document
-		artDecorBaseUrl = ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL;
-		artDecorDocTemplateId = "2.16.756.5.30.1.1.10.1.5";
-		artDecorPrefix = "cdachemed-";
-		targetDir = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "emed";
-		targetNamespace = "org.ehealth_connector.cda.ch.emed";
-
-		contentProfileConfig = ContentProfileConfig.builder().withArtDecorBaseUrl(artDecorBaseUrl)
-				.withArtDecorDocTemplateId(artDecorDocTemplateId).withArtDecorPrefix(artDecorPrefix)
-				.withTargetDir(targetDir).withTargetNamespace(targetNamespace).build();
-
-		contentProfilePackageConfig.addContentProfileConfig(contentProfileConfig);
+		contentProfileConfig.addTemplateId("2.16.756.5.30.1.1.10.1.5", "2016-05-21T00:00:00");
 
 		// Medication List document
-		artDecorBaseUrl = ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL;
-		artDecorDocTemplateId = "2.16.756.5.30.1.1.10.1.13";
-		artDecorPrefix = "cdachemed-";
-		targetDir = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "emed";
-		targetNamespace = "org.ehealth_connector.cda.ch.emed";
-
-		contentProfileConfig = ContentProfileConfig.builder().withArtDecorBaseUrl(artDecorBaseUrl)
-				.withArtDecorDocTemplateId(artDecorDocTemplateId).withArtDecorPrefix(artDecorPrefix)
-				.withTargetDir(targetDir).withTargetNamespace(targetNamespace).build();
-
-		contentProfilePackageConfig.addContentProfileConfig(contentProfileConfig);
+		contentProfileConfig.addTemplateId("2.16.756.5.30.1.1.10.1.13", "2018-01-22T15:17:26");
 
 		// Medication Prescription document
-		artDecorBaseUrl = ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL;
-		artDecorDocTemplateId = "2.16.756.5.30.1.1.10.1.4";
-		artDecorPrefix = "cdachemed-";
-		targetDir = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "emed";
-		targetNamespace = "org.ehealth_connector.cda.ch.emed";
-
-		contentProfileConfig = ContentProfileConfig.builder().withArtDecorBaseUrl(artDecorBaseUrl)
-				.withArtDecorDocTemplateId(artDecorDocTemplateId).withArtDecorPrefix(artDecorPrefix)
-				.withTargetDir(targetDir).withTargetNamespace(targetNamespace).build();
-
-		contentProfilePackageConfig.addContentProfileConfig(contentProfileConfig);
+		contentProfileConfig.addTemplateId("2.16.756.5.30.1.1.10.1.4", "2016-05-21T00:00:00");
 
 		// Medication Treatment Plan document
-		artDecorBaseUrl = ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL;
-		artDecorDocTemplateId = "2.16.756.5.30.1.1.10.1.7";
-		artDecorPrefix = "cdachemed-";
-		targetDir = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "emed";
-		targetNamespace = "org.ehealth_connector.cda.ch.emed";
-
-		contentProfileConfig = ContentProfileConfig.builder().withArtDecorBaseUrl(artDecorBaseUrl)
-				.withArtDecorDocTemplateId(artDecorDocTemplateId).withArtDecorPrefix(artDecorPrefix)
-				.withTargetDir(targetDir).withTargetNamespace(targetNamespace).build();
-
-		contentProfilePackageConfig.addContentProfileConfig(contentProfileConfig);
+		contentProfileConfig.addTemplateId("2.16.756.5.30.1.1.10.1.7", "2017-04-12T13:57:31");
 
 		// Pharmaceutical Advice document
-		artDecorBaseUrl = ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL;
-		artDecorDocTemplateId = "2.16.756.5.30.1.1.10.1.6";
-		artDecorPrefix = "cdachemed-";
-		targetDir = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "emed";
-		targetNamespace = "org.ehealth_connector.cda.ch.emed";
+		contentProfileConfig.addTemplateId("2.16.756.5.30.1.1.10.1.6", "2016-05-21T00:00:00");
 
-		contentProfileConfig = ContentProfileConfig.builder().withArtDecorBaseUrl(artDecorBaseUrl)
-				.withArtDecorDocTemplateId(artDecorDocTemplateId).withArtDecorPrefix(artDecorPrefix)
-				.withTargetDir(targetDir).withTargetNamespace(targetNamespace).build();
-
+		// Complete package config
 		contentProfilePackageConfig.addContentProfileConfig(contentProfileConfig);
 
 		// Prepare cleanup
@@ -190,18 +118,108 @@ public class ArtDecor2JavaManagerTest {
 				.loadContentProfilePackageConfig(configFile);
 
 		int count = 6;
-		assertEquals(count, contentProfilePackageConfig.getContentProfileConfigList().size());
+		assertEquals(1, contentProfilePackageConfig.getContentProfileConfigList().size());
+		assertEquals(count, contentProfilePackageConfig.getContentProfileConfigList().get(0)
+				.getArtDecorDocTemplateMap().size());
 
 		assertTrue(artDecorBaseUrl.equals(contentProfilePackageConfig2.getContentProfileConfigList()
-				.get(count - 1).getArtDecorBaseUrl()));
-		assertTrue(artDecorPrefix.equals(contentProfilePackageConfig2.getContentProfileConfigList()
-				.get(count - 1).getArtDecorPrefix()));
-		assertTrue(artDecorDocTemplateId.equals(contentProfilePackageConfig2
-				.getContentProfileConfigList().get(count - 1).getArtDecorDocTemplateId()));
+				.get(0).getArtDecorBaseUrl()));
+		assertTrue(contentProfilePackageConfig2.getContentProfileConfigList().get(0)
+				.getArtDecorProjectMap().get(artDecorPrefix) != null);
+		assertEquals(count, contentProfilePackageConfig2.getContentProfileConfigList().get(0)
+				.getArtDecorDocTemplateMap().size());
+		assertTrue(contentProfilePackageConfig2.getContentProfileConfigList().get(0)
+				.getArtDecorDocTemplateMap().get("2.16.756.5.30.1.1.10.1.3") != null);
+		assertTrue(contentProfilePackageConfig2.getContentProfileConfigList().get(0)
+				.getArtDecorDocTemplateMap().get("2.16.756.5.30.1.1.10.1.6") != null);
 		assertTrue(targetNamespace.equals(contentProfilePackageConfig2.getContentProfileConfigList()
-				.get(count - 1).getTargetNamespace()));
-		assertTrue(targetDir.equals(contentProfilePackageConfig2.getContentProfileConfigList()
-				.get(count - 1).getTargetDir()));
+				.get(0).getTargetNamespace()));
+		assertTrue(targetDir.equals(
+				contentProfilePackageConfig2.getContentProfileConfigList().get(0).getTargetDir()));
+
+	}
+
+	/**
+	 * Tests for save and load a content profile configuration on the example of
+	 * CDA-CH-EMED.
+	 *
+	 * @throws IOException
+	 * @throws ConfigurationException
+	 */
+	@Test
+	public void saveLoadTestContentProfileConfigLrep() throws IOException, ConfigurationException {
+
+		ArtDecor2JavaManager artDecor2JavaManager = new ArtDecor2JavaManager();
+		File configFile = new File(
+				Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator()
+						+ "ContentProfilePackageConfigCdaChLrepV133.yml");
+
+		// Create a content profile package config
+		ContentProfilePackageConfig contentProfilePackageConfig = ContentProfilePackageConfig
+				.builder()
+				.withDescription(
+						"CDA-CH-LREP - Swiss Laboratory Report - General Report, draft version 1.3.3 of august 12, 2019")
+				.build();
+
+		String artDecorBaseUrl = ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL;
+		String artDecorPrefix = "cdachlrep-";
+		String targetDir = "api-java/ehealth_connector-cda/ehealth_connector-cda-ch";
+		String targetNamespace = "org.ehealth_connector.cda.ch.lrep.v133";
+		ContentProfileConfig contentProfileConfig = ContentProfileConfig.builder()
+				.withArtDecorBaseUrl(artDecorBaseUrl).withTargetDir(targetDir)
+				.withTargetNamespace(targetNamespace).build();
+
+		// Add the main prefix
+		contentProfileConfig.addProject(artDecorPrefix,
+				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+
+		// Add further prefixes (referenced projects)
+		contentProfileConfig.addProject("hl7chcda-",
+				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+		contentProfileConfig.addProject("ch-epr-",
+				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+		contentProfileConfig.addProject("ch-palm-",
+				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+		contentProfileConfig.addProject("ch-pcc-",
+				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+		contentProfileConfig.addProject("cdachvacd-",
+				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+
+		// Swiss Laboratory Report - General Report
+		contentProfileConfig.addTemplateId("2.16.756.5.30.1.1.10.1.10", "2019-07-30T18:01:10");
+
+		// Complete package config
+		contentProfilePackageConfig.addContentProfileConfig(contentProfileConfig);
+
+		// Prepare cleanup
+		configFile.deleteOnExit();
+
+		// Save a content profile config
+		artDecor2JavaManager.saveContentProfilePackageConfig(contentProfilePackageConfig,
+				configFile);
+
+		// load the saved package
+		ArtDecor2JavaManager artDecor2JavaManager2 = new ArtDecor2JavaManager();
+		ContentProfilePackageConfig contentProfilePackageConfig2 = artDecor2JavaManager2
+				.loadContentProfilePackageConfig(configFile);
+
+		int count = 1;
+		assertEquals(1, contentProfilePackageConfig.getContentProfileConfigList().size());
+		assertEquals(count, contentProfilePackageConfig.getContentProfileConfigList().get(0)
+				.getArtDecorDocTemplateMap().size());
+
+		assertTrue(artDecorBaseUrl.equals(contentProfilePackageConfig2.getContentProfileConfigList()
+				.get(0).getArtDecorBaseUrl()));
+		assertTrue(contentProfilePackageConfig2.getContentProfileConfigList().get(0)
+				.getArtDecorProjectMap().get(artDecorPrefix) != null);
+		assertEquals(count, contentProfilePackageConfig2.getContentProfileConfigList().get(0)
+				.getArtDecorDocTemplateMap().size());
+		assertTrue(contentProfilePackageConfig2.getContentProfileConfigList().get(0)
+				.getArtDecorDocTemplateMap().get("2.16.756.5.30.1.1.10.1.10") != null);
+		assertTrue(targetNamespace.equals(contentProfilePackageConfig2.getContentProfileConfigList()
+				.get(0).getTargetNamespace()));
+		assertTrue(targetDir.equals(
+				contentProfilePackageConfig2.getContentProfileConfigList().get(0).getTargetDir()));
 
 	}
 }

@@ -5,3 +5,4 @@ target
 bin
 *.interp
 *.tokens
+/ehealth_connector-codegenerator-gen/logs
