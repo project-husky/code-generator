@@ -729,9 +729,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 						body.addStatement("IVLTS ivlts = factory.createIVLTS();");
 						body.addStatement("ivlts.setValue(value.getValue());");
 						body.addStatement("this." + temp + " = ivlts;");
-					} else
-						throw new RuntimeException(
+					} else {
+						addBodyComment(method,
 								memberType.getName() + " cannot be cast to " + dataType);
+						System.out.println("\nERROR: " + cdaElement.getFullXmlName() + " :"
+								+ memberType.getName() + " cannot be cast to " + dataType);
+					}
 				} else
 					body.addStatement("this." + temp + " = " + cast + "value;");
 			}
@@ -2595,6 +2598,17 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		String cdaElementName = cdaElement.getXmlName().replace("hl7:", "").replace("pharm:", "")
 				.replace("xsi:", "");
 
+		String parentDataType = "";
+		if (cdaElement.getParentCdaElement() != null) {
+			parentDataType = cdaElement.getParentCdaElement().getDataType();
+			if (parentDataType == null) {
+				parentDataType = getDataType(cdaElement.getParentCdaElement(), templateIndex);
+				if (parentDataType != null) {
+					parentDataType = adjustDataType(parentDataType);
+				}
+			}
+		}
+
 		if (retVal == null) {
 			ArrayList<String> candidates = new ArrayList<String>();
 			if (dataTypeIndex == null)
@@ -2603,7 +2617,11 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				String value = dataTypeIndex.get(key).toString();
 				if (key.startsWith(cdaElementName)
 						|| key.startsWith("all.InfrastructureRoot." + cdaElementName)) {
-					candidates.add(value);
+					if (parentDataType.startsWith("org.ehealth_connector.common.hl7cdar2")) {
+						if (parentDataType.equals(value))
+							candidates.add(value);
+					} else
+						candidates.add(value);
 				}
 			}
 			if (candidates.size() == 1)
@@ -2611,17 +2629,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			else if (candidates.size() > 1) {
 				throw new RuntimeException("There are multiple data type candidates for "
 						+ cdaElement.getFullXmlName());
-			}
-		}
-
-		String parentDataType = null;
-		if (cdaElement.getParentCdaElement() != null) {
-			parentDataType = cdaElement.getParentCdaElement().getDataType();
-			if (parentDataType == null) {
-				parentDataType = getDataType(cdaElement.getParentCdaElement(), templateIndex);
-				if (parentDataType != null) {
-					parentDataType = adjustDataType(parentDataType);
-				}
 			}
 		}
 
@@ -2642,6 +2649,10 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				}
 			}
 		}
+
+		if (retVal == null)
+			if (parentDataType.startsWith("org.ehealth_connector.common.hl7cdar2"))
+				retVal = parentDataType;
 
 		if (retVal == null)
 			throw new RuntimeException("There is no data type candidate for "

@@ -28,6 +28,7 @@ import org.ehealth_connector.codegenerator.cda.model.CdaTemplate;
 import org.ehealth_connector.codegenerator.java.JavaCodeGenerator;
 import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.Util;
+import org.junit.Test;
 
 import net.sf.saxon.s9api.SaxonApiException;
 
@@ -85,7 +86,6 @@ public class ArtDecor2JavaGeneratorTest {
 		// MedicationCardDocument
 		templateId = "2.16.756.5.30.1.1.10.1.3";
 		srcFilePath = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
-				+ FileUtil.getPlatformSpecificPathSeparator() + templateId
 				+ FileUtil.getPlatformSpecificPathSeparator();
 		artDecor2JavaGenerator = new ArtDecor2JavaGenerator(null, templateIndex, valueSetIndex,
 				templateList, srcFilePath, dstFilePath, packageName, fileHeader, prefix,
@@ -95,7 +95,6 @@ public class ArtDecor2JavaGeneratorTest {
 		// MedicationDispenseDocument
 		templateId = "2.16.756.5.30.1.1.10.1.5";
 		srcFilePath = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
-				+ FileUtil.getPlatformSpecificPathSeparator() + templateId
 				+ FileUtil.getPlatformSpecificPathSeparator();
 		artDecor2JavaGenerator.prepareForAnotherTemplate();
 		artDecor2JavaGenerator.doOneTemplate(templateId);
@@ -103,7 +102,6 @@ public class ArtDecor2JavaGeneratorTest {
 		// MedicationListDocument
 		templateId = "2.16.756.5.30.1.1.10.1.13";
 		srcFilePath = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
-				+ FileUtil.getPlatformSpecificPathSeparator() + templateId
 				+ FileUtil.getPlatformSpecificPathSeparator();
 		artDecor2JavaGenerator.prepareForAnotherTemplate();
 		artDecor2JavaGenerator.doOneTemplate(templateId);
@@ -111,7 +109,6 @@ public class ArtDecor2JavaGeneratorTest {
 		// MedicationPrescriptionDocument
 		templateId = "2.16.756.5.30.1.1.10.1.4";
 		srcFilePath = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
-				+ FileUtil.getPlatformSpecificPathSeparator() + templateId
 				+ FileUtil.getPlatformSpecificPathSeparator();
 		artDecor2JavaGenerator.prepareForAnotherTemplate();
 		artDecor2JavaGenerator.doOneTemplate(templateId);
@@ -119,7 +116,6 @@ public class ArtDecor2JavaGeneratorTest {
 		// MedicationTreatmentPlanDocument
 		templateId = "2.16.756.5.30.1.1.10.1.7";
 		srcFilePath = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
-				+ FileUtil.getPlatformSpecificPathSeparator() + templateId
 				+ FileUtil.getPlatformSpecificPathSeparator();
 		artDecor2JavaGenerator.prepareForAnotherTemplate();
 		artDecor2JavaGenerator.doOneTemplate(templateId);
@@ -127,7 +123,6 @@ public class ArtDecor2JavaGeneratorTest {
 		// PharmaceuticalAdviceDocument
 		templateId = "2.16.756.5.30.1.1.10.1.6";
 		srcFilePath = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
-				+ FileUtil.getPlatformSpecificPathSeparator() + templateId
 				+ FileUtil.getPlatformSpecificPathSeparator();
 		artDecor2JavaGenerator.prepareForAnotherTemplate();
 		artDecor2JavaGenerator.doOneTemplate(templateId);
