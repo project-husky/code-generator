@@ -97,7 +97,7 @@ public class ArtDecor2JavaGeneratorTest {
 		srcFilePath = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
 				+ FileUtil.getPlatformSpecificPathSeparator() + templateId
 				+ FileUtil.getPlatformSpecificPathSeparator();
-		artDecor2JavaGenerator.prepareForAnotherTemplate(srcFilePath);
+		artDecor2JavaGenerator.prepareForAnotherTemplate();
 		artDecor2JavaGenerator.doOneTemplate(templateId);
 
 		// MedicationListDocument
@@ -105,7 +105,7 @@ public class ArtDecor2JavaGeneratorTest {
 		srcFilePath = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
 				+ FileUtil.getPlatformSpecificPathSeparator() + templateId
 				+ FileUtil.getPlatformSpecificPathSeparator();
-		artDecor2JavaGenerator.prepareForAnotherTemplate(srcFilePath);
+		artDecor2JavaGenerator.prepareForAnotherTemplate();
 		artDecor2JavaGenerator.doOneTemplate(templateId);
 
 		// MedicationPrescriptionDocument
@@ -113,7 +113,7 @@ public class ArtDecor2JavaGeneratorTest {
 		srcFilePath = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
 				+ FileUtil.getPlatformSpecificPathSeparator() + templateId
 				+ FileUtil.getPlatformSpecificPathSeparator();
-		artDecor2JavaGenerator.prepareForAnotherTemplate(srcFilePath);
+		artDecor2JavaGenerator.prepareForAnotherTemplate();
 		artDecor2JavaGenerator.doOneTemplate(templateId);
 
 		// MedicationTreatmentPlanDocument
@@ -121,7 +121,7 @@ public class ArtDecor2JavaGeneratorTest {
 		srcFilePath = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
 				+ FileUtil.getPlatformSpecificPathSeparator() + templateId
 				+ FileUtil.getPlatformSpecificPathSeparator();
-		artDecor2JavaGenerator.prepareForAnotherTemplate(srcFilePath);
+		artDecor2JavaGenerator.prepareForAnotherTemplate();
 		artDecor2JavaGenerator.doOneTemplate(templateId);
 
 		// PharmaceuticalAdviceDocument
@@ -129,7 +129,7 @@ public class ArtDecor2JavaGeneratorTest {
 		srcFilePath = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
 				+ FileUtil.getPlatformSpecificPathSeparator() + templateId
 				+ FileUtil.getPlatformSpecificPathSeparator();
-		artDecor2JavaGenerator.prepareForAnotherTemplate(srcFilePath);
+		artDecor2JavaGenerator.prepareForAnotherTemplate();
 		artDecor2JavaGenerator.doOneTemplate(templateId);
 
 		artDecor2JavaGenerator.createJavaClasses();

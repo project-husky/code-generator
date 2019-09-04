@@ -157,15 +157,31 @@ public class ArtDecorRestClient {
 		if (!baseDir.endsWith(FileUtil.getPlatformSpecificPathSeparator()))
 			baseDir += FileUtil.getPlatformSpecificPathSeparator();
 
+		// prepare directory, where to put the downloaded files
+		String dir = baseDir;
+		File targetDir = new File(dir);
+		try {
+			if (targetDir.exists())
+				FileUtils.deleteDirectory(targetDir);
+			FileUtils.forceMkdir(targetDir);
+			dir += FileUtil.getPlatformSpecificPathSeparator() + "kit";
+			targetDir = new File(dir);
+			if (!targetDir.exists())
+				FileUtils.forceMkdir(targetDir);
+		} catch (IOException e1) {
+			throw new RuntimeException(e1);
+		}
+
 		this.artDecorProjectMap = artDecorProjectMap;
 		this.baseDir = baseDir;
 		this.templates = new ArrayList<String>();
 
+		// download the project indexes
 		for (String prefix : artDecorProjectMap.keySet()) {
 			try {
 				addArtDecorProject(prefix, (String) artDecorProjectMap.get(prefix));
 			} catch (Exception e) {
-				// Do nothing
+				throw new RuntimeException(e);
 			}
 		}
 	}
@@ -261,17 +277,8 @@ public class ArtDecorRestClient {
 			String dir = baseDir;
 			if (!dir.endsWith(FileUtil.getPlatformSpecificPathSeparator()))
 				dir += FileUtil.getPlatformSpecificPathSeparator();
-			dir += documentTemplateId;
-			if (templateId.equals(documentTemplateId)) {
-				File targetDir = new File(dir);
-				if (targetDir.exists())
-					FileUtils.deleteDirectory(targetDir);
-				FileUtils.forceMkdir(targetDir);
-			} else {
-				dir += FileUtil.getPlatformSpecificPathSeparator() + "kit";
-				File targetDir = new File(dir);
-				if (!targetDir.exists())
-					FileUtils.forceMkdir(targetDir);
+			if (!templateId.equals(documentTemplateId)) {
+				dir += "kit" + FileUtil.getPlatformSpecificPathSeparator();
 			}
 
 			// download only, when it is not already there
@@ -287,8 +294,7 @@ public class ArtDecorRestClient {
 				Document doc = XmlUtil.getXmlDocument(is);
 
 				// Write the downloaded yml to file
-				File targetFile = new File(
-						dir + FileUtil.getPlatformSpecificPathSeparator() + templateId + ".xml");
+				File targetFile = new File(dir + templateId + ".xml");
 				XmlUtil.writeXmlDocumentToFile(doc, targetFile);
 
 				// Process all contains and includes in the current template
@@ -306,6 +312,8 @@ public class ArtDecorRestClient {
 					nl = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
 					processNodeList(nl, documentTemplateId, templateId, "contains");
 				}
+
+				System.out.println("Downloading template complete: " + templateId);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

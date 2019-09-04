@@ -88,55 +88,31 @@ public class ArtDecorRestClientTest {
 		String templateId;
 		templateId = "2.16.756.5.30.1.1.10.1.3";
 		artDecorRestClient.downloadTemplateRecursive(templateId, "dynamic");
-		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId);
-		assertTrue(dest.listFiles().length == 2);
-		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId
-				+ FileUtil.getPlatformSpecificPathSeparator() + "kit");
-		assertTrue(dest.listFiles().length > 1);
 
 		// MedicationDispenseDocument
 		templateId = "2.16.756.5.30.1.1.10.1.5";
 		artDecorRestClient.downloadTemplateRecursive(templateId, "dynamic");
-		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId);
-		assertTrue(dest.listFiles().length == 2);
-		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId
-				+ FileUtil.getPlatformSpecificPathSeparator() + "kit");
-		assertTrue(dest.listFiles().length > 1);
 
 		// MedicationListDocument
 		templateId = "2.16.756.5.30.1.1.10.1.13";
 		artDecorRestClient.downloadTemplateRecursive(templateId, "dynamic");
-		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId);
-		assertTrue(dest.listFiles().length == 2);
-		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId
-				+ FileUtil.getPlatformSpecificPathSeparator() + "kit");
-		assertTrue(dest.listFiles().length > 1);
 
 		// MedicationPrescriptionDocument
 		templateId = "2.16.756.5.30.1.1.10.1.4";
 		artDecorRestClient.downloadTemplateRecursive(templateId, "dynamic");
-		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId);
-		assertTrue(dest.listFiles().length == 2);
-		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId
-				+ FileUtil.getPlatformSpecificPathSeparator() + "kit");
-		assertTrue(dest.listFiles().length > 1);
 
 		// MedicationTreatmentPlanDocument
 		templateId = "2.16.756.5.30.1.1.10.1.7";
 		artDecorRestClient.downloadTemplateRecursive(templateId, "dynamic");
-		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId);
-		assertTrue(dest.listFiles().length == 2);
-		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId
-				+ FileUtil.getPlatformSpecificPathSeparator() + "kit");
-		assertTrue(dest.listFiles().length > 1);
 
 		// PharmaceuticalAdviceDocument
 		templateId = "2.16.756.5.30.1.1.10.1.6";
 		artDecorRestClient.downloadTemplateRecursive(templateId, "dynamic");
-		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId);
-		assertTrue(dest.listFiles().length == 2);
-		dest = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + templateId
-				+ FileUtil.getPlatformSpecificPathSeparator() + "kit");
+
+		// tests
+		dest = new File(dir);
+		assertTrue(dest.listFiles().length == 15);
+		dest = new File(dir + "kit");
 		assertTrue(dest.listFiles().length > 1);
 
 	}
@@ -171,12 +147,9 @@ public class ArtDecorRestClientTest {
 				"2019-07-30T18:01:10");
 
 		File dest;
-		dest = new File(
-				dir + FileUtil.getPlatformSpecificPathSeparator() + "2.16.756.5.30.1.1.10.1.10");
-		assertTrue(dest.listFiles().length == 2);
-		dest = new File(
-				dir + FileUtil.getPlatformSpecificPathSeparator() + "2.16.756.5.30.1.1.10.1.10"
-						+ FileUtil.getPlatformSpecificPathSeparator() + "kit");
+		dest = new File(dir);
+		assertTrue(dest.listFiles().length == 8);
+		dest = new File(dir + "kit");
 		assertTrue(dest.listFiles().length > 1);
 	}
 

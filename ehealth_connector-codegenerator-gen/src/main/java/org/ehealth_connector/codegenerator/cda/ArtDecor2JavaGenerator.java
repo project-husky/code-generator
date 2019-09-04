@@ -1162,8 +1162,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 					contentProfile.getTargetNamespace(), JavaCodeGenerator.getFileHeader(), prefix,
 					url);
 			for (String templateId : contentProfile.getArtDecorDocTemplateMap().keySet()) {
-				artDecor2JavaGenerator.prepareForAnotherTemplate(
-						srcFilePath + templateId + FileUtil.getPlatformSpecificPathSeparator());
+				artDecor2JavaGenerator.prepareForAnotherTemplate();
 				artDecor2JavaGenerator.doOneTemplate(templateId);
 			}
 			artDecor2JavaGenerator.createJavaClasses();
@@ -1225,34 +1224,37 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		return value.substring(0, 1).toUpperCase() + value.substring(1, value.length());
 	}
 
-	private static int transformOneDocumentTemplate(String templateId, String dir)
-			throws Exception {
-		if (!dir.endsWith(FileUtil.getPlatformSpecificPathSeparator()))
-			dir += FileUtil.getPlatformSpecificPathSeparator();
-
-		File srcFile = new File(dir + templateId + ".xml");
-		File dstFile = new File(dir + templateId + "_transformed.xml");
-
-		File folder = new File(dir + FileUtil.getPlatformSpecificPathSeparator() + "kit");
-
-		Hl7Its2EhcTransformer.transform(srcFile, dstFile);
-
-		int countTransformed = 0;
-		for (final File file : folder.listFiles()) {
-			if (!file.isDirectory()) {
-				if (!file.getName().endsWith("_transformed.xml")) {
-					srcFile = file;
-					dstFile = new File(file.getAbsolutePath().replace(".xml", "_transformed.xml"));
-
-					Hl7Its2EhcTransformer.transform(srcFile, dstFile);
-					countTransformed++;
-				}
-			}
-		}
-
-		return countTransformed;
-
-	}
+	// private static int transformOneDocumentTemplate(String templateId, String
+	// dir)
+	// throws Exception {
+	// if (!dir.endsWith(FileUtil.getPlatformSpecificPathSeparator()))
+	// dir += FileUtil.getPlatformSpecificPathSeparator();
+	//
+	// File srcFile = new File(dir + templateId + ".xml");
+	// File dstFile = new File(dir + templateId + "_transformed.xml");
+	//
+	// File folder = new File(dir + FileUtil.getPlatformSpecificPathSeparator()
+	// + "kit");
+	//
+	// Hl7Its2EhcTransformer.transform(srcFile, dstFile);
+	//
+	// int countTransformed = 0;
+	// for (final File file : folder.listFiles()) {
+	// if (!file.isDirectory()) {
+	// if (!file.getName().endsWith("_transformed.xml")) {
+	// srcFile = file;
+	// dstFile = new File(file.getAbsolutePath().replace(".xml",
+	// "_transformed.xml"));
+	//
+	// Hl7Its2EhcTransformer.transform(srcFile, dstFile);
+	// countTransformed++;
+	// }
+	// }
+	// }
+	//
+	// return countTransformed;
+	//
+	// }
 
 	private CdaElement callingCdaElement;
 
@@ -1922,10 +1924,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			InstantiationException, NoSuchFieldException, SecurityException {
 
 		CdaTemplate retVal = null;
-
-		// TODO: This is a quick fix for CDA-CH-EMED
-		if (templateId.startsWith("1.3.6.1.4.1.19376."))
-			return null;
 
 		if (templateIndex.containsKey(templateId)) {
 			if (printParsingDebugInformation)
@@ -2767,7 +2765,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		return retVal;
 	}
 
-	public void prepareForAnotherTemplate(String srcFilePath) {
+	public void prepareForAnotherTemplate() {
 		this.callingCdaElement = null;
 		this.currentCdaAttribute = null;
 		this.currentCdaElement = null;
@@ -2775,9 +2773,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		this.mainCdaTemplate = null;
 		this.parentForContains = null;
 		this.parentForIncludes = null;
-
-		this.srcFilePath = srcFilePath;
-
 	}
 
 	private void regroupTemplateElements(ArrayList<CdaTemplate> myTemplateList) {
