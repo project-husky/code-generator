@@ -28,7 +28,6 @@ import org.ehealth_connector.codegenerator.cda.model.CdaTemplate;
 import org.ehealth_connector.codegenerator.java.JavaCodeGenerator;
 import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.Util;
-import org.junit.Test;
 
 import net.sf.saxon.s9api.SaxonApiException;
 
@@ -80,7 +79,7 @@ public class ArtDecor2JavaGeneratorTest {
 		// Common properties
 		String prefix = "cdachemed-";
 		String packageName = "org.ehealth_connector.cda.ch.emed.v0954";
-		String dstFilePath = "C:\\src\\git\\eHC_AD2J\\api-java\\ehealth_connector-cda\\ehealth_connector-cda-ch";
+		String dstFilePath = "C:\\src\\git\\eHC-AD2J\\api-java\\ehealth_connector-cda\\ehealth_connector-cda-ch";
 		String fileHeader = JavaCodeGenerator.getFileHeader();
 
 		// MedicationCardDocument
@@ -174,7 +173,7 @@ public class ArtDecor2JavaGeneratorTest {
 		// Common properties
 		String prefix = "cdachlrep-";
 		String packageName = "org.ehealth_connector.cda.ch.lrep.v133";
-		String dstFilePath = "C:\\src\\git\\eHC_AD2J\\api-java\\ehealth_connector-cda\\ehealth_connector-cda-ch";
+		String dstFilePath = "C:\\src\\git\\eHC-AD2J\\api-java\\ehealth_connector-cda\\ehealth_connector-cda-ch";
 		String fileHeader = JavaCodeGenerator.getFileHeader();
 
 		// Swiss Laboratory Report - General Report

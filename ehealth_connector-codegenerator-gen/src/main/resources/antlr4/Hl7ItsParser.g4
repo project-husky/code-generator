@@ -11,6 +11,7 @@
  * 2019.07.25: Tony Schaller, medshare GmbH: Adding strength attribute to element
  * 2019.07.26: Tony Schaller, medshare GmbH: Adding flexibility attribute to element and new vocabulary element
  * 2019.08.22: Tony Schaller, medshare GmbH: Adding codeSystem attribute to vocabulary element
+ * 2019.09.05: Tony Schaller, medshare GmbH: Adding codeSystemName and displayName attributes to vocabulary element
  * 
  * ******************************************************************************
  */
@@ -25,7 +26,7 @@ options { tokenVocab=Hl7ItsLexer; }
 
 prolog : XMLDeclOpen attr* SPECIAL_CLOSE SEA_WS?;
 
-template : prolog? '<' TEMPLATE attr* idAttr? attr* nameAttr? attr* '>' content '<' '/' TEMPLATE '>' ;
+template : prolog? '<' TEMPLATE attr* displayNameAttr? attr* idAttr? attr* nameAttr? attr* '>' content '<' '/' TEMPLATE '>' ;
 
 desc : '<' DESC attr* '>' content '<' '/' DESC '>' ;
 
@@ -40,8 +41,8 @@ choice : '<' CHOICE attr* maxOccursAttr? minOccursAttr? '>' content '<' '/' CHOI
 include : '<' INCLUDE attr* conformanceAttr? flexibilityAttr? idAttr? isMandatoryAttr? maxOccursAttr? minOccursAttr? refAttr? attr* '/>' | 
           '<' INCLUDE attr* conformanceAttr? flexibilityAttr? idAttr? isMandatoryAttr? maxOccursAttr? minOccursAttr? refAttr? attr* '>' content '<' '/' INCLUDE '>';
           
-vocab : '<' VOCAB attr* codeAttr? codeSystemAttr? flexibilityAttr? valueSetAttr? attr* '/>' | 
-        '<' VOCAB attr* codeAttr? codeSystemAttr? flexibilityAttr? valueSetAttr? attr* '>' content '<' '/' VOCAB '>';
+vocab : '<' VOCAB attr* codeAttr? codeSystemAttr? codeSystemNameAttr? displayNameAttr? flexibilityAttr? valueSetAttr? attr* '/>' | 
+        '<' VOCAB attr* codeAttr? codeSystemAttr? codeSystemNameAttr? displayNameAttr? flexibilityAttr? valueSetAttr? attr* '>' content '<' '/' VOCAB '>';
 
 
 letter : '<' LET nameAttr? valueAttr? '/>' | 
@@ -69,8 +70,10 @@ conformanceAttr : CONFATTR AttrValue ;
 flexibilityAttr : FLEXIBILITYATTR AttrValue ;
 codeAttr : CODEATTR AttrValue ;
 codeSystemAttr : CODESYSTEMATTR AttrValue ;
+codeSystemNameAttr : CODESYSTEMNAMEATTR AttrValue ;
 containsAttr : CONTAINSATTR AttrValue ;
-dataTypeAttr : TYPEATTR AttrValue ;
+dataTypeAttr : DATATYPEATTR AttrValue ;
+displayNameAttr : DISPLAYNAMEATTR AttrValue ;
 idAttr : IDATTR AttrValue ;
 isMandatoryAttr : MANDATTR AttrValue ;
 isOptionalAttr : OPTATTR AttrValue ;

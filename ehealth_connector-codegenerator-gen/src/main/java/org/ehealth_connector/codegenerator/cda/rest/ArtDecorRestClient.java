@@ -225,6 +225,9 @@ public class ArtDecorRestClient {
 	 *             the exception
 	 */
 	public void addArtDecorProject(String artDecorPrefix, URL baseUrl) throws Exception {
+
+		System.out.println("Downloading Project Index " + artDecorPrefix);
+
 		InputStream is = getArtDecorProjectIndex(baseUrl, artDecorPrefix);
 		Document doc = XmlUtil.getXmlDocument(is);
 		if (doc != null) {

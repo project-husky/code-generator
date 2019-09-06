@@ -11,6 +11,7 @@
  * 2019.07.25: Tony Schaller, medshare GmbH: Adding strength attribute to element
  * 2019.07.26: Tony Schaller, medshare GmbH: Adding flexibility attribute to element and new vocabulary element
  * 2019.08.22: Tony Schaller, medshare GmbH: Adding codeSystem attribute to vocabulary element
+ * 2019.09.05: Tony Schaller, medshare GmbH: Adding codeSystemName and displayName attributes to vocabulary element
  * 
  * ******************************************************************************
  */
@@ -50,9 +51,12 @@ ATTRIBUTE : 'attribute';
 CHOICE : 'choice';
 CODEATTR : 'code=';
 CODESYSTEMATTR : 'codeSystem=';
+CODESYSTEMNAMEATTR : 'codeSystemName=';
 CONFATTR : 'conformance=';
-FLEXIBILITYATTR : 'flexibility=';
 CONTAINSATTR : 'contains=';
+DATATYPEATTR : 'datatype=';
+DISPLAYNAMEATTR : 'displayName=';
+FLEXIBILITYATTR : 'flexibility=';
 DESC : 'desc';
 ELEMENT : 'element';
 IDATTR : 'id=';
@@ -68,7 +72,6 @@ REFATTR : 'ref=';
 REPORT : 'report';
 STRENGTHATTR : 'strength=';
 TEMPLATE : 'template';
-TYPEATTR : 'datatype=';
 VALUEATTR : 'value=';
 VALUESETATTR: 'valueSet=';
 VOCAB : 'vocabulary';

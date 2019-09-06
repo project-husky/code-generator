@@ -29,7 +29,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.Util;
-import org.junit.Test;
 
 /**
  * The test class for ArtDecorRestClient.
@@ -44,7 +43,9 @@ public class ArtDecorRestClientTest {
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
-	@Test
+	// This is for debugging purposes, only. Do not commit this test with the
+	// test annotation enabled!
+	// @Test
 	public void projectIndexTest() throws ClientProtocolException, IOException {
 
 		String content = "";
