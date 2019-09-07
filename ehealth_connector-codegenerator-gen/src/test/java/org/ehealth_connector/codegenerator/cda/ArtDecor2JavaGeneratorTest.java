@@ -78,7 +78,7 @@ public class ArtDecor2JavaGeneratorTest {
 
 		// Common properties
 		String prefix = "cdachemed-";
-		String packageName = "org.ehealth_connector.cda.ch.emed.v0954";
+		String packageName = "org.ehealth_connector.cda.ch.emed.v096";
 		String dstFilePath = "C:\\src\\git\\eHC-AD2J\\api-java\\ehealth_connector-cda\\ehealth_connector-cda-ch";
 		String fileHeader = JavaCodeGenerator.getFileHeader();
 

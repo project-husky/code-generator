@@ -19,5 +19,5 @@ contentProfileConfigList:
     ch-pharm-: https://art-decor.org/decor/services/
     hl7chcda-: https://art-decor.org/decor/services/
   targetDir: api-java/ehealth_connector-cda/ehealth_connector-cda-ch
-  targetNamespace: org.ehealth_connector.cda.ch.emed.v0954
-description: CDA-CH-EMED - Swiss eMedication, draft version 0.95.4 of august 27, 2019
+  targetNamespace: org.ehealth_connector.cda.ch.emed.v096
+description: CDA-CH-EMED - Swiss eMedication, draft version 0.9.6 of September 6, 2019

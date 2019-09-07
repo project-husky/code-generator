@@ -47,19 +47,19 @@ public class ArtDecor2JavaManagerTest {
 		ArtDecor2JavaManager artDecor2JavaManager = new ArtDecor2JavaManager();
 		File configFile = new File(
 				Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator()
-						+ "ContentProfilePackageConfigCdaChEmedV0954.yml");
+						+ "ContentProfilePackageConfigCdaChEmedV096.yml");
 
 		// Create a content profile package config
 		ContentProfilePackageConfig contentProfilePackageConfig = ContentProfilePackageConfig
 				.builder()
 				.withDescription(
-						"CDA-CH-EMED - Swiss eMedication, draft version 0.95.4 of august 27, 2019")
+						"CDA-CH-EMED - Swiss eMedication, draft version 0.9.6 of September 6, 2019")
 				.build();
 
 		String artDecorBaseUrl = ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL;
 		String artDecorPrefix = "cdachemed-";
 		String targetDir = "api-java/ehealth_connector-cda/ehealth_connector-cda-ch";
-		String targetNamespace = "org.ehealth_connector.cda.ch.emed.v0954";
+		String targetNamespace = "org.ehealth_connector.cda.ch.emed.v096";
 		ContentProfileConfig contentProfileConfig = ContentProfileConfig.builder()
 				.withArtDecorBaseUrl(artDecorBaseUrl).withTargetDir(targetDir)
 				.withTargetNamespace(targetNamespace).build();
@@ -158,7 +158,7 @@ public class ArtDecor2JavaManagerTest {
 		ContentProfilePackageConfig contentProfilePackageConfig = ContentProfilePackageConfig
 				.builder()
 				.withDescription(
-						"CDA-CH-LREP - Swiss Laboratory Report - General Report, draft version 1.3.3 of august 12, 2019")
+						"CDA-CH-LREP - Swiss Laboratory Report - General Report, draft version 1.3.3 of August 12, 2019")
 				.build();
 
 		String artDecorBaseUrl = ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL;

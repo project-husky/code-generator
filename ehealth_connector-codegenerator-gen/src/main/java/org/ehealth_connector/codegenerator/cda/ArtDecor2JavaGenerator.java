@@ -1819,7 +1819,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 							}
 
 							addBodyStatement(constructor, statement);
-						} else if (cdaElement.getMinOccurs() == 0) {
+						}
+
+						if ((cdaElement.getMinOccurs() == 0) || (arguments.size() > 1)) {
 							// This is fixed content for an optional element
 							String methodName = "getPredefined"
 									+ JavaCodeGenerator.toPascalCase(
@@ -1855,7 +1857,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 								body.addStatement("return " + creator + ";");
 							}
 
-						} else if (cdaElement.getMinOccurs() > 1) {
+						}
+
+						if (cdaElement.getMinOccurs() > 1) {
 							// This is fixed content for an element with
 							// multiple
 							// required elements
