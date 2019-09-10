@@ -32,6 +32,10 @@ import org.ehealth_connector.codegenerator.cda.config.ContentProfilePackageConfi
 import org.ehealth_connector.common.utils.CustomizedYaml;
 
 /**
+ * <div class="en">TODO.</div>
+ *
+ * <div class="de">TODO.</div>
+ *
  * TODO This class is the main entry point for the code generation. An eHC
  * maintainer has to launch this class as a Java application by providing the
  * base URL to ART-DECOR (e.g. https://art-decor.org/decor/services/), the
@@ -41,6 +45,7 @@ import org.ehealth_connector.common.utils.CustomizedYaml;
  */
 public class ArtDecor2JavaManager {
 
+	/** The default ART-DECOR base URL. */
 	public final static String ART_DECOR_MAIN_SERVER_BASE_URL = "https://art-decor.org/decor/services/";
 
 	/**
@@ -56,6 +61,7 @@ public class ArtDecor2JavaManager {
 	 * @throws ConfigurationException
 	 *             the configuration exception
 	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
 	 */
 	public ContentProfileConfig loadContentProfileConfig(File config)
 			throws ConfigurationException, IOException {
@@ -98,7 +104,7 @@ public class ArtDecor2JavaManager {
 	 * (the given filename must contain the relative or full path to access the
 	 * file).</div>
 	 *
-	 * <div class="de">Lädt eine Inhaltsprofil-Konfigurationaus der angegebenen
+	 * <div class="de">Lädt eine Inhaltsprofil-Konfiguration aus der angegebenen
 	 * Datei (der angegebene Dateiname muss den relativen oder vollständigen
 	 * Pfad enthalten, um auf die Datei zuzugreifen).</div>
 	 *
@@ -108,6 +114,7 @@ public class ArtDecor2JavaManager {
 	 * @throws ConfigurationException
 	 *             the configuration exception
 	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
 	 */
 	public ContentProfileConfig loadContentProfileConfig(String fileName)
 			throws ConfigurationException, IOException {
@@ -128,6 +135,7 @@ public class ArtDecor2JavaManager {
 	 * @throws ConfigurationException
 	 *             the configuration exception
 	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
 	 */
 	public ContentProfilePackageConfig loadContentProfilePackageConfig(File config)
 			throws ConfigurationException, IOException {
@@ -170,7 +178,7 @@ public class ArtDecor2JavaManager {
 	 * given file (the given filename must contain the relative or full path to
 	 * access the file).</div>
 	 *
-	 * <div class="de">Lädt eine Inhaltsprofil Paket-Konfigurationaus der
+	 * <div class="de">Lädt eine Inhaltsprofil Paket-Konfiguration aus der
 	 * angegebenen Datei (der angegebene Dateiname muss den relativen oder
 	 * vollständigen Pfad enthalten, um auf die Datei zuzugreifen).</div>
 	 *
@@ -180,6 +188,7 @@ public class ArtDecor2JavaManager {
 	 * @throws ConfigurationException
 	 *             the configuration exception
 	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
 	 */
 	public ContentProfilePackageConfig loadContentProfilePackageConfig(String fileName)
 			throws ConfigurationException, IOException {

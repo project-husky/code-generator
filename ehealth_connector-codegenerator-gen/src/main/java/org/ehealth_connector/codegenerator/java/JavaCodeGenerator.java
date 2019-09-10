@@ -35,20 +35,13 @@ import com.github.javaparser.printer.PrettyPrinterConfiguration;
 import com.github.javaparser.printer.PrettyPrinterConfiguration.IndentType;
 
 /**
- * <div class="en">This is the main class of the ART-DECOR to Java code
- * generator. It orchestrates the individual modules (such as REST Client to
- * ART-DECOR, XSLT, ANTLR and the final Java Class file creation).</div>
+ * <div class="en">This class contains some methods to assist the Java Code
+ * generation by using the JavaParser engine. See https://javaparser.org/ for
+ * more information.</div>
  *
- * <div class="de">Es orchestriert die einzelnen Module (z. B. REST-Client to
- * ART-DECOR, XSLT, ANTLR und die endgültige Erstellung der
- * Java-Klassendateien).</div>
- *
- * <pre>
- * TODOs:
- * 1. Javadoc bestehende Methoden
- * 2. Sorted List für Imports
- * 3. Member und Method sorter
- * </pre>
+ * <div class="de">Diese Klasse enthält einige Methoden zur Unterstützung der
+ * Java-Codegenerierung mithilfe der JavaParser-Engine. Weitere Informationen:
+ * https://javaparser.org/.</div>
  *
  */
 public class JavaCodeGenerator {
@@ -64,6 +57,20 @@ public class JavaCodeGenerator {
 	 */
 	private final static String REGEX = "(?<=[a-z0-9])[A-Z0-9]";
 
+	/**
+	 * <div class="en">Sorts the class content alphabetically and saves it to
+	 * the given file.</div>
+	 *
+	 * <div class="de">Sortiert den Klasseninhalt alphabetisch und speichert ihn
+	 * in der angegebenen Datei.</div>
+	 *
+	 * @param compilationUnit
+	 *            the compilation unit
+	 * @param outFile
+	 *            the out file
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
+	 */
 	public static void completeAndSave(CompilationUnit compilationUnit, File outFile)
 			throws IOException {
 
@@ -95,11 +102,34 @@ public class JavaCodeGenerator {
 
 	}
 
+	/**
+	 * <div class="en">Sorts the class content alphabetically and saves it to
+	 * the given file.</div>
+	 *
+	 * <div class="de">Sortiert den Klasseninhalt alphabetisch und speichert ihn
+	 * in der angegebenen Datei.</div>
+	 *
+	 * @param compilationUnit
+	 *            the compilation unit
+	 * @param fileName
+	 *            the file name
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
+	 */
 	public static void completeAndSave(CompilationUnit compilationUnit, String fileName)
 			throws IOException {
 		completeAndSave(compilationUnit, new File(fileName));
 	}
 
+	/**
+	 * <div class="en">Gets the eHealth Connectors default Java file
+	 * header.</div>
+	 *
+	 * <div class="de">Ruft den Standard Java File Header des eHealth Connectors
+	 * ab.</div>
+	 *
+	 * @return the file header
+	 */
 	public static String getFileHeader() {
 		File fileHeaderFile = new File(
 				System.getProperty("user.dir") + "/src/main/resources/format/JavaFileHeader.txt");
@@ -115,6 +145,7 @@ public class JavaCodeGenerator {
 
 	/**
 	 * <div class="en">Converts the given String to camelCase notation.</div>
+	 *
 	 * <div class="de">Konvertiert den angegebenen String in die
 	 * camelCase-Notation.</div>
 	 *
@@ -127,29 +158,11 @@ public class JavaCodeGenerator {
 	}
 
 	/**
-	 * <div class="en">Prepares the given String for Pascal, camel, kebab and
-	 * snake casing.</div> <div class="de">Bereitet den angegebenen String vor
-	 * für Pascal-, Kamel-, Kebab- und Snake Notationen.</div>
-	 *
-	 * @param value
-	 *            the value
-	 * @return the string
-	 */
-	private static String toEssentials(String value) {
-		String temp = value.replaceAll("[^A-Za-z0-9]", " ");
-		Matcher m = Pattern.compile(REGEX).matcher(temp);
-		StringBuffer sb = new StringBuffer();
-		while (m.find()) {
-			m.appendReplacement(sb, " " + m.group().toLowerCase());
-		}
-		m.appendTail(sb);
-		return sb.toString();
-	}
-
-	/**
 	 * <div class="en">Converts the given String to kebab-case notation
-	 * (lowercase letters).</div> <div class="de">Konvertiert den angegebenen
-	 * String in die kebab-case-Notation (Kleinbuchstaben)</div>
+	 * (lowercase letters).</div>
+	 *
+	 * <div class="de">Konvertiert den angegebenen String in die
+	 * kebab-case-Notation (Kleinbuchstaben)</div>
 	 *
 	 * @param value
 	 *            the value
@@ -167,8 +180,10 @@ public class JavaCodeGenerator {
 
 	/**
 	 * <div class="en">Converts the given String to KEBAB-CASE notation
-	 * (capital/uppercase letters).</div> <div class="de">Konvertiert den
-	 * angegebenen String in die KEBAB-CASE-Notation (Grossbuchastaben)</div>
+	 * (capital/uppercase letters).</div>
+	 *
+	 * <div class="de">Konvertiert den angegebenen String in die
+	 * KEBAB-CASE-Notation (Grossbuchastaben)</div>
 	 *
 	 * @param value
 	 *            the value
@@ -180,6 +195,7 @@ public class JavaCodeGenerator {
 
 	/**
 	 * <div class="en">Converts the given String to PascalCase notation.</div>
+	 *
 	 * <div class="de">Konvertiert den angegebenen String in die
 	 * PascalCase-Notation.</div>
 	 *
@@ -193,8 +209,10 @@ public class JavaCodeGenerator {
 
 	/**
 	 * <div class="en">Converts the given String to snake_case notation
-	 * (lowercase letters).</div> <div class="de">Konvertiert den angegebenen
-	 * String in die snake_case-Notation (Kleinbuchstaben)</div>
+	 * (lowercase letters).</div>
+	 *
+	 * <div class="de">Konvertiert den angegebenen String in die
+	 * snake_case-Notation (Kleinbuchstaben)</div>
 	 *
 	 * @param value
 	 *            the value
@@ -212,8 +230,10 @@ public class JavaCodeGenerator {
 
 	/**
 	 * <div class="en">Converts the given String to SNAKE_CASE notation
-	 * (capital/uppercase letters).</div> <div class="de">Konvertiert den
-	 * angegebenen String in die SNAKE_CASE-Notation (Grossbuchastaben)</div>
+	 * (capital/uppercase letters).</div>
+	 *
+	 * <div class="de">Konvertiert den angegebenen String in die
+	 * SNAKE_CASE-Notation (Grossbuchastaben)</div>
 	 *
 	 * @param value
 	 *            the value
@@ -224,10 +244,25 @@ public class JavaCodeGenerator {
 	}
 
 	/**
-	 * Instantiates a new java code generator. Default constructor.
+	 * <div class="en">Prepares the given String for Pascal, camel, kebab and
+	 * snake casing.</div>
+	 *
+	 * <div class="de">Bereitet den angegebenen String vor für Pascal-, Kamel-,
+	 * Kebab- und Snake Notationen.</div>
+	 *
+	 * @param value
+	 *            the value
+	 * @return the string
 	 */
-	public JavaCodeGenerator() {
-
+	private static String toEssentials(String value) {
+		String temp = value.replaceAll("[^A-Za-z0-9]", " ");
+		Matcher m = Pattern.compile(REGEX).matcher(temp);
+		StringBuffer sb = new StringBuffer();
+		while (m.find()) {
+			m.appendReplacement(sb, " " + m.group().toLowerCase());
+		}
+		m.appendTail(sb);
+		return sb.toString();
 	}
 
 }

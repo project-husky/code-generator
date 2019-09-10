@@ -118,11 +118,18 @@ import com.github.javaparser.javadoc.Javadoc;
 import net.sf.saxon.s9api.SaxonApiException;
 
 /**
- * <div class="en">This class generates Java Classes for all templates used for
- * a HL7 CDA Document Template modeled in ART-DECOR.</div>
+ * <div class="en">This is the main class of the ART-DECOR to Java Code
+ * Generator. It orchestrates the individual modules (such as REST Client to
+ * ART-DECOR, XSLT, ANTLR and the final Java Class file creation). This class
+ * generates Java Classes for all templates used for a HL7 CDA Document Template
+ * modeled in ART-DECOR.</div>
  *
- * <div class="de">Diese Klasse generiert Java-Klassen für alle HL7 CDA Document
- * Templates, die in ART-DECOR modelliert sind.</div>
+ * <div class="de">Dies ist die Hauptklasse des ART-DECOR to Java Code
+ * Generators. Sie orchestriert die einzelnen Module (z. B. REST-Client to
+ * ART-DECOR, XSLT, ANTLR und die endgültige Erstellung der
+ * Java-Klassendateien). Diese Klasse generiert Java-Klassen für alle HL7 CDA
+ * Document Templates, die in ART-DECOR modelliert sind.</div>
+ *
  */
 public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
@@ -392,7 +399,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
-	 * Adds comment to the constructor body.
+	 * Adds a comment to the constructor body.
 	 *
 	 * @param constructor
 	 *            the constructor
@@ -406,7 +413,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
-	 * Adds comment to the method body.
+	 * Adds a comment to the method body.
 	 *
 	 * @param method
 	 *            the method
@@ -422,7 +429,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
-	 * Adds statement to the constructor body.
+	 * Adds a statement to the constructor body.
 	 *
 	 * @param constructor
 	 *            the constructor
@@ -555,8 +562,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
-	 * Creates name for the method for adding the given element to the resulting
-	 * class.
+	 * Creates the name for the method for adding the given element to the
+	 * resulting class.
 	 *
 	 * @param name
 	 *            the name
@@ -1266,7 +1273,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
-	 * Gets the pure class name (without package name) of the Class identified
+	 * Gets the pure class name (without package name) of the class identified
 	 * by the given name.
 	 *
 	 * @param className
@@ -1521,7 +1528,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
-	 * Uppercase the first charcter of the given string.
+	 * Uppercase the first character of the given string.
 	 *
 	 * @param value
 	 *            the value
@@ -1602,7 +1609,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	private CdaTemplate runningTemplate;
 
 	/**
-	 * This is for debugging puroposes, only and allows to skip the value set
+	 * This is for debugging purposes, only and allows to skip the value set
 	 * generation.
 	 */
 	private boolean skipValueSetGeneration = false;
@@ -1702,9 +1709,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	/**
 	 *
-	 * <div class="en">Creates the generated Java Classes as files.</div>
+	 * <div class="en">Creates all Java Classes as files.</div>
 	 *
-	 * <div class="de">Erstellt die generierten Java-Klassen in Dateien.</div>
+	 * <div class="de">Erstellt alle Java-Klassen in Dateien.</div>
 	 *
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
@@ -2444,12 +2451,11 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
+	 * <div class="en">Overrides the given Method of the ANTL4 parser for the
+	 * ART-DECOR to Java Generator.</div>
 	 *
-	 * <div class="en">TODO.</div>
-	 *
-	 * <div class="de">TODO.</div>
-	 *
-	 * Exit template.
+	 * <div class="de">Überschreibt die angegebene Methode des ANTL4-Parsers für
+	 * den ART-DECOR to Java Generator.</div>
 	 *
 	 * @param ctx
 	 *            the ctx
@@ -2482,7 +2488,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
-	 * Adjust data type.
+	 * Performs some data type adjustments.
 	 *
 	 * @param dataType
 	 *            the data type
@@ -2520,7 +2526,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
-	 * Adjust value set.
+	 * Performs some value set adjustments.
 	 *
 	 * @param value
 	 *            the value
@@ -2543,7 +2549,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
-	 * Creates the creator for fixed contents attribute.
+	 * Creates the creator method for fixed attribute contents.
 	 *
 	 * @param compilationUnit
 	 *            the compilation unit
@@ -2586,7 +2592,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
-	 * Creates the creator for fixed contents element.
+	 * Creates the creator method for fixed element contents.
 	 *
 	 * @param compilationUnit
 	 *            the compilation unit
@@ -2649,7 +2655,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
-	 * Creates the fixed attribute values.
+	 * Creates the assignment if fixed attribute value.
 	 *
 	 * @param compilationUnit
 	 *            the compilation unit
@@ -2722,8 +2728,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 						if (cdaAttribute.getValue() != null) {
 							boolean ignoreAttr = false;
 							// fix for createHl7EffectiveTimeFixedValue: there
-							// is no
-							// type in the ART-DECOR model
+							// is no type in the ART-DECOR model
 							if ("createHl7EffectiveTimeFixedValue"
 									.equals(creatorForFixedContentsMethod.getNameAsString())) {
 								ignoreAttr = ("xsi:type".contentEquals(cdaAttribute.getName()));
@@ -3040,7 +3045,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
-	 * Creates the java class file.
+	 * Creates the Java class for the given CDA Template and writes it to file.
 	 *
 	 * @param cdaTemplate
 	 *            the cda template
@@ -3161,7 +3166,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
-	 * Creates the members.
+	 * Creates the members of the given CDA element to the resulting class.
 	 *
 	 * @param compilationUnit
 	 *            the compilation unit
@@ -3201,7 +3206,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
-	 * Exist adder or setter.
+	 * Checks whether the adder or setter already exists in the resulting class.
 	 *
 	 * @param myClass
 	 *            the my class
@@ -3259,7 +3264,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
-	 * Fill datatypes recursive.
+	 * Fill all data types recursively for all CDA elements.
 	 *
 	 * @param cdaElement
 	 *            the cda element
@@ -3288,7 +3293,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			NoSuchFieldException, SecurityException {
 		if (cdaElement != null) {
 			if (dataTypeIndex == null)
-				dataTypeIndex = loadDataTypeIndex();
+				dataTypeIndex = loadHl7CdaR2DataTypeIndex();
 
 			String dataType = cdaElement.getDataType();
 			if (dataType != null)
@@ -3311,7 +3316,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
-	 * Gets the data type.
+	 * Gets the data type of the given CDA Template.
 	 *
 	 * @param cdaElement
 	 *            the cda element
@@ -3358,7 +3363,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		if (retVal == null) {
 			ArrayList<String> candidates = new ArrayList<String>();
 			if (dataTypeIndex == null)
-				dataTypeIndex = loadDataTypeIndex();
+				dataTypeIndex = loadHl7CdaR2DataTypeIndex();
 			for (String key : dataTypeIndex.keySet()) {
 				String value = dataTypeIndex.get(key).toString();
 				if (key.startsWith(cdaElementName)
@@ -3387,11 +3392,11 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		if ((retVal == null) && (parentDataType != null)) {
 			retVal = getDataType(parentDataType, cdaElementName);
 			if (retVal == null) {
-				String parentType = getParentDataType(parentDataType);
+				String parentType = getSuperClassDataType(parentDataType);
 				while ((retVal == null) && (parentType != null)
 						&& (!"java.lang.Object".equals(parentType))) {
 					retVal = getDataType(parentType, cdaElementName);
-					parentType = getParentDataType(parentType);
+					parentType = getSuperClassDataType(parentType);
 				}
 			}
 		}
@@ -3409,7 +3414,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
-	 * Gets the data type.
+	 * Gets the data type of the given CDA element identified by name.
 	 *
 	 * @param parentClassName
 	 *            the parent class name
@@ -3484,7 +3489,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
-	 * Gets the full dst file path.
+	 * Gets the full destination file path for the given class identified by
+	 * name.
 	 *
 	 * @return the full dst file path
 	 */
@@ -3493,10 +3499,10 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
-	 * Gets the parent data type.
+	 * Gets the data type of the super class of the given class.
 	 *
-	 * @param parentClassName
-	 *            the parent class name
+	 * @param className
+	 *            the class name
 	 * @return the parent data type
 	 * @throws InstantiationException
 	 *             the instantiation exception
@@ -3506,10 +3512,10 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	 *             the class not found exception
 	 */
 	@SuppressWarnings("rawtypes")
-	private String getParentDataType(String parentClassName)
+	private String getSuperClassDataType(String className)
 			throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 		String retVal = null;
-		Class cl = Class.forName(adjustDataType(parentClassName));
+		Class cl = Class.forName(adjustDataType(className));
 		if (cl != null)
 			if (cl.getSuperclass() != null)
 				retVal = cl.getSuperclass().getName();
@@ -3517,7 +3523,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
-	 * Load data type index.
+	 * Loads the data type index of all classes in the HL7 CDA R2 Object
+	 * Factory.
 	 *
 	 * @return the hash map
 	 * @throws ClassNotFoundException
@@ -3532,8 +3539,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	 *             the invocation target exception
 	 */
 	@SuppressWarnings("rawtypes")
-	private HashMap<String, String> loadDataTypeIndex() throws ClassNotFoundException, IOException,
-			IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	private HashMap<String, String> loadHl7CdaR2DataTypeIndex()
+			throws ClassNotFoundException, IOException, IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException {
 		HashMap<String, String> retVal = new HashMap<String, String>();
 
 		ObjectFactory factory = new ObjectFactory();
@@ -3575,7 +3583,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
-	 * Regroup template elements.
+	 * Performs some template adjustments (regrouping contained elements to the
+	 * hosting template).
 	 *
 	 * @param myTemplateList
 	 *            the my template list
@@ -3603,7 +3612,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
-	 * Update creator for fixed contents method.
+	 * Updates the creator method for fixed contents by the given Element.
 	 *
 	 * @param compilationUnit
 	 *            the compilation unit
@@ -3689,20 +3698,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 								javadoc.addBlockTag("param",
 										"codeDisplayName the desired fixed value for this argument.");
 
-								String temp;
-								temp = "null";
-								if (cdaAttribute.getCode().getCodeSystem() != null)
-									temp = "\"" + cdaAttribute.getCode().getCodeSystem() + "\"";
 								body.addStatement("retVal.setCodeSystem(codeSystem);");
-
-								temp = "null";
-								if (cdaAttribute.getCode().getCodeSystemName() != null)
-									temp = "\"" + cdaAttribute.getCode().getCodeSystemName() + "\"";
 								body.addStatement("retVal.setCodeSystemName(codeSystemName);");
-
-								temp = "null";
-								if (cdaAttribute.getCode().getDisplayName() != null)
-									temp = "\"" + cdaAttribute.getCode().getDisplayName() + "\"";
 								body.addStatement("retVal.setDisplayName(displayName);");
 
 							}
