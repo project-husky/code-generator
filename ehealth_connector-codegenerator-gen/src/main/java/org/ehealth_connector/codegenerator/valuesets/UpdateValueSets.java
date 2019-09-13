@@ -126,11 +126,11 @@ public class UpdateValueSets {
 	private static final Type STRING_TYPE = com.github.javaparser.StaticJavaParser
 			.parseClassOrInterfaceType("String");
 
-	// private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG =
-	// "SwissEprValueSetPackageConfig-201704.0-stable.yaml";
-	// private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG =
-	// "SwissEprValueSetPackageConfig-201704.3-beta.yaml";
-	private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG = "SwissEprValueSetPackageConfig-201907.0-beta.yaml";
+	/**
+	 * As publish on September 4, 2019:
+	 * https://www.e-health-suisse.ch/technik-semantik/semantische-interoperabilitaet/metadaten.html
+	 */
+	private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG = "SwissEprValueSetPackage-201907.0-beta.yaml";
 
 	/**
 	 * <div class="en">Relative path where to find the Java template text
@@ -148,118 +148,6 @@ public class UpdateValueSets {
 	 * the actual generated enum name.</div>
 	 */
 	private static final String TEMPLATE_PACKAGE_NAME_TO_REPLACE = "TemplatePackageNameToReplace";
-
-	/**
-	 * <div class="en">Adds all concepts of the value set definition as enum
-	 * elements to the given enum type.</div>
-	 *
-	 * @param enumType
-	 *            The enum type representing parsed Java enum class.
-	 * @param concepts
-	 *            The concepts from the value set definition file.
-	 */
-	private static void addEnumElements(EnumDeclaration enumType, ValueSet valueSet) {
-
-		ArrayList<ValueSetEntry> list;
-		list = valueSet.getSortedEntryList();
-
-		// TODO: nested lists not supported, yet (due to duplicate enum names).
-		// list = valueSet.getSortedEntryListRecursive();
-
-		for (ValueSetEntry valueSetEntry : list) {
-			String enumConstantName = ValueSet
-					.buildEnumName(valueSetEntry.getCodeBaseType().getDisplayName());
-			String preferredDesignation = valueSetEntry.getDesignation(LanguageCode.ENGLISH,
-					DesignationType.PREFERRED);
-			if (preferredDesignation != null)
-				enumConstantName = ValueSet.buildEnumName(preferredDesignation);
-			String code = valueSetEntry.getCodeBaseType().getCode();
-			String codeSystem = valueSetEntry.getCodeBaseType().getCodeSystem();
-			String displayName = valueSetEntry.getCodeBaseType().getDisplayName();
-
-			NodeList<Expression> values = new NodeList<>();
-			StringBuilder javadocEnum = new StringBuilder();
-			StringBuilder javadocConstant = new StringBuilder();
-
-			values.add(new StringLiteralExpr(code));
-			values.add(new StringLiteralExpr(codeSystem));
-			values.add(new StringLiteralExpr(displayName));
-
-			// build comments per language
-			javadocEnum.append("<!-- @formatter:off -->\n");
-			javadocConstant.append("<!-- @formatter:off -->\n");
-			for (LanguageCode language : LANGUAGE_CODES) {
-				String designation = valueSetEntry.getDesignation(language,
-						DesignationType.PREFERRED);
-				if (designation == null)
-					designation = valueSetEntry.getDesignation(language, DesignationType.PREFERRED);
-				if ((designation == null) && (ENGLISH.equals(language)))
-					designation = valueSetEntry.getCodeBaseType().getDisplayName();
-				if (designation != null) {
-					values.add(new StringLiteralExpr(designation));
-					javadocEnum.append(buildJavadocComment(language, designation));
-					javadocConstant.append(buildJavadocComment(language,
-							CODE_JAVADOC_PREFIX.get(language) + designation));
-				} else
-					values.add(new StringLiteralExpr("TOTRANSLATE"));
-
-			}
-			javadocEnum.append("<!-- @formatter:on -->\n");
-			javadocConstant.append("<!-- @formatter:on -->\n");
-
-			// the enum constant with all values
-			EnumConstantDeclaration enumConstant = new EnumConstantDeclaration(new NodeList<>(),
-					new SimpleName(enumConstantName), new NodeList<>(values), new NodeList<>());
-			enumConstant.setJavadocComment(javadocEnum.toString());
-			enumType.addEntry(enumConstant);
-
-			// the static final code field for each concept
-			enumType.addFieldWithInitializer(STRING_TYPE, enumConstantName + "_CODE",
-					new StringLiteralExpr(code), publicModifier().getKeyword(),
-					staticModifier().getKeyword(), finalModifier().getKeyword())
-					.setJavadocComment(javadocConstant.toString());
-
-		}
-	}
-
-	/**
-	 * <div class="en">Formats a javadoc comment HTML snippet in the given
-	 * language.</div>
-	 *
-	 * @param language
-	 *            The language code to add.
-	 * @param comment
-	 *            The comment to add.
-	 * @return The HTML snippet of the comment.
-	 */
-	private static String buildJavadocComment(LanguageCode language, String comment) {
-		return "<div class=\"" + language.getCodeValue().substring(0, 2) + "\">" + comment
-				+ "</div>\n";
-	}
-
-	// /**
-	// * <div class="en">Parses the description of a value set from its parsed
-	// * JSON definition.</div>
-	// *
-	// * @param language
-	// * The language of the description to parse.
-	// * @param descriptions
-	// * The description JSON object.
-	// * @return The description in the desired language.
-	// * @throws IllegalStateException
-	// * If no description was found.
-	// */
-	// private static String getDescription(LanguageCode language, Object
-	// descriptions)
-	// throws IllegalStateException {
-	// List<Map<String, String>> filteredDescriptions =
-	// JsonPath.read(descriptions,
-	// "$..[?(@.language =~ /" + language.getCodeValue() + ".*/i)]");
-	// if (filteredDescriptions == null || filteredDescriptions.isEmpty()) {
-	// return "no designation found for language " + language;
-	// } else
-	// return filteredDescriptions.get(0).get("content");
-	// }
 
 	/**
 	 * <div class="en">Creates an enum definition class.</div>
@@ -444,64 +332,29 @@ public class UpdateValueSets {
 
 	}
 
-	/**
-	 * <div class="en">Remove everything from an enum type, leaving an empty
-	 * definition body.</div>
-	 *
-	 * @param enumType
-	 *            The enum to clean out.
-	 */
-	private static void removeEverything(EnumDeclaration enumType) {
-		List<Node> allNodes = new ArrayList<>();
-		allNodes.addAll(enumType.getEntries());
-		allNodes.addAll(enumType.getFields());
-		allNodes.addAll(enumType.getConstructors());
-		allNodes.addAll(enumType.getMethods());
-		allNodes.addAll(enumType.getChildNodes());
-		allNodes.forEach(enumType::remove);
-	}
-
-	/**
-	 * <div class="en">Replaces the value of a constant in the parsed type
-	 * declaration of a Java class.</div>
-	 *
-	 * @param body
-	 *            The parsed body declaration of the Java class that holds the
-	 *            constant.
-	 * @param constantName
-	 *            The name of the constant to replace the value of.
-	 * @param value
-	 *            The value to set.
-	 */
-	private static void replaceConstantValue(TypeDeclaration<? extends TypeDeclaration<?>> body,
-			String constantName, String value) {
-		body.getFieldByName(constantName).ifPresent(
-				field -> field.getVariable(0).setInitializer(new StringLiteralExpr(value)));
-	}
-
-	/**
-	 * <div class="en">Replaces the value of a annotation parameter.</div>
-	 *
-	 * @param annotation
-	 *            The annotation that holds the parameter.
-	 * @param parameterName
-	 *            The name of the parameter to replace the value of.
-	 * @param value
-	 *            The value to set.
-	 */
-	private static void replaceParameterValue(AnnotationExpr annotationExpr, String parameterName,
-			String value) {
-		List<Node> parameters = annotationExpr.getChildNodes();
-		for (Node parameter : parameters) {
-			if (parameter instanceof MemberValuePair) {
-				MemberValuePair memberValuePair = (MemberValuePair) parameter;
-				if (parameterName.equals(memberValuePair.getNameAsString())) {
-					memberValuePair.setValue(new StringLiteralExpr(value));
-				}
-
-			}
-		}
-	}
+	// /**
+	// * <div class="en">Parses the description of a value set from its parsed
+	// * JSON definition.</div>
+	// *
+	// * @param language
+	// * The language of the description to parse.
+	// * @param descriptions
+	// * The description JSON object.
+	// * @return The description in the desired language.
+	// * @throws IllegalStateException
+	// * If no description was found.
+	// */
+	// private static String getDescription(LanguageCode language, Object
+	// descriptions)
+	// throws IllegalStateException {
+	// List<Map<String, String>> filteredDescriptions =
+	// JsonPath.read(descriptions,
+	// "$..[?(@.language =~ /" + language.getCodeValue() + ".*/i)]");
+	// if (filteredDescriptions == null || filteredDescriptions.isEmpty()) {
+	// return "no designation found for language " + language;
+	// } else
+	// return filteredDescriptions.get(0).get("content");
+	// }
 
 	/**
 	 * <div class="en">Updates an existing enum definition and adds the value
@@ -595,6 +448,153 @@ public class UpdateValueSets {
 		FileUtils.write(destFile, classFileContent, Charsets.UTF_8);
 
 		return destFile.getAbsoluteFile();
+	}
+
+	/**
+	 * <div class="en">Adds all concepts of the value set definition as enum
+	 * elements to the given enum type.</div>
+	 *
+	 * @param enumType
+	 *            The enum type representing parsed Java enum class.
+	 * @param concepts
+	 *            The concepts from the value set definition file.
+	 */
+	private static void addEnumElements(EnumDeclaration enumType, ValueSet valueSet) {
+
+		ArrayList<ValueSetEntry> list;
+		list = valueSet.getSortedEntryList();
+
+		// TODO: nested lists not supported, yet (due to duplicate enum names).
+		// list = valueSet.getSortedEntryListRecursive();
+
+		for (ValueSetEntry valueSetEntry : list) {
+			String enumConstantName = ValueSet
+					.buildEnumName(valueSetEntry.getCodeBaseType().getDisplayName());
+			String preferredDesignation = valueSetEntry.getDesignation(LanguageCode.ENGLISH,
+					DesignationType.PREFERRED);
+			if (preferredDesignation != null)
+				enumConstantName = ValueSet.buildEnumName(preferredDesignation);
+			String code = valueSetEntry.getCodeBaseType().getCode();
+			String codeSystem = valueSetEntry.getCodeBaseType().getCodeSystem();
+			String displayName = valueSetEntry.getCodeBaseType().getDisplayName();
+
+			NodeList<Expression> values = new NodeList<>();
+			StringBuilder javadocEnum = new StringBuilder();
+			StringBuilder javadocConstant = new StringBuilder();
+
+			values.add(new StringLiteralExpr(code));
+			values.add(new StringLiteralExpr(codeSystem));
+			values.add(new StringLiteralExpr(displayName));
+
+			// build comments per language
+			javadocEnum.append("<!-- @formatter:off -->\n");
+			javadocConstant.append("<!-- @formatter:off -->\n");
+			for (LanguageCode language : LANGUAGE_CODES) {
+				String designation = valueSetEntry.getDesignation(language,
+						DesignationType.PREFERRED);
+				if (designation == null)
+					designation = valueSetEntry.getDesignation(language, DesignationType.PREFERRED);
+				if ((designation == null) && (ENGLISH.equals(language)))
+					designation = valueSetEntry.getCodeBaseType().getDisplayName();
+				if (designation != null) {
+					values.add(new StringLiteralExpr(designation));
+					javadocEnum.append(buildJavadocComment(language, designation));
+					javadocConstant.append(buildJavadocComment(language,
+							CODE_JAVADOC_PREFIX.get(language) + designation));
+				} else
+					values.add(new StringLiteralExpr("TOTRANSLATE"));
+
+			}
+			javadocEnum.append("<!-- @formatter:on -->\n");
+			javadocConstant.append("<!-- @formatter:on -->\n");
+
+			// the enum constant with all values
+			EnumConstantDeclaration enumConstant = new EnumConstantDeclaration(new NodeList<>(),
+					new SimpleName(enumConstantName), new NodeList<>(values), new NodeList<>());
+			enumConstant.setJavadocComment(javadocEnum.toString());
+			enumType.addEntry(enumConstant);
+
+			// the static final code field for each concept
+			enumType.addFieldWithInitializer(STRING_TYPE, enumConstantName + "_CODE",
+					new StringLiteralExpr(code), publicModifier().getKeyword(),
+					staticModifier().getKeyword(), finalModifier().getKeyword())
+					.setJavadocComment(javadocConstant.toString());
+
+		}
+	}
+
+	/**
+	 * <div class="en">Formats a javadoc comment HTML snippet in the given
+	 * language.</div>
+	 *
+	 * @param language
+	 *            The language code to add.
+	 * @param comment
+	 *            The comment to add.
+	 * @return The HTML snippet of the comment.
+	 */
+	private static String buildJavadocComment(LanguageCode language, String comment) {
+		return "<div class=\"" + language.getCodeValue().substring(0, 2) + "\">" + comment
+				+ "</div>\n";
+	}
+
+	/**
+	 * <div class="en">Remove everything from an enum type, leaving an empty
+	 * definition body.</div>
+	 *
+	 * @param enumType
+	 *            The enum to clean out.
+	 */
+	private static void removeEverything(EnumDeclaration enumType) {
+		List<Node> allNodes = new ArrayList<>();
+		allNodes.addAll(enumType.getEntries());
+		allNodes.addAll(enumType.getFields());
+		allNodes.addAll(enumType.getConstructors());
+		allNodes.addAll(enumType.getMethods());
+		allNodes.addAll(enumType.getChildNodes());
+		allNodes.forEach(enumType::remove);
+	}
+
+	/**
+	 * <div class="en">Replaces the value of a constant in the parsed type
+	 * declaration of a Java class.</div>
+	 *
+	 * @param body
+	 *            The parsed body declaration of the Java class that holds the
+	 *            constant.
+	 * @param constantName
+	 *            The name of the constant to replace the value of.
+	 * @param value
+	 *            The value to set.
+	 */
+	private static void replaceConstantValue(TypeDeclaration<? extends TypeDeclaration<?>> body,
+			String constantName, String value) {
+		body.getFieldByName(constantName).ifPresent(
+				field -> field.getVariable(0).setInitializer(new StringLiteralExpr(value)));
+	}
+
+	/**
+	 * <div class="en">Replaces the value of a annotation parameter.</div>
+	 *
+	 * @param annotation
+	 *            The annotation that holds the parameter.
+	 * @param parameterName
+	 *            The name of the parameter to replace the value of.
+	 * @param value
+	 *            The value to set.
+	 */
+	private static void replaceParameterValue(AnnotationExpr annotationExpr, String parameterName,
+			String value) {
+		List<Node> parameters = annotationExpr.getChildNodes();
+		for (Node parameter : parameters) {
+			if (parameter instanceof MemberValuePair) {
+				MemberValuePair memberValuePair = (MemberValuePair) parameter;
+				if (parameterName.equals(memberValuePair.getNameAsString())) {
+					memberValuePair.setValue(new StringLiteralExpr(value));
+				}
+
+			}
+		}
 	}
 
 }

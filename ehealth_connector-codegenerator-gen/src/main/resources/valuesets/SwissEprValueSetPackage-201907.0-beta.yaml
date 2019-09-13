@@ -1,28 +1,19 @@
-# The authorship of this project and accompanying materials is held by medshare GmbH, Switzerland.
-# All rights reserved. https://medshare.net
-#
 # Source code, documentation and other resources have been contributed by various people.
 # Project Team: https://sourceforge.net/p/ehealthconnector/wiki/Team/
 # For exact developer information, please refer to the commit history of the forge.
 #
-# This code is made available under the terms of the Eclipse Public License v1.0.
-#
-# Accompanying materials are made available under the terms of the Creative Commons
-# Attribution-ShareAlike 4.0 License.
-#
 # This line is intended for UTF-8 encoding checks, do not modify/delete: הצüיט
 
-# The list of all configured value sets that will used for static and dynamic 
-# value set handling in the eHealth Connector
+# The list of all configured value sets that will used for static and dynamic value set handling in the eHealth Connector
 #
 # Required fields for each item in the list are:
-#  className:					The fully qualified class name of the enum class that will be generated/overwritten (for static value set handling, only)
+#  className:	The fully qualified class name of the enum class that will be generated/overwritten (for static value set handling, only)
 #  projectFolder:   	The base folder where the project containing the enum Java class can be found
 #  effectiveDate:   	The date and time stamp of the version to download from the CH-EPR repository
 #  codeSystemName:  	The code system name that should be set (CODE_SYSTEM_NAME)
 #  sourceFormatType: 	JSON, XML or IHESVS
 #  sourceSystemType: 	ARTDECOR_FHIR (later also TERMINOLOGIESERVER_SOAP, but this is not implemented, yet)
-#  sourceUrl: 				URL where to get the value Set in the mentioned sourceFormat from the mentioned sourceSystem
+#  sourceUrl: 	URL where to get the value set in the mentioned sourceFormat from the mentioned sourceSystem
 #
 
 description: Swiss EPR ValueSets
