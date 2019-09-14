@@ -1,9 +1,4 @@
-# Source code, documentation and other resources have been contributed by various people.
-# Project Team: https://sourceforge.net/p/ehealthconnector/wiki/Team/
-# For exact developer information, please refer to the commit history of the forge.
-#
 # This line is intended for UTF-8 encoding checks, do not modify/delete: הצüיט
-
 # The list of all configured value sets that will used for static and dynamic value set handling in the eHealth Connector
 #
 # Required fields for each item in the list are:
@@ -23,112 +18,112 @@ valueSetConfigList:
   projectFolder: common/ehealth_connector-common-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
-  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-07-19T15%3A47%3A21&id=2.16.756.5.30.1.127.3.10.1.1.3&effectiveDate=2019-01-24T08%3A53%3A05&format=json
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-09-13T18%3A43%3A40&id=2.16.756.5.30.1.127.3.10.1.1.3&effectiveDate=2019-01-24T08%3A53%3A05&format=json
 - className: org.ehealth_connector.common.ch.enums.ConfidentialityCode
   projectFolder: common/ehealth_connector-common-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
-  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-07-19T15%3A47%3A21&id=2.16.756.5.30.1.127.3.10.1.5&effectiveDate=2019-06-08T11%3A19%3A14&format=json
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-09-13T18%3A43%3A40&id=2.16.756.5.30.1.127.3.10.1.5&effectiveDate=2019-06-08T11%3A19%3A14&format=json
 - className: org.ehealth_connector.communication.ch.enums.FormatCode
   projectFolder: api-java/ehealth_connector-communication/ehealth_connector-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
-  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-07-19T15%3A47%3A21&id=2.16.756.5.30.1.127.3.10.1.9&effectiveDate=2019-06-08T11%3A29%3A34&format=json
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-09-13T18%3A43%3A40&id=2.16.756.5.30.1.127.3.10.1.9&effectiveDate=2019-06-08T11%3A29%3A34&format=json
 - className: org.ehealth_connector.communication.ch.enums.HealthcareFacilityTypeCode
   projectFolder: api-java/ehealth_connector-communication/ehealth_connector-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
-  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-07-19T15%3A47%3A21&id=2.16.756.5.30.1.127.3.10.1.11&effectiveDate=2019-06-20T16%3A46%3A45&format=json
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-09-13T18%3A43%3A40&id=2.16.756.5.30.1.127.3.10.1.11&effectiveDate=2019-06-20T16%3A46%3A45&format=json
 - className: org.ehealth_connector.common.ch.enums.DocumentLanguage
   projectFolder: common/ehealth_connector-common-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
-  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-07-19T15%3A47%3A21&id=2.16.756.5.30.1.127.3.10.1.13&effectiveDate=2019-06-13T11%3A54%3A18&format=json
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-09-13T18%3A43%3A40&id=2.16.756.5.30.1.127.3.10.1.13&effectiveDate=2019-06-13T11%3A54%3A18&format=json
 - className: org.ehealth_connector.communication.ch.enums.MimeType
   projectFolder: api-java/ehealth_connector-communication/ehealth_connector-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
-  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-07-19T15%3A47%3A21&id=2.16.756.5.30.1.127.3.10.1.16&effectiveDate=2019-06-08T11%3A40%3A41&format=json
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-09-13T18%3A43%3A40&id=2.16.756.5.30.1.127.3.10.1.16&effectiveDate=2019-06-08T11%3A40%3A41&format=json
 - className: org.ehealth_connector.communication.ch.enums.PracticeSettingCode
   projectFolder: api-java/ehealth_connector-communication/ehealth_connector-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
-  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-07-19T15%3A47%3A21&id=2.16.756.5.30.1.127.3.10.1.18&effectiveDate=2019-06-12T15%3A34%3A20&format=json
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-09-13T18%3A43%3A40&id=2.16.756.5.30.1.127.3.10.1.18&effectiveDate=2019-06-12T15%3A34%3A20&format=json
 - className: org.ehealth_connector.communication.ch.enums.TypeCode
   projectFolder: api-java/ehealth_connector-communication/ehealth_connector-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
-  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-07-19T15%3A47%3A21&id=2.16.756.5.30.1.127.3.10.1.27&effectiveDate=2019-06-08T09%3A42%3A21&format=json
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-09-13T18%3A43%3A40&id=2.16.756.5.30.1.127.3.10.1.27&effectiveDate=2019-06-08T09%3A42%3A21&format=json
 - className: org.ehealth_connector.common.ch.enums.AuthorSpeciality
   projectFolder: common/ehealth_connector-common-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
-  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-07-19T15%3A47%3A21&id=2.16.756.5.30.1.127.3.10.1.1.4&effectiveDate=2018-08-14T16%3A04%3A21&format=json
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-09-13T18%3A43%3A40&id=2.16.756.5.30.1.127.3.10.1.1.4&effectiveDate=2018-08-14T16%3A04%3A21&format=json
 - className: org.ehealth_connector.communication.ch.enums.SourcePatientInfo
   projectFolder: api-java/ehealth_connector-communication/ehealth_connector-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
-  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-07-19T15%3A47%3A21&id=2.16.840.1.113883.4.642.3.1&effectiveDate=2019-01-25T16%3A23%3A42&format=json
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-09-13T18%3A43%3A40&id=2.16.840.1.113883.4.642.3.1&effectiveDate=2019-01-25T16%3A23%3A42&format=json
 - className: org.ehealth_connector.communication.ch.enums.ClassCode
   projectFolder: api-java/ehealth_connector-communication/ehealth_connector-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
-  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-07-19T15%3A47%3A21&id=2.16.756.5.30.1.127.3.10.1.3&effectiveDate=2019-06-07T16%3A46%3A39&format=json
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-09-13T18%3A43%3A40&id=2.16.756.5.30.1.127.3.10.1.3&effectiveDate=2019-06-07T16%3A46%3A39&format=json
 - className: org.ehealth_connector.communication.ch.enums.ClassTypeCodeMapping
   projectFolder: api-java/ehealth_connector-communication/ehealth_connector-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
-  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-07-19T15%3A47%3A21&id=2.16.756.5.30.1.127.3.10.1.30&effectiveDate=2018-03-06T13%3A55%3A38&format=json
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-09-13T18%3A43%3A40&id=2.16.756.5.30.1.127.3.10.1.30&effectiveDate=2018-03-06T13%3A55%3A38&format=json
 - className: org.ehealth_connector.communication.ch.enums.EventCodeList
   projectFolder: api-java/ehealth_connector-communication/ehealth_connector-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
-  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-07-19T15%3A47%3A21&id=2.16.756.5.30.1.127.3.10.1.8&effectiveDate=2017-11-15T11%3A33%3A59&format=json
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-09-13T18%3A43%3A40&id=2.16.756.5.30.1.127.3.10.1.8&effectiveDate=2017-11-15T11%3A33%3A59&format=json
 - className: org.ehealth_connector.communication.ch.enums.ContentTypeCode
   projectFolder: api-java/ehealth_connector-communication/ehealth_connector-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
-  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-07-19T15%3A47%3A21&id=2.16.756.5.30.1.127.3.10.1.40&effectiveDate=2019-06-08T12%3A19%3A19&format=json
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-09-13T18%3A43%3A40&id=2.16.756.5.30.1.127.3.10.1.40&effectiveDate=2019-06-08T12%3A19%3A19&format=json
 - className: org.ehealth_connector.communication.ch.enums.SubmissionSetAuthorRole
   projectFolder: api-java/ehealth_connector-communication/ehealth_connector-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
-  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-07-19T15%3A47%3A21&id=2.16.756.5.30.1.127.3.10.1.41&effectiveDate=2019-06-08T12%3A29%3A25&format=json
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-09-13T18%3A43%3A40&id=2.16.756.5.30.1.127.3.10.1.41&effectiveDate=2019-06-08T12%3A29%3A25&format=json
 - className: org.ehealth_connector.security.ch.epr.enums.PurposeOfUse
   projectFolder: api-java/ehealth_connector-security/ehealth_connector-security-ch-impl
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
-  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-07-19T15%3A47%3A21&id=2.16.756.5.30.1.127.3.10.15.2&effectiveDate=2018-05-22T13%3A48%3A17&format=json
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-09-13T18%3A43%3A40&id=2.16.756.5.30.1.127.3.10.15.2&effectiveDate=2018-05-22T13%3A48%3A17&format=json
 - className: org.ehealth_connector.communication.ch.enums.AgentRole
   projectFolder: api-java/ehealth_connector-communication/ehealth_connector-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
-  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-07-19T15%3A47%3A21&id=2.16.756.5.30.1.127.3.10.13.1&effectiveDate=2019-06-26T16%3A42%3A21&format=json
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-09-13T18%3A43%3A40&id=2.16.756.5.30.1.127.3.10.13.1&effectiveDate=2019-06-26T16%3A42%3A21&format=json
 - className: org.ehealth_connector.communication.ch.enums.AuditTrailConsumptionEventType
   projectFolder: api-java/ehealth_connector-communication/ehealth_connector-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
-  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-07-19T15%3A47%3A21&id=2.16.756.5.30.1.127.3.10.13.2&effectiveDate=2019-06-26T16%3A47%3A02&format=json
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-09-13T18%3A43%3A40&id=2.16.756.5.30.1.127.3.10.13.2&effectiveDate=2019-06-26T16%3A47%3A02&format=json
 - className: org.ehealth_connector.communication.ch.enums.Role
   projectFolder: api-java/ehealth_connector-communication/ehealth_connector-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
-  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-07-19T15%3A47%3A21&id=2.16.756.5.30.1.127.3.10.15.1&effectiveDate=2018-05-22T14%3A18%3A55&format=json
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-09-13T18%3A43%3A40&id=2.16.756.5.30.1.127.3.10.15.1&effectiveDate=2018-05-22T14%3A18%3A55&format=json
 - className: org.ehealth_connector.common.ch.enums.HcpProfession
   projectFolder: common/ehealth_connector-common-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
-  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-07-19T15%3A47%3A21&id=2.16.756.5.30.1.127.3.10.8.1&effectiveDate=2019-07-19T13%3A47%3A42&format=json
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-09-13T18%3A43%3A40&id=2.16.756.5.30.1.127.3.10.8.1&effectiveDate=2019-07-19T13%3A47%3A42&format=json
 - className: org.ehealth_connector.common.ch.enums.HcpSpecialisation
   projectFolder: common/ehealth_connector-common-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
-  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-07-19T15%3A47%3A21&id=2.16.756.5.30.1.127.77.10.11.9&effectiveDate=2019-07-19T14%3A13%3A18&format=json
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-09-13T18%3A43%3A40&id=2.16.756.5.30.1.127.3.10.8.2&effectiveDate=2019-07-19T14%3A13%3A18&format=json
 - className: org.ehealth_connector.common.ch.enums.HcpProfessionSpecialisationMap
   projectFolder: common/ehealth_connector-common-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
-  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-07-19T15%3A47%3A21&id=2.16.756.5.30.1.127.77.10.11.10&effectiveDate=2019-07-19T14%3A37%3A49&format=json
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2019-09-13T18%3A43%3A40&id=2.16.756.5.30.1.127.3.10.8.3&effectiveDate=2019-07-19T14%3A37%3A49&format=json
 version:
-  label: 201907.0-beta
-  validFrom: 2019-07-19T00:00:00+02:00
+  label: 201907.0-stable
+  validFrom: 2019-09-13T00:00:00+02:00
