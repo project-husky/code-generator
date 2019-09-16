@@ -194,6 +194,8 @@ public class UpdateValueSets {
 	 */
 	public static void main(String[] args) throws Exception {
 
+		Util.initLogger(UpdateValueSets.class);
+
 		log.debug("Update value sets");
 		System.out.print("===== Update value sets =====\n");
 
