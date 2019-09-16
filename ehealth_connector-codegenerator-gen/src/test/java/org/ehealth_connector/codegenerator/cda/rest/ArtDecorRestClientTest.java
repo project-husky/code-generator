@@ -29,6 +29,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.Util;
+import org.junit.Test;
 
 /**
  * The test class for ArtDecorRestClient.
@@ -65,7 +66,7 @@ public class ArtDecorRestClientTest {
 	 */
 	// This is for debugging purposes, only. Do not commit this test with the
 	// test annotation enabled!
-	// @Test
+	@Test
 	public void templateTestRecursiveCdaChEmed() throws Exception {
 
 		String dir = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"

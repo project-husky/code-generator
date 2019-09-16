@@ -28,7 +28,6 @@ import org.ehealth_connector.codegenerator.cda.model.CdaTemplate;
 import org.ehealth_connector.codegenerator.java.JavaCodeGenerator;
 import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.Util;
-import org.junit.Test;
 
 import net.sf.saxon.s9api.SaxonApiException;
 
@@ -63,7 +62,7 @@ public class ArtDecor2JavaGeneratorTest {
 	 */
 	// This is for debugging purposes, only. Do not commit this test with the
 	// test annotation enabled!
-	@Test
+	// @Test
 	public void doEmedTest()
 			throws SaxonApiException, IOException, JAXBException, ClassNotFoundException,
 			IllegalAccessException, IllegalArgumentException, InvocationTargetException,
@@ -84,11 +83,11 @@ public class ArtDecor2JavaGeneratorTest {
 				+ "../../api-java/ehealth_connector-cda/ehealth_connector-cda-ch".replace("/",
 						FileUtil.getPlatformSpecificPathSeparator());
 		String fileHeader = JavaCodeGenerator.getFileHeader();
+		srcFilePath = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
+				+ FileUtil.getPlatformSpecificPathSeparator();
 
 		// MedicationCardDocument
 		templateId = "2.16.756.5.30.1.1.10.1.3";
-		srcFilePath = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
-				+ FileUtil.getPlatformSpecificPathSeparator();
 		artDecor2JavaGenerator = new ArtDecor2JavaGenerator(null, templateIndex, valueSetIndex,
 				templateList, srcFilePath, dstFilePath, packageName, fileHeader, prefix,
 				new URL(ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL));
@@ -96,36 +95,26 @@ public class ArtDecor2JavaGeneratorTest {
 
 		// MedicationDispenseDocument
 		templateId = "2.16.756.5.30.1.1.10.1.5";
-		srcFilePath = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
-				+ FileUtil.getPlatformSpecificPathSeparator();
 		artDecor2JavaGenerator.prepareForAnotherTemplate();
 		artDecor2JavaGenerator.doOneTemplate(templateId);
 
 		// MedicationListDocument
 		templateId = "2.16.756.5.30.1.1.10.1.13";
-		srcFilePath = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
-				+ FileUtil.getPlatformSpecificPathSeparator();
 		artDecor2JavaGenerator.prepareForAnotherTemplate();
 		artDecor2JavaGenerator.doOneTemplate(templateId);
 
 		// MedicationPrescriptionDocument
 		templateId = "2.16.756.5.30.1.1.10.1.4";
-		srcFilePath = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
-				+ FileUtil.getPlatformSpecificPathSeparator();
 		artDecor2JavaGenerator.prepareForAnotherTemplate();
 		artDecor2JavaGenerator.doOneTemplate(templateId);
 
 		// MedicationTreatmentPlanDocument
 		templateId = "2.16.756.5.30.1.1.10.1.7";
-		srcFilePath = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
-				+ FileUtil.getPlatformSpecificPathSeparator();
 		artDecor2JavaGenerator.prepareForAnotherTemplate();
 		artDecor2JavaGenerator.doOneTemplate(templateId);
 
 		// PharmaceuticalAdviceDocument
 		templateId = "2.16.756.5.30.1.1.10.1.6";
-		srcFilePath = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
-				+ FileUtil.getPlatformSpecificPathSeparator();
 		artDecor2JavaGenerator.prepareForAnotherTemplate();
 		artDecor2JavaGenerator.doOneTemplate(templateId);
 
@@ -159,7 +148,7 @@ public class ArtDecor2JavaGeneratorTest {
 	 */
 	// This is for debugging purposes, only. Do not commit this test with the
 	// test annotation enabled!
-	@Test
+	// @Test
 	public void doLrepTest()
 			throws SaxonApiException, IOException, JAXBException, ClassNotFoundException,
 			IllegalAccessException, IllegalArgumentException, InvocationTargetException,
@@ -184,7 +173,6 @@ public class ArtDecor2JavaGeneratorTest {
 		// Swiss Laboratory Report - General Report
 		templateId = "2.16.756.5.30.1.1.10.1.10";
 		srcFilePath = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
-				+ FileUtil.getPlatformSpecificPathSeparator() + templateId
 				+ FileUtil.getPlatformSpecificPathSeparator();
 		artDecor2JavaGenerator = new ArtDecor2JavaGenerator(null, templateIndex, valueSetIndex,
 				templateList, srcFilePath, dstFilePath, packageName, fileHeader, prefix,
