@@ -38,6 +38,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.XmlUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -55,6 +57,9 @@ import org.w3c.dom.NodeList;
  *
  */
 public class ArtDecorRestClient {
+
+	/** The log. */
+	protected final static Logger log = LoggerFactory.getLogger(ArtDecorRestClient.class);
 
 	/**
 	 *
@@ -226,7 +231,10 @@ public class ArtDecorRestClient {
 	 */
 	public void addArtDecorProject(String artDecorPrefix, URL baseUrl) throws Exception {
 
-		System.out.println("Downloading Project Index " + artDecorPrefix);
+		String logMsg;
+		logMsg = "Downloading Project Index " + artDecorPrefix;
+		log.debug(logMsg);
+		System.out.println(logMsg);
 
 		InputStream is = getArtDecorProjectIndex(baseUrl, artDecorPrefix);
 		Document doc = XmlUtil.getXmlDocument(is);
@@ -274,6 +282,7 @@ public class ArtDecorRestClient {
 	 */
 	public boolean downloadTemplateRecursive(String documentTemplateId, String effectiveDate,
 			String templateId, String type) {
+		String logMsg;
 		boolean retVal = false;
 		try {
 			// prepare directory, where to put the downloaded files
@@ -288,7 +297,9 @@ public class ArtDecorRestClient {
 			if (!templates.contains(templateId)) {
 				templates.add(templateId);
 
-				System.out.println("Downloading template: " + templateId);
+				logMsg = "Downloading template: " + templateId;
+				log.debug(logMsg);
+				System.out.println(logMsg);
 
 				// download the template from ART-DECOR REST Service as stream
 				InputStream is = getArtDecorTemplate(documentTemplateId, templateId, effectiveDate);
@@ -316,47 +327,15 @@ public class ArtDecorRestClient {
 					processNodeList(nl, documentTemplateId, templateId, "contains");
 				}
 
-				System.out.println("Downloading template complete: " + templateId);
+				logMsg = "Downloading template complete: " + templateId;
+				log.debug(logMsg);
+				System.out.println(logMsg);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return retVal;
 
-	}
-
-	/**
-	 * Gets the project prefix of the given template.
-	 *
-	 * @param templateId
-	 *            the template id
-	 * @return the prefix
-	 * @throws XPathExpressionException
-	 *             the x path expression exception
-	 */
-	private String getArtDecorPrefix(String templateId) {
-		String retVal = null;
-		NodeList nl;
-		XPathFactory xPathfactory = XPathFactory.newInstance();
-		XPath xpath = xPathfactory.newXPath();
-		XPathExpression expr;
-
-		try {
-			expr = xpath.compile("//template[@id='" + templateId + "']");
-			for (Document projectIndex : projectIndexes) {
-				nl = (NodeList) expr.evaluate(projectIndex, XPathConstants.NODESET);
-				if (nl.getLength() > 0) {
-					XPathExpression expr1 = xpath.compile("/return/@prefix");
-					nl = (NodeList) expr1.evaluate(projectIndex, XPathConstants.NODESET);
-					retVal = nl.item(0).getNodeValue();
-				}
-				if (retVal != null)
-					break;
-			}
-		} catch (XPathExpressionException e) {
-			return null;
-		}
-		return retVal;
 	}
 
 	/**
@@ -416,6 +395,40 @@ public class ArtDecorRestClient {
 	}
 
 	/**
+	 * Gets the project prefix of the given template.
+	 *
+	 * @param templateId
+	 *            the template id
+	 * @return the prefix
+	 * @throws XPathExpressionException
+	 *             the x path expression exception
+	 */
+	private String getArtDecorPrefix(String templateId) {
+		String retVal = null;
+		NodeList nl;
+		XPathFactory xPathfactory = XPathFactory.newInstance();
+		XPath xpath = xPathfactory.newXPath();
+		XPathExpression expr;
+
+		try {
+			expr = xpath.compile("//template[@id='" + templateId + "']");
+			for (Document projectIndex : projectIndexes) {
+				nl = (NodeList) expr.evaluate(projectIndex, XPathConstants.NODESET);
+				if (nl.getLength() > 0) {
+					XPathExpression expr1 = xpath.compile("/return/@prefix");
+					nl = (NodeList) expr1.evaluate(projectIndex, XPathConstants.NODESET);
+					retVal = nl.item(0).getNodeValue();
+				}
+				if (retVal != null)
+					break;
+			}
+		} catch (XPathExpressionException e) {
+			return null;
+		}
+		return retVal;
+	}
+
+	/**
 	 * Processes the given node list.
 	 *
 	 * @param nl
@@ -431,6 +444,7 @@ public class ArtDecorRestClient {
 	 */
 	private void processNodeList(NodeList nl, String documentTemplateId, String templateId,
 			String type) throws XPathExpressionException {
+		String logMsg;
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = null;
 			String id = "";
@@ -443,18 +457,24 @@ public class ArtDecorRestClient {
 				node = nl.item(i).getAttributes().getNamedItem("flexibility");
 				if (node != null)
 					flexibility = node.getNodeValue();
-				System.out.println("include: " + id + " (flexibility=" + flexibility + ")");
+				logMsg = "include: " + id + " (flexibility=" + flexibility + ")";
+				log.debug(logMsg);
+				System.out.println(logMsg);
 			}
 			if ("contains".equals(type)) {
 				id = nl.item(i).getNodeValue();
-				System.out.println("contains: " + id);
+				logMsg = "contains: " + id;
+				log.debug(logMsg);
+				System.out.println(logMsg);
 			}
 
 			String prefix = getArtDecorPrefix(id);
 
-			if ("".equals(prefix))
-				System.out.println("*** ERROR: Prefix not found for templateId " + id);
-			else
+			if ("".equals(prefix)) {
+				logMsg = "Prefix not found for templateId " + id;
+				log.error(logMsg);
+				System.out.println("*** ERROR: " + logMsg);
+			} else
 				downloadTemplateRecursive(documentTemplateId, flexibility, id, type);
 		}
 	}

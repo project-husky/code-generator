@@ -172,8 +172,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	 */
 	public static void main(String[] args) throws Exception {
 
-		log.debug("ArtDecor2JavaGenerator started");
-		System.out.print("===== ART-DECOR to Java Generator started =====\n");
+		Util.initLogger(ArtDecor2JavaGenerator.class);
+
+		String logMsg;
+		logMsg = "ArtDecor2JavaGenerator started";
+		log.info(logMsg);
+		System.out.print("===== " + logMsg + " =====\n");
 
 		File eclipseApp = null;
 		File orgWorkspacePath = null;
@@ -187,13 +191,16 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			if (eclipseApplicationPath != null) {
 				eclipseApp = new File(eclipseApplicationPath);
 				if (!eclipseApp.exists()) {
-					System.out.println("ERROR: Eclipse application does not exist ("
-							+ eclipseApplicationPath + ")");
+					logMsg = "Eclipse application does not exist (" + eclipseApplicationPath + ")";
+					log.error(logMsg);
+					System.out.println("ERROR: " + logMsg);
 					argsOk = false;
 				} else {
 					if (!eclipseApp.isFile()) {
-						System.out.println("ERROR: Eclipse application is not a file ("
-								+ eclipseApplicationPath + ")");
+						logMsg = "Eclipse application is not a file (" + eclipseApplicationPath
+								+ ")";
+						log.error(logMsg);
+						System.out.println("ERROR: " + logMsg);
 						argsOk = false;
 					}
 				}
@@ -203,13 +210,15 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			if (orgWorkspacePathString != null) {
 				orgWorkspacePath = new File(orgWorkspacePathString);
 				if (!orgWorkspacePath.exists()) {
-					System.out.println(
-							"ERROR: Workspace does not exist (" + orgWorkspacePathString + ")");
+					logMsg = "Workspace does not exist (" + orgWorkspacePathString + ")";
+					log.error(logMsg);
+					System.out.println("ERROR: " + logMsg);
 					argsOk = false;
 				} else {
 					if (!orgWorkspacePath.isDirectory()) {
-						System.out.println("ERROR: Workspace is not a directory ("
-								+ orgWorkspacePathString + ")");
+						logMsg = "Workspace is not a directory (" + orgWorkspacePathString + ")";
+						log.error(logMsg);
+						System.out.println("ERROR: " + logMsg);
 						argsOk = false;
 					}
 				}
@@ -219,22 +228,26 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			if (orgConfigPathString != null) {
 				configFile = new File(orgConfigPathString);
 				if (!configFile.exists()) {
-					System.out.println(
-							"ERROR: Config File does not exist (" + orgConfigPathString + ")");
+					logMsg = "Config File does not exist (" + orgConfigPathString + ")";
+					log.error(logMsg);
+					System.out.println("ERROR: " + logMsg);
 					argsOk = false;
 				} else {
 					if (!configFile.isFile()) {
-						System.out.println(
-								"ERROR: Config is not a file (" + orgConfigPathString + ")");
+						logMsg = "Config is not a file (" + orgConfigPathString + ")";
+						log.error(logMsg);
+						System.out.println("ERROR: " + logMsg);
 						argsOk = false;
 					}
 				}
 			}
 
 		} else {
+			logMsg = "ArtDecor2JavaGenerator <eclipse> <workspace> <config>";
+			log.warn("Invalid or no parameter given. Usage: " + logMsg);
 			System.out.println("Usage:");
 			System.out.println("");
-			System.out.println("ArtDecor2JavaGenerator <eclipse> <workspace> <config>");
+			System.out.println(logMsg);
 			System.out.println("");
 			System.out.println(
 					"  eclipse:   First parameter must be the full path and filename of your eclipse application");
@@ -273,38 +286,64 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		FileUtils.deleteDirectory(tempDownloadPath);
 		FileUtils.copyDirectoryToDirectory(orgWorkspacePath, tempWorkspacePath);
 
+		logMsg = "Settings";
+		log.info(logMsg + ":");
 		System.out.println("----------------------------------------");
-		System.out.println("Settings");
+		System.out.println(logMsg);
 		System.out.println("----------------------------------------");
-		System.out.println("Eclipse runtime: " + eclipseApp.getAbsolutePath());
-		System.out.println("Temp. workspace: " + tempWorkspacePath.getAbsolutePath());
-		System.out.println("Config file: " + configFile.getAbsolutePath());
-		System.out.println();
+
+		logMsg = "Eclipse runtime: " + eclipseApp.getAbsolutePath();
+		log.info(logMsg);
+		System.out.println(logMsg);
+
+		logMsg = "Temp. workspace: " + tempWorkspacePath.getAbsolutePath();
+		log.info(logMsg);
+		System.out.println(logMsg);
+
+		logMsg = "Config file: " + configFile.getAbsolutePath();
+		log.info(logMsg);
+		System.out.println(logMsg);
 
 		// Load Config
+		logMsg = "Configuration";
+		log.info(logMsg + ":");
 		System.out.println("----------------------------------------");
-		System.out.println("Configuration");
+		System.out.println(logMsg);
 		System.out.println("----------------------------------------");
-		System.out.print("Loading configuration...");
+		logMsg = "Loading configuration...";
+		log.info(logMsg);
+		System.out.println(logMsg);
 		ArtDecor2JavaManager artDecor2JavaManager2 = new ArtDecor2JavaManager();
 		ContentProfilePackageConfig contentProfilePackageConfig = artDecor2JavaManager2
 				.loadContentProfilePackageConfig(configFile.getAbsolutePath());
-		System.out.println("done");
+		logMsg = "Loading configuration done.";
+		log.info(logMsg);
+		System.out.println(logMsg);
 
-		System.out.println("Loaded configuration:");
+		logMsg = "Loaded configuration:";
+		log.debug(logMsg);
+		System.out.println(logMsg);
 		for (ContentProfileConfig contentProfile : contentProfilePackageConfig
 				.getContentProfileConfigList()) {
-			System.out.println("- Target namespace: " + contentProfile.getTargetNamespace());
+			logMsg = "- Target namespace: " + contentProfile.getTargetNamespace();
+			log.debug(logMsg);
+			System.out.println(logMsg);
 			for (String templateId : contentProfile.getArtDecorDocTemplateMap().keySet()) {
-				System.out.println("  - template id: " + templateId);
+				logMsg = "  - template id: " + templateId;
+				log.debug(logMsg);
+				System.out.println(logMsg);
 			}
 		}
-		System.out.println("Configuration done");
+		logMsg = "Configuration done.";
+		log.info(logMsg);
+		System.out.println(logMsg);
 		System.out.println();
 
 		// Perform REST calls
+		logMsg = "Download from ART-DECOR";
+		log.info(logMsg);
 		System.out.println("----------------------------------------");
-		System.out.println("Download from ART-DECOR");
+		System.out.println(logMsg);
 		System.out.println("----------------------------------------");
 		for (ContentProfileConfig contentProfile : contentProfilePackageConfig
 				.getContentProfileConfigList()) {
@@ -320,14 +359,17 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				artDecorRestClient.downloadTemplateRecursive(templateId, effectiveTime);
 			}
 		}
-		System.out.println("Download from ART-DECOR done");
+		logMsg = "Download from ART-DECOR done.";
+		log.info(logMsg);
+		System.out.println(logMsg);
 		System.out.println();
 
 		// Perform Java code generation
+		logMsg = "Perform Java code generation";
+		log.info(logMsg);
 		System.out.println("----------------------------------------");
-		System.out.println("Perform Java code generation");
+		System.out.println(logMsg);
 		System.out.println("----------------------------------------");
-		System.out.println("Java code generation done");
 		System.out.println();
 		ArrayList<String> dstPathList = new ArrayList<String>();
 		for (ContentProfileConfig contentProfile : contentProfilePackageConfig
@@ -367,10 +409,16 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				dstPathList.add(artDecor2JavaGenerator.getFullDstFilePath() + "enums"
 						+ FileUtil.getPlatformSpecificPathSeparator());
 		}
+		logMsg = "Java code generation done.";
+		log.info(logMsg);
+		System.out.println(logMsg);
+		System.out.println();
 
 		// Apply formatter
+		logMsg = "Applying formatter";
+		log.info(logMsg);
 		System.out.println("----------------------------------------");
-		System.out.println("Applying formatter");
+		System.out.println(logMsg);
 		System.out.println("----------------------------------------");
 		for (String path : dstPathList) {
 			try {
@@ -381,19 +429,27 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				e.printStackTrace();
 			}
 		}
-		System.out.println("Formatter applied");
+		logMsg = "Formatter applied.";
+		log.info(logMsg);
+		System.out.println(logMsg);
 		System.out.println();
 
 		FileUtils.deleteDirectory(tempWorkspacePath);
 		FileUtils.deleteDirectory(tempDownloadPath);
 
-		System.out.println("Generated Java classes and enums in the following folders:");
+		logMsg = "Generated Java classes and enums in the following folders:";
+		log.info(logMsg);
+		System.out.println(logMsg);
 		for (String path : dstPathList) {
-			System.out.println("- " + path);
+			logMsg = "- " + path;
+			log.info(logMsg);
+			System.out.println(logMsg);
 		}
 		System.out.println();
 
-		log.debug("ArtDecor2JavaGenerator finished");
+		logMsg = "ArtDecor2JavaGenerator finished.";
+		log.info(logMsg);
+		System.out.println(logMsg);
 		System.out.print("===== ART-DECOR to Java Generator finished =====\n");
 
 	}
@@ -503,6 +559,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	private static void createAdder(CompilationUnit compilationUnit,
 			ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
 
+		String logMsg;
+
 		if (cdaElement.getDataType() == null)
 			throw new NotImplementedException("Type undefined for " + cdaElement.getJavaName());
 
@@ -554,8 +612,10 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				body.addStatement("getContent().add(new JAXBElement<En" + enPartU
 						+ ">(new QName(\"hl7:" + enPartL + "\"), En" + enPartU + ".class, obj));");
 			} else {
-				System.out.println("\nWARNING: " + cdaElement.getFullXmlName()
-						+ " is declared as list, but the XML Schema hosts it as single field. It is strongly recommended to correct the ART-DECOR model!");
+				logMsg = cdaElement.getFullXmlName()
+						+ " is declared as list, but the XML Schema hosts it as single field. It is strongly recommended to correct the ART-DECOR model!";
+				log.warn(logMsg);
+				System.out.println("\nWARNING: " + logMsg);
 				body.addStatement(name + "= value;");
 			}
 		}
@@ -1089,6 +1149,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	private static void createSetter(CompilationUnit compilationUnit,
 			ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
 
+		String logMsg;
+
 		if (cdaElement.getDataType() == null)
 			throw new NotImplementedException("Type undefined for " + cdaElement.getJavaName());
 
@@ -1157,8 +1219,10 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 					} else {
 						addBodyComment(method,
 								memberType.getName() + " cannot be cast to " + dataType);
-						System.out.println("\nERROR: " + cdaElement.getFullXmlName() + " :"
-								+ memberType.getName() + " cannot be cast to " + dataType);
+						logMsg = cdaElement.getFullXmlName() + " :" + memberType.getName()
+								+ " cannot be cast to " + dataType;
+						log.error(logMsg);
+						System.out.println("\nERROR: " + logMsg);
 					}
 				} else
 					body.addStatement("this." + temp + " = " + cast + "value;");
@@ -1718,12 +1782,20 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	 */
 	public void createJavaClasses() throws IOException {
 		regroupTemplateElements(templateList);
-		System.out.println("Writing Java Class files:");
+		String logMsg;
+
+		logMsg = "Writing Java Class files:";
+		log.debug(logMsg);
+		System.out.println(logMsg);
 		for (CdaTemplate cdaTemplate : templateList) {
-			System.out.println("- " + cdaTemplate.getName());
+			logMsg = "- " + cdaTemplate.getName();
+			log.debug(logMsg);
+			System.out.println(logMsg);
 			createJavaClassFile(cdaTemplate, packageName, fullDstFilePath);
 		}
-		System.out.println(" done.");
+		logMsg = "Writing Java Class files done.";
+		log.debug(logMsg);
+		System.out.println(logMsg);
 	}
 
 	/**
@@ -1763,18 +1835,23 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			IllegalAccessException, IllegalArgumentException, InvocationTargetException,
 			InstantiationException, NoSuchFieldException, SecurityException {
 
+		String logMsg;
 		CdaTemplate retVal = null;
 
 		if (templateIndex.containsKey(templateId)) {
+			logMsg = templateId + " is already known as " + templateIndex.get(templateId);
+			log.debug(logMsg);
 			if (printParsingDebugInformation)
-				System.out.println(
-						templateId + " is already known as " + templateIndex.get(templateId));
+				System.out.println(logMsg);
 			retVal = templateIndex.get(templateId);
 		}
 
 		if (retVal == null) {
-			if (initialRun)
-				System.out.println("Processing document template: " + templateId);
+			if (initialRun) {
+				logMsg = "Processing document template: " + templateId;
+				log.debug(logMsg);
+				System.out.println(logMsg);
+			}
 
 			templateIndex.put(templateId, runningTemplate);
 
@@ -1808,16 +1885,20 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			ParseTreeWalker walker = new ParseTreeWalker();
 
 			// Parse the template
+			logMsg = "Parsing started";
+			log.debug(logMsg);
 			if (printParsingDebugInformation)
-				System.out.println("Parsing started");
+				System.out.println(logMsg);
 
 			walker.walk(this, parser.template());
 			templateIndex.remove(templateId, runningTemplate);
 			templateIndex.put(templateId, currentCdaTemplate);
 			retVal = currentCdaTemplate;
 
+			logMsg = "Parsing completed";
+			log.debug(logMsg);
 			if (printParsingDebugInformation) {
-				System.out.println("Parsing completed");
+				System.out.println(logMsg);
 				System.out.println("-----------------------------------------------------------");
 				System.out.println("");
 			}
@@ -1828,9 +1909,13 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			}
 
 			// Show the content (this is for debugging purposes, only)
-			if (printAssembledDebugInformation && initialRun) {
-				System.out.println("Assembled content for template " + mainCdaTemplate.getName()
-						+ " (id: " + mainCdaTemplate.getId() + ")");
+			if (initialRun) {
+				logMsg = "Assembled content for template " + mainCdaTemplate.getName() + " (id: "
+						+ mainCdaTemplate.getId() + ")";
+				log.debug(logMsg);
+				if (printAssembledDebugInformation)
+					System.out.println(logMsg);
+
 				printCdaAttributes(" ", mainCdaTemplate.getCdaAttributeList());
 
 				for (CdaElement item : mainCdaTemplate.getCdaElementList()) {
@@ -1839,8 +1924,11 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			}
 		}
 
-		if (initialRun)
-			System.out.println("Processing: " + templateId + " done.");
+		if (initialRun) {
+			logMsg = "Processing: " + templateId + " done.";
+			log.info(logMsg);
+			System.out.println(logMsg);
+		}
 
 		return retVal;
 
@@ -1858,6 +1946,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	 */
 	@Override
 	public void enterAttribute(Hl7ItsParser.AttributeContext ctx) {
+
+		String logMsg;
+
 		processingAttribute++;
 		currentCdaAttribute = new CdaAttribute();
 		currentCdaAttribute.setCdaElement(currentCdaElement);
@@ -1881,10 +1972,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		else
 			currentCdaElement.addAttribute(currentCdaAttribute);
 
+		logMsg = "Attribute: " + currentCdaAttribute.getName() + "="
+				+ currentCdaAttribute.getValue() + " (dataType: "
+				+ currentCdaAttribute.getDataType() + ")";
+		log.debug(logMsg);
 		if (printParsingDebugInformation)
-			System.out.println("Attribute: " + currentCdaAttribute.getName() + "="
-					+ currentCdaAttribute.getValue() + " (dataType: "
-					+ currentCdaAttribute.getDataType() + ")");
+			System.out.println(logMsg);
 	}
 
 	/**
@@ -1933,6 +2026,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	 */
 	@Override
 	public void enterElement(Hl7ItsParser.ElementContext ctx) {
+
+		String logMsg;
 
 		currentCdaAttribute = null;
 
@@ -2115,8 +2210,10 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		String ref = "";
 		if (containsAttrCtx != null) {
 			ref = containsAttrCtx.AttrValue().getText().replace("\"", "");
+			logMsg = cdaElement.getJavaName() + " contains " + ref;
+			log.debug(logMsg);
 			if (printParsingDebugInformation)
-				System.out.println(cdaElement.getJavaName() + " contains " + ref);
+				System.out.println(logMsg);
 			try {
 				if (parentForContains == null)
 					throw new RuntimeException("parent is null for contains " + ref);
@@ -2138,9 +2235,11 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			}
 		}
 
+		logMsg = "Element: " + cdaElement.getJavaName() + " (dataType: " + cdaElement.getDataType()
+				+ ")";
+		log.debug(logMsg);
 		if (printParsingDebugInformation)
-			System.out.println("Element: " + cdaElement.getJavaName() + " (dataType: "
-					+ cdaElement.getDataType() + ")");
+			System.out.println(logMsg);
 
 	}
 
@@ -2156,6 +2255,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	 */
 	@Override
 	public void enterInclude(Hl7ItsParser.IncludeContext ctx) {
+
+		String logMsg;
 
 		RefAttrContext refAttrCtx = ctx.refAttr();
 		String ref = "";
@@ -2179,9 +2280,10 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				}
 			}
 
+			logMsg = "Include: " + ref;
+			log.debug(logMsg);
 			if (printParsingDebugInformation)
-				if (printParsingDebugInformation)
-					System.out.println("Include: " + ref);
+				System.out.println(logMsg);
 			try {
 				// Process includes
 				ArtDecor2JavaGenerator artDecor2JavaGenerator = new ArtDecor2JavaGenerator(
@@ -2197,8 +2299,11 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				else if (isParentElement)
 					currentCdaElement.getParentCdaElement().getParentCdaElement()
 							.addCdaTemplate(template, ProcessModes.INCLUDE);
-				else
-					System.out.println("Stop here - no child, noc sibling, no parent - what else?");
+				else {
+					logMsg = "Uups, no child, no sibling, no parent - what else?";
+					log.error(logMsg);
+					System.out.println("ERROR:" + logMsg);
+				}
 
 				// not sure, if this is really needed. if not, remove also the
 				// template hash map property in CDATemplate
@@ -2226,6 +2331,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	 */
 	@Override
 	public void enterTemplate(Hl7ItsParser.TemplateContext ctx) {
+
+		String logMsg;
 		String name = null;
 		String id = null;
 
@@ -2255,9 +2362,11 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		templateList.add(currentCdaTemplate);
 
+		logMsg = "Template: " + currentCdaTemplate.getName() + " (id: " + currentCdaTemplate.getId()
+				+ ")";
+		log.debug(logMsg);
 		if (printParsingDebugInformation)
-			System.out.println("Template: " + currentCdaTemplate.getName() + " (id: "
-					+ currentCdaTemplate.getId() + ")");
+			System.out.println(logMsg);
 	}
 
 	/**
@@ -2272,6 +2381,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	 */
 	@Override
 	public void enterVocab(Hl7ItsParser.VocabContext ctx) {
+
+		String logMsg;
 
 		String code = null;
 		CodeAttrContext codeAttrCtx = ctx.codeAttr();
@@ -2332,13 +2443,14 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				currentCdaAttribute.setValueSetId(valueSetId);
 
 				if (!skipValueSetGeneration && !valueSetIndex.containsKey(valueSetId)) {
-					System.out.print("- downloading ValueSet " + valueSetId + " ...");
+					logMsg = "- downloading ValueSet " + valueSetId + " ...";
+					log.debug(logMsg);
+					System.out.println(logMsg);
 
 					String sourceUrl = artDecorBaseUrl.toString() + "RetrieveValueSet?prefix="
 							+ artDecorPrefix + "&id=" + valueSetId + "&format=json";
 					if (!"dynamic".equals(flexibility) && flexibility != null)
 						try {
-							System.out.println("Stop here - static flexibility");
 							sourceUrl += "&effectiveDate=" + java.net.URLEncoder.encode(flexibility,
 									Charsets.UTF_8.toString());
 						} catch (UnsupportedEncodingException e) {
@@ -2360,7 +2472,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 								+ ") cannot be downloaded: " + e.getMessage());
 					}
 					if (valueSet != null) {
-						System.out.print(" creating class file ...");
+						logMsg = "  creating enum class file ...";
+						log.debug(logMsg);
+						System.out.println(logMsg);
 						String fullValueSetClassName = packageName + ".enums."
 								+ JavaCodeGenerator.toPascalCase(valueSet.getName());
 						valueSetIndex.put(valueSetId, fullValueSetClassName);
@@ -2382,9 +2496,14 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 							throw new RuntimeException("valueSet (" + valueSetId
 									+ ") cannot be created as Java enum file: " + e.getMessage());
 						}
+						logMsg = "  creating enum class file done";
+						log.debug(logMsg);
+						System.out.println(logMsg);
 
 					}
-					System.out.print(" done.\n");
+					logMsg = "- downloading ValueSet " + valueSetId + " done.";
+					log.debug(logMsg);
+					System.out.println(logMsg);
 				}
 			}
 			if (currentCdaElement == null)
@@ -2394,10 +2513,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			else
 				currentCdaElement.addAttribute(currentCdaAttribute);
 
+			logMsg = "Attribute from vocab Element: " + currentCdaAttribute.getName() + "="
+					+ currentCdaAttribute.getValue() + " (dataType: "
+					+ currentCdaAttribute.getDataType() + ")";
+			log.debug(logMsg);
 			if (printParsingDebugInformation)
-				System.out.println("Attribute from vocab Element: " + currentCdaAttribute.getName()
-						+ "=" + currentCdaAttribute.getValue() + " (dataType: "
-						+ currentCdaAttribute.getDataType() + ")");
+				System.out.println(logMsg);
 		}
 	}
 
@@ -3291,6 +3412,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			throws JAXBException, ClassNotFoundException, IOException, IllegalAccessException,
 			IllegalArgumentException, InvocationTargetException, InstantiationException,
 			NoSuchFieldException, SecurityException {
+
+		String logMsg;
+
 		if (cdaElement != null) {
 			if (dataTypeIndex == null)
 				dataTypeIndex = loadHl7CdaR2DataTypeIndex();
@@ -3303,12 +3427,11 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				dataType = getDataType(cdaElement, templateIndex);
 				cdaElement.setDataType(dataType);
 			}
+			logMsg = "Datatype for " + cdaElement.getFullXmlName().replace("hl7:", "")
+					.replace("pharm:", "").replace("xsi:", "") + " --> " + dataType;
+			log.debug(logMsg);
 			if (printDataTypeDebugInformation)
-				System.out
-						.println("Datatype for "
-								+ cdaElement.getFullXmlName().replace("hl7:", "")
-										.replace("pharm:", "").replace("xsi:", "")
-								+ " --> " + dataType);
+				System.out.println(logMsg);
 			for (CdaElement item : cdaElement.getChildrenCdaElementList()) {
 				fillDatatypesRecursive(item);
 			}
@@ -3591,17 +3714,25 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	 */
 	private void regroupTemplateElements(ArrayList<CdaTemplate> myTemplateList) {
 		for (CdaTemplate cdaTemplate : myTemplateList) {
-			// System.out.println("Processing " + cdaTemplate.getName());
+
+			String logMsg;
+			logMsg = "Processing " + cdaTemplate.getName();
+			log.debug(logMsg);
+			// System.out.println(logMsg);
 			for (CdaElement cdaElement : cdaTemplate.getCdaElementList()) {
-				// System.out.println(" " + cdaElement.getXmlName());
+				logMsg = " " + cdaElement.getXmlName();
+				log.debug(logMsg);
+				// System.out.println(logMsg);
 				for (CdaTemplate cdaTemplate2 : cdaElement.getCdaTemplateList().keySet()) {
 					ProcessModes mode = cdaElement.getCdaTemplateList().get(cdaTemplate2);
-					// System.out.println(" " + mode + " " +
-					// cdaTemplate2.getName());
+					logMsg = " " + mode + " " + cdaTemplate2.getName();
+					log.debug(logMsg);
+					// System.out.println(logMsg);
 					if (mode != ProcessModes.CONTAINS) {
 						for (CdaElement cdaElement2 : cdaTemplate2.getCdaElementList()) {
-							// System.out.println("Adding " +
-							// cdaElement2.getXmlName());
+							logMsg = "Adding " + cdaElement2.getXmlName();
+							log.debug(logMsg);
+							// System.out.println(logMsg);
 							cdaElement.addChild(cdaElement2);
 						}
 					}

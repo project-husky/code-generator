@@ -20,7 +20,6 @@
 	</appender>
 	<appender name="LogFileAppender" class="org.apache.log4j.FileAppender">
 		<param name="File" value="logs/ehealthconnectordemo.log" />
-		<!-- remove this entry if you want to debug:-->
 		<param name="Threshold" value="DEBUG" />
 		<layout class="org.apache.log4j.PatternLayout">
 			<param name="ConversionPattern" value="%d %r [%t] %-5p %c %x - %m%n"/>
@@ -28,7 +27,6 @@
 	</appender>
 	<appender name="httpclient" class="org.apache.log4j.FileAppender">
 		<param name="File" value="logs/http-client.log" />
-		<!-- remove this entry if you want to debug:-->
 		<param name="Threshold" value="INFO" />
 		<layout class="org.apache.log4j.PatternLayout">
 			<param name="ConversionPattern" value="%d %r [%t] %-5p %c %x - %m%n"/>

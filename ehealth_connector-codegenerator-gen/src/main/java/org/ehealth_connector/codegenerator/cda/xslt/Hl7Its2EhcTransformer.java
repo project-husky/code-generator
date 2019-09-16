@@ -20,6 +20,9 @@ import java.io.File;
 
 import javax.xml.transform.stream.StreamSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 //import org.ehealth_connector.validation.service.schematron.RuleSetTransformer;
 //import org.ehealth_connector.validation.service.transform.StylesheetFactory;
 //import org.ehealth_connector.validation.service.transform.StylesheetURIResolver;
@@ -48,6 +51,9 @@ import net.sf.saxon.s9api.XsltTransformer;
  */
 public class Hl7Its2EhcTransformer {
 
+	/** The log. */
+	protected final static Logger log = LoggerFactory.getLogger(Hl7Its2EhcTransformer.class);
+
 	/**
 	 * <div class="en">Performs one XSL transformation. The inputFile will be
 	 * transformed by using the internally stored XSL stylesheet and then stored
@@ -66,7 +72,11 @@ public class Hl7Its2EhcTransformer {
 	 */
 	public static void transform(File inputFile, File outputFile) throws SaxonApiException {
 
-		System.out.print("Transforming " + inputFile.getName() + "...");
+		String logMsg;
+
+		logMsg = "Transforming " + inputFile.getName() + "...";
+		log.debug(logMsg);
+		System.out.println(logMsg);
 		Processor processor = new Processor(false);
 		XsltCompiler compiler = processor.newXsltCompiler();
 		XsltExecutable xsl = compiler
@@ -85,7 +95,9 @@ public class Hl7Its2EhcTransformer {
 		transformer.setDestination(out);
 
 		transformer.transform();
-		System.out.println("done.");
+		logMsg = "Transforming " + inputFile.getName() + " done.";
+		log.debug(logMsg);
+		System.out.println(logMsg);
 
 	}
 
