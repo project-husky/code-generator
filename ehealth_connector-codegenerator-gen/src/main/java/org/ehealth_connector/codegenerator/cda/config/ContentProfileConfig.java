@@ -193,8 +193,10 @@ public class ContentProfileConfig {
 	/**
 	 * Adds a template Id to the list.
 	 *
-	 * @param value
-	 *            the value
+	 * @param templateId
+	 *            the template id
+	 * @param effectiveTime
+	 *            the effective time
 	 */
 	public void addTemplateId(String templateId, String effectiveTime) {
 		if (this.artDecorDocTemplateMap == null)

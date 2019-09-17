@@ -236,40 +236,14 @@ public class UpdateValueSets {
 				+ "</div>\n";
 	}
 
-	// /**
-	// * <div class="en">Parses the description of a value set from its parsed
-	// * JSON definition.</div>
-	// *
-	// * @param language
-	// * The language of the description to parse.
-	// * @param descriptions
-	// * The description JSON object.
-	// * @return The description in the desired language.
-	// * @throws IllegalStateException
-	// * If no description was found.
-	// */
-	// private static String getDescription(LanguageCode language, Object
-	// descriptions)
-	// throws IllegalStateException {
-	// List<Map<String, String>> filteredDescriptions =
-	// JsonPath.read(descriptions,
-	// "$..[?(@.language =~ /" + language.getCodeValue() + ".*/i)]");
-	// if (filteredDescriptions == null || filteredDescriptions.isEmpty()) {
-	// return "no designation found for language " + language;
-	// } else
-	// return filteredDescriptions.get(0).get("content");
-	// }
-
 	/**
 	 * <div class="en">Creates an enum definition class.</div>
 	 *
 	 * @param baseJavaFolder
 	 *            The base Java source folder (relative to the root of the
 	 *            project hierarchy) where the Java package structure begins.
-	 * @param className
-	 *            The fully qualified Java class name of the enum to update.
-	 * @param valueSetDefinition
-	 *            The parsed value set definition file.
+	 * @param fullyQualifiedclassName
+	 *            the fully qualifiedclass name
 	 * @throws IOException
 	 *             When reading or writing the Java source file fails.
 	 */
