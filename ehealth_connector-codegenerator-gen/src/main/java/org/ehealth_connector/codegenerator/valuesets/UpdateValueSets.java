@@ -76,7 +76,6 @@ import com.google.common.collect.ImmutableMap;
  */
 public class UpdateValueSets {
 
-	private final static String ART_DECOR_VALUE_SET_PACKAGE_CONFIG = "ArtDecorInfrastructure-201908.yaml";
 	/**
 	 * <div class="en">Javadoc comment prefix for the code fields.</div>
 	 */

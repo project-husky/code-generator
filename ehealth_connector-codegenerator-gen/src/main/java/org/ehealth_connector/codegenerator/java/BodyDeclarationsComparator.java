@@ -60,8 +60,6 @@ public class BodyDeclarationsComparator implements Comparator<BodyDeclaration<?>
 			// TODO: static declarations need to come first!
 
 			if (a instanceof ConstructorDeclaration && b instanceof ConstructorDeclaration) {
-				ConstructorDeclaration constructor_a = (ConstructorDeclaration) a;
-				ConstructorDeclaration constructor_b = (ConstructorDeclaration) b;
 				// TODO when there are multiple constructors, add a comparision
 				// on their arg list, here
 				return 0;

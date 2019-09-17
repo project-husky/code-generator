@@ -90,7 +90,7 @@ public class ArtDecor2JavaGeneratorTest {
 		templateId = "2.16.756.5.30.1.1.10.1.3";
 		artDecor2JavaGenerator = new ArtDecor2JavaGenerator(null, templateIndex, valueSetIndex,
 				templateList, srcFilePath, dstFilePath, packageName, fileHeader, prefix,
-				new URL(ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL));
+				new URL(ArtDecor2JavaManager.ART_DECOR_DEFAULT_SERVER_BASE_URL));
 		artDecor2JavaGenerator.doOneTemplate(templateId);
 
 		// MedicationDispenseDocument
@@ -176,7 +176,7 @@ public class ArtDecor2JavaGeneratorTest {
 				+ FileUtil.getPlatformSpecificPathSeparator();
 		artDecor2JavaGenerator = new ArtDecor2JavaGenerator(null, templateIndex, valueSetIndex,
 				templateList, srcFilePath, dstFilePath, packageName, fileHeader, prefix,
-				new URL(ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL));
+				new URL(ArtDecor2JavaManager.ART_DECOR_DEFAULT_SERVER_BASE_URL));
 		artDecor2JavaGenerator.doOneTemplate(templateId);
 		artDecor2JavaGenerator.createJavaClasses();
 

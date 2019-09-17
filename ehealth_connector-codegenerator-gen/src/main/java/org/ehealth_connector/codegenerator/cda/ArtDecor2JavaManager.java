@@ -32,21 +32,17 @@ import org.ehealth_connector.codegenerator.cda.config.ContentProfilePackageConfi
 import org.ehealth_connector.common.utils.CustomizedYaml;
 
 /**
- * <div class="en">TODO.</div>
+ * <div class="en">This class host som managing methods for the ART-DECOR to
+ * Java Code Generator.</div>
  *
- * <div class="de">TODO.</div>
- *
- * TODO This class is the main entry point for the code generation. An eHC
- * maintainer has to launch this class as a Java application by providing the
- * base URL to ART-DECOR (e.g. https://art-decor.org/decor/services/), the
- * ART-DECOR prefix for the desired project (e.g. cdachlrep-) and the template
- * id of the desired Document Template (e.g. 2.16.756.5.30.1.1.10.1.10).
+ * <div class="de">Diese Klasse enthält einige Verwaltungsmethoden für den
+ * ART-DECOR to Java Code Generator.</div>
  *
  */
 public class ArtDecor2JavaManager {
 
-	/** The default ART-DECOR base URL. */
-	public final static String ART_DECOR_MAIN_SERVER_BASE_URL = "https://art-decor.org/decor/services/";
+	/** The default ART-DECOR base URL (main ART-DECOR host). */
+	public final static String ART_DECOR_DEFAULT_SERVER_BASE_URL = "https://art-decor.org/decor/services/";
 
 	/**
 	 * <div class="en">Loads a content profile configuration from the given
@@ -74,7 +70,7 @@ public class ArtDecor2JavaManager {
 	 * <div class="en">Loads a content profile configuration from the given
 	 * stream.</div>
 	 *
-	 * <div class="de">Lädt eine Inhaltsprofil-Konfigurationaus dem angegebenen
+	 * <div class="de">Lädt eine Inhaltsprofil-Konfiguration aus dem angegebenen
 	 * Stream.</div>
 	 *
 	 * @param inputStream

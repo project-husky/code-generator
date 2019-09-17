@@ -54,7 +54,7 @@ public class ContentProfileConfigTest {
 
 		contentProfileConfig.addTemplateId(artDecorDocTemplateId, "dynamic");
 		contentProfileConfig.addProject(artDecorPrefix,
-				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+				ArtDecor2JavaManager.ART_DECOR_DEFAULT_SERVER_BASE_URL);
 
 		assertTrue(artDecorBaseUrl.toString().equals(contentProfileConfig.getArtDecorBaseUrl()));
 		assertTrue(artDecorPrefix

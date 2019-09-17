@@ -56,7 +56,7 @@ public class ArtDecor2JavaManagerTest {
 						"CDA-CH-EMED - Swiss eMedication, draft version 0.9.6 of September 6, 2019")
 				.build();
 
-		String artDecorBaseUrl = ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL;
+		String artDecorBaseUrl = ArtDecor2JavaManager.ART_DECOR_DEFAULT_SERVER_BASE_URL;
 		String artDecorPrefix = "cdachemed-";
 		String targetDir = "api-java/ehealth_connector-cda/ehealth_connector-cda-ch";
 		String targetNamespace = "org.ehealth_connector.cda.ch.emed.v096";
@@ -66,21 +66,21 @@ public class ArtDecor2JavaManagerTest {
 
 		// Add the main prefix
 		contentProfileConfig.addProject(artDecorPrefix,
-				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+				ArtDecor2JavaManager.ART_DECOR_DEFAULT_SERVER_BASE_URL);
 
 		// Add further prefixes (referenced projects)
 		contentProfileConfig.addProject("ad1bbr-",
-				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+				ArtDecor2JavaManager.ART_DECOR_DEFAULT_SERVER_BASE_URL);
 		contentProfileConfig.addProject("ad2bbr-",
-				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+				ArtDecor2JavaManager.ART_DECOR_DEFAULT_SERVER_BASE_URL);
 		contentProfileConfig.addProject("ch-epr-",
-				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+				ArtDecor2JavaManager.ART_DECOR_DEFAULT_SERVER_BASE_URL);
 		contentProfileConfig.addProject("ch-pharm-",
-				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+				ArtDecor2JavaManager.ART_DECOR_DEFAULT_SERVER_BASE_URL);
 		contentProfileConfig.addProject("ch-pcc-",
-				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+				ArtDecor2JavaManager.ART_DECOR_DEFAULT_SERVER_BASE_URL);
 		contentProfileConfig.addProject("hl7chcda-",
-				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+				ArtDecor2JavaManager.ART_DECOR_DEFAULT_SERVER_BASE_URL);
 		contentProfileConfig.addProject("IHE-PCC-",
 				"https://art-decor.ihe-europe.net/decor/services/");
 
@@ -161,7 +161,7 @@ public class ArtDecor2JavaManagerTest {
 						"CDA-CH-LREP - Swiss Laboratory Report - General Report, draft version 1.3.3 of August 12, 2019")
 				.build();
 
-		String artDecorBaseUrl = ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL;
+		String artDecorBaseUrl = ArtDecor2JavaManager.ART_DECOR_DEFAULT_SERVER_BASE_URL;
 		String artDecorPrefix = "cdachlrep-";
 		String targetDir = "api-java/ehealth_connector-cda/ehealth_connector-cda-ch";
 		String targetNamespace = "org.ehealth_connector.cda.ch.lrep.v133";
@@ -171,19 +171,19 @@ public class ArtDecor2JavaManagerTest {
 
 		// Add the main prefix
 		contentProfileConfig.addProject(artDecorPrefix,
-				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+				ArtDecor2JavaManager.ART_DECOR_DEFAULT_SERVER_BASE_URL);
 
 		// Add further prefixes (referenced projects)
 		contentProfileConfig.addProject("hl7chcda-",
-				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+				ArtDecor2JavaManager.ART_DECOR_DEFAULT_SERVER_BASE_URL);
 		contentProfileConfig.addProject("ch-epr-",
-				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+				ArtDecor2JavaManager.ART_DECOR_DEFAULT_SERVER_BASE_URL);
 		contentProfileConfig.addProject("ch-palm-",
-				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+				ArtDecor2JavaManager.ART_DECOR_DEFAULT_SERVER_BASE_URL);
 		contentProfileConfig.addProject("ch-pcc-",
-				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+				ArtDecor2JavaManager.ART_DECOR_DEFAULT_SERVER_BASE_URL);
 		contentProfileConfig.addProject("cdachvacd-",
-				ArtDecor2JavaManager.ART_DECOR_MAIN_SERVER_BASE_URL);
+				ArtDecor2JavaManager.ART_DECOR_DEFAULT_SERVER_BASE_URL);
 
 		// Swiss Laboratory Report - General Report
 		contentProfileConfig.addTemplateId("2.16.756.5.30.1.1.10.1.10", "2019-07-30T18:01:10");
