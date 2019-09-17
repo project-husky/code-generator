@@ -339,6 +339,40 @@ public class ArtDecorRestClient {
 	}
 
 	/**
+	 * Gets the project prefix of the given template.
+	 *
+	 * @param templateId
+	 *            the template id
+	 * @return the prefix
+	 * @throws XPathExpressionException
+	 *             the x path expression exception
+	 */
+	private String getArtDecorPrefix(String templateId) {
+		String retVal = null;
+		NodeList nl;
+		XPathFactory xPathfactory = XPathFactory.newInstance();
+		XPath xpath = xPathfactory.newXPath();
+		XPathExpression expr;
+
+		try {
+			expr = xpath.compile("//template[@id='" + templateId + "']");
+			for (Document projectIndex : projectIndexes) {
+				nl = (NodeList) expr.evaluate(projectIndex, XPathConstants.NODESET);
+				if (nl.getLength() > 0) {
+					XPathExpression expr1 = xpath.compile("/return/@prefix");
+					nl = (NodeList) expr1.evaluate(projectIndex, XPathConstants.NODESET);
+					retVal = nl.item(0).getNodeValue();
+				}
+				if (retVal != null)
+					break;
+			}
+		} catch (XPathExpressionException e) {
+			return null;
+		}
+		return retVal;
+	}
+
+	/**
 	 * <div class="en">Downloads the ART-DECOR template with the given id from
 	 * the given project/base url.</div>
 	 *
@@ -392,40 +426,6 @@ public class ArtDecorRestClient {
 		return getArtDecorXml(
 				new URL(baseUrl.toString() + "RetrieveTemplate?prefix=" + prefix + "&id="
 						+ templateId + "&effectiveDate=" + effectiveDate + "&format=xmlnowrapper"));
-	}
-
-	/**
-	 * Gets the project prefix of the given template.
-	 *
-	 * @param templateId
-	 *            the template id
-	 * @return the prefix
-	 * @throws XPathExpressionException
-	 *             the x path expression exception
-	 */
-	private String getArtDecorPrefix(String templateId) {
-		String retVal = null;
-		NodeList nl;
-		XPathFactory xPathfactory = XPathFactory.newInstance();
-		XPath xpath = xPathfactory.newXPath();
-		XPathExpression expr;
-
-		try {
-			expr = xpath.compile("//template[@id='" + templateId + "']");
-			for (Document projectIndex : projectIndexes) {
-				nl = (NodeList) expr.evaluate(projectIndex, XPathConstants.NODESET);
-				if (nl.getLength() > 0) {
-					XPathExpression expr1 = xpath.compile("/return/@prefix");
-					nl = (NodeList) expr1.evaluate(projectIndex, XPathConstants.NODESET);
-					retVal = nl.item(0).getNodeValue();
-				}
-				if (retVal != null)
-					break;
-			}
-		} catch (XPathExpressionException e) {
-			return null;
-		}
-		return retVal;
 	}
 
 	/**

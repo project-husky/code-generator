@@ -155,306 +155,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	protected final static Logger log = LoggerFactory.getLogger(ArtDecor2JavaGenerator.class);
 
 	/**
-	 * <div class="en">The main entry for the ART-DECOR to Java Code
-	 * Generator.</div>
-	 *
-	 * <div class="de">Hauptzugang zum ART-DECOR to Java Code Generator.</div>
-	 *
-	 * @param args
-	 *            <pre>
-	 *            command line arguments:
-	 *            1. Full path and filename to eclipse
-	 *            2. Full path to the workspace application
-	 *            </pre>
-	 *
-	 * @throws Exception
-	 *             When any operation fails.
-	 */
-	public static void main(String[] args) throws Exception {
-
-		Util.initLogger(ArtDecor2JavaGenerator.class);
-
-		String logMsg;
-		logMsg = "ArtDecor2JavaGenerator started";
-		log.info(logMsg);
-		System.out.print("===== " + logMsg + " =====\n");
-
-		File eclipseApp = null;
-		File orgWorkspacePath = null;
-		File configFile = null;
-
-		boolean argsOk = false;
-
-		if (args.clone().length >= 3) {
-			argsOk = true;
-			final String eclipseApplicationPath = args[0].toString();
-			if (eclipseApplicationPath != null) {
-				eclipseApp = new File(eclipseApplicationPath);
-				if (!eclipseApp.exists()) {
-					logMsg = "Eclipse application does not exist (" + eclipseApplicationPath + ")";
-					log.error(logMsg);
-					System.out.println("ERROR: " + logMsg);
-					argsOk = false;
-				} else {
-					if (!eclipseApp.isFile()) {
-						logMsg = "Eclipse application is not a file (" + eclipseApplicationPath
-								+ ")";
-						log.error(logMsg);
-						System.out.println("ERROR: " + logMsg);
-						argsOk = false;
-					}
-				}
-			}
-
-			final String orgWorkspacePathString = args[1].toString();
-			if (orgWorkspacePathString != null) {
-				orgWorkspacePath = new File(orgWorkspacePathString);
-				if (!orgWorkspacePath.exists()) {
-					logMsg = "Workspace does not exist (" + orgWorkspacePathString + ")";
-					log.error(logMsg);
-					System.out.println("ERROR: " + logMsg);
-					argsOk = false;
-				} else {
-					if (!orgWorkspacePath.isDirectory()) {
-						logMsg = "Workspace is not a directory (" + orgWorkspacePathString + ")";
-						log.error(logMsg);
-						System.out.println("ERROR: " + logMsg);
-						argsOk = false;
-					}
-				}
-			}
-
-			final String orgConfigPathString = args[2].toString();
-			if (orgConfigPathString != null) {
-				configFile = new File(orgConfigPathString);
-				if (!configFile.exists()) {
-					logMsg = "Config File does not exist (" + orgConfigPathString + ")";
-					log.error(logMsg);
-					System.out.println("ERROR: " + logMsg);
-					argsOk = false;
-				} else {
-					if (!configFile.isFile()) {
-						logMsg = "Config is not a file (" + orgConfigPathString + ")";
-						log.error(logMsg);
-						System.out.println("ERROR: " + logMsg);
-						argsOk = false;
-					}
-				}
-			}
-
-		} else {
-			logMsg = "ArtDecor2JavaGenerator <eclipse> <workspace> <config>";
-			log.warn("Invalid or no parameter given. Usage: " + logMsg);
-			System.out.println("Usage:");
-			System.out.println("");
-			System.out.println(logMsg);
-			System.out.println("");
-			System.out.println(
-					"  eclipse:   First parameter must be the full path and filename of your eclipse application");
-			System.out.println(
-					"             (e.g. C:\\JavaProgramme\\eclipse\\rcp-2019-06\\eclipse\\eclipse.exe");
-			System.out.println("");
-			System.out.println(
-					"  workspace: Second parameter must be the full path to your current workspace directory");
-			System.out.println(
-					"             Note: It will be copied into a temp folder, as the current one is in use by Eclipse IDE");
-			System.out.println("");
-			System.out.println(
-					"  config: Third parameter must be the full path to your configuration file");
-
-			argsOk = false;
-		}
-
-		if (!argsOk) {
-			System.out.println("");
-			System.out.println("***");
-			System.out.println("Try again :-)");
-			return;
-		}
-
-		final String tempWorkspacePathString = Util.getTempDirectory()
-				+ FileUtil.getPlatformSpecificPathSeparator() + "tmpWS_"
-				+ orgWorkspacePath.getName();
-		final File tempWorkspacePath = new File(tempWorkspacePathString);
-
-		final String tempDownloadPathString = Util.getTempDirectory()
-				+ FileUtil.getPlatformSpecificPathSeparator() + "eHC_Arde_Download"
-				+ FileUtil.getPlatformSpecificPathSeparator();
-		final File tempDownloadPath = new File(tempDownloadPathString);
-
-		FileUtils.deleteDirectory(tempWorkspacePath);
-		FileUtils.deleteDirectory(tempDownloadPath);
-		FileUtils.copyDirectoryToDirectory(orgWorkspacePath, tempWorkspacePath);
-
-		logMsg = "Settings";
-		log.info(logMsg + ":");
-		System.out.println("----------------------------------------");
-		System.out.println(logMsg);
-		System.out.println("----------------------------------------");
-
-		logMsg = "Eclipse runtime: " + eclipseApp.getAbsolutePath();
-		log.info(logMsg);
-		System.out.println(logMsg);
-
-		logMsg = "Temp. workspace: " + tempWorkspacePath.getAbsolutePath();
-		log.info(logMsg);
-		System.out.println(logMsg);
-
-		logMsg = "Config file: " + configFile.getAbsolutePath();
-		log.info(logMsg);
-		System.out.println(logMsg);
-
-		// Load Config
-		logMsg = "Configuration";
-		log.info(logMsg + ":");
-		System.out.println("----------------------------------------");
-		System.out.println(logMsg);
-		System.out.println("----------------------------------------");
-		logMsg = "Loading configuration...";
-		log.info(logMsg);
-		System.out.println(logMsg);
-		ArtDecor2JavaManager artDecor2JavaManager2 = new ArtDecor2JavaManager();
-		ContentProfilePackageConfig contentProfilePackageConfig = artDecor2JavaManager2
-				.loadContentProfilePackageConfig(configFile.getAbsolutePath());
-		logMsg = "Loading configuration done.";
-		log.info(logMsg);
-		System.out.println(logMsg);
-
-		logMsg = "Loaded configuration:";
-		log.debug(logMsg);
-		System.out.println(logMsg);
-		for (ContentProfileConfig contentProfile : contentProfilePackageConfig
-				.getContentProfileConfigList()) {
-			logMsg = "- Target namespace: " + contentProfile.getTargetNamespace();
-			log.debug(logMsg);
-			System.out.println(logMsg);
-			for (String templateId : contentProfile.getArtDecorDocTemplateMap().keySet()) {
-				logMsg = "  - template id: " + templateId;
-				log.debug(logMsg);
-				System.out.println(logMsg);
-			}
-		}
-		logMsg = "Configuration done.";
-		log.info(logMsg);
-		System.out.println(logMsg);
-		System.out.println();
-
-		// Perform REST calls
-		logMsg = "Download from ART-DECOR";
-		log.info(logMsg);
-		System.out.println("----------------------------------------");
-		System.out.println(logMsg);
-		System.out.println("----------------------------------------");
-		for (ContentProfileConfig contentProfile : contentProfilePackageConfig
-				.getContentProfileConfigList()) {
-			String dir = tempDownloadPath.getAbsolutePath()
-					+ FileUtil.getPlatformSpecificPathSeparator()
-					+ contentProfile.getTargetNamespace()
-					+ FileUtil.getPlatformSpecificPathSeparator();
-			ArtDecorRestClient artDecorRestClient = new ArtDecorRestClient(
-					contentProfile.getArtDecorProjectMap(), dir);
-
-			for (String templateId : contentProfile.getArtDecorDocTemplateMap().keySet()) {
-				String effectiveTime = contentProfile.getArtDecorDocTemplateMap().get(templateId);
-				artDecorRestClient.downloadTemplateRecursive(templateId, effectiveTime);
-			}
-		}
-		logMsg = "Download from ART-DECOR done.";
-		log.info(logMsg);
-		System.out.println(logMsg);
-		System.out.println();
-
-		// Perform Java code generation
-		logMsg = "Perform Java code generation";
-		log.info(logMsg);
-		System.out.println("----------------------------------------");
-		System.out.println(logMsg);
-		System.out.println("----------------------------------------");
-		System.out.println();
-		ArrayList<String> dstPathList = new ArrayList<String>();
-		for (ContentProfileConfig contentProfile : contentProfilePackageConfig
-				.getContentProfileConfigList()) {
-			String srcFilePath = tempDownloadPath.getAbsolutePath()
-					+ FileUtil.getPlatformSpecificPathSeparator()
-					+ contentProfile.getTargetNamespace()
-					+ FileUtil.getPlatformSpecificPathSeparator();
-			HashMap<String, CdaTemplate> templateIndex = new HashMap<String, CdaTemplate>();
-			HashMap<String, String> valueSetIndex = new HashMap<String, String>();
-			ArrayList<CdaTemplate> templateList = new ArrayList<CdaTemplate>();
-			String dstFilePath = contentProfile.getTargetDir();
-			if (!(dstFilePath.startsWith("/") || dstFilePath.startsWith("\\")
-					|| ":".equals(dstFilePath.subSequence(2, 3)))) {
-				// is not an absolute path, so we adjust the relative path
-				dstFilePath = ".." + FileUtil.getPlatformSpecificPathSeparator() + ".."
-						+ FileUtil.getPlatformSpecificPathSeparator() + dstFilePath;
-			}
-			if (!dstFilePath.endsWith(FileUtil.getPlatformSpecificPathSeparator()))
-				dstFilePath += FileUtil.getPlatformSpecificPathSeparator();
-
-			String prefix = contentProfile.getArtDecorMainPrefix();
-			URL url = new URL(contentProfile.getArtDecorMainBaseUrl());
-			ArtDecor2JavaGenerator artDecor2JavaGenerator = new ArtDecor2JavaGenerator(null,
-					templateIndex, valueSetIndex, templateList, srcFilePath, dstFilePath,
-					contentProfile.getTargetNamespace(), JavaCodeGenerator.getFileHeader(), prefix,
-					url);
-			for (String templateId : contentProfile.getArtDecorDocTemplateMap().keySet()) {
-				artDecor2JavaGenerator.prepareForAnotherTemplate();
-				artDecor2JavaGenerator.doOneTemplate(templateId);
-			}
-			artDecor2JavaGenerator.createJavaClasses();
-			if (!dstPathList.contains(artDecor2JavaGenerator.getFullDstFilePath()))
-				dstPathList.add(artDecor2JavaGenerator.getFullDstFilePath());
-			if (!dstPathList.contains(artDecor2JavaGenerator.getFullDstFilePath()
-					+ FileUtil.getPlatformSpecificPathSeparator() + "enums"))
-				dstPathList.add(artDecor2JavaGenerator.getFullDstFilePath() + "enums"
-						+ FileUtil.getPlatformSpecificPathSeparator());
-		}
-		logMsg = "Java code generation done.";
-		log.info(logMsg);
-		System.out.println(logMsg);
-		System.out.println();
-
-		// Apply formatter
-		logMsg = "Applying formatter";
-		log.info(logMsg);
-		System.out.println("----------------------------------------");
-		System.out.println(logMsg);
-		System.out.println("----------------------------------------");
-		for (String path : dstPathList) {
-			try {
-				Util.runExternalCommand(
-						eclipseApp + " -application org.eclipse.jdt.core.JavaCodeFormatter -data "
-								+ tempWorkspacePath + " -config " + FORMATTER_PREFS + " " + path);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-		logMsg = "Formatter applied.";
-		log.info(logMsg);
-		System.out.println(logMsg);
-		System.out.println();
-
-		FileUtils.deleteDirectory(tempWorkspacePath);
-		FileUtils.deleteDirectory(tempDownloadPath);
-
-		logMsg = "Generated Java classes and enums in the following folders:";
-		log.info(logMsg);
-		System.out.println(logMsg);
-		for (String path : dstPathList) {
-			logMsg = "- " + path;
-			log.info(logMsg);
-			System.out.println(logMsg);
-		}
-		System.out.println();
-
-		logMsg = "ArtDecor2JavaGenerator finished.";
-		log.info(logMsg);
-		System.out.println(logMsg);
-		System.out.print("===== ART-DECOR to Java Generator finished =====\n");
-
-	}
-
-	/**
 	 * Adds a comment to the constructor body.
 	 *
 	 * @param constructor
@@ -1560,6 +1260,306 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
+	 * <div class="en">The main entry for the ART-DECOR to Java Code
+	 * Generator.</div>
+	 *
+	 * <div class="de">Hauptzugang zum ART-DECOR to Java Code Generator.</div>
+	 *
+	 * @param args
+	 *            <pre>
+	 *            command line arguments:
+	 *            1. Full path and filename to eclipse
+	 *            2. Full path to the workspace application
+	 *            </pre>
+	 *
+	 * @throws Exception
+	 *             When any operation fails.
+	 */
+	public static void main(String[] args) throws Exception {
+
+		Util.initLogger(ArtDecor2JavaGenerator.class);
+
+		String logMsg;
+		logMsg = "ArtDecor2JavaGenerator started";
+		log.info(logMsg);
+		System.out.print("===== " + logMsg + " =====\n");
+
+		File eclipseApp = null;
+		File orgWorkspacePath = null;
+		File configFile = null;
+
+		boolean argsOk = false;
+
+		if (args.clone().length >= 3) {
+			argsOk = true;
+			final String eclipseApplicationPath = args[0].toString();
+			if (eclipseApplicationPath != null) {
+				eclipseApp = new File(eclipseApplicationPath);
+				if (!eclipseApp.exists()) {
+					logMsg = "Eclipse application does not exist (" + eclipseApplicationPath + ")";
+					log.error(logMsg);
+					System.out.println("ERROR: " + logMsg);
+					argsOk = false;
+				} else {
+					if (!eclipseApp.isFile()) {
+						logMsg = "Eclipse application is not a file (" + eclipseApplicationPath
+								+ ")";
+						log.error(logMsg);
+						System.out.println("ERROR: " + logMsg);
+						argsOk = false;
+					}
+				}
+			}
+
+			final String orgWorkspacePathString = args[1].toString();
+			if (orgWorkspacePathString != null) {
+				orgWorkspacePath = new File(orgWorkspacePathString);
+				if (!orgWorkspacePath.exists()) {
+					logMsg = "Workspace does not exist (" + orgWorkspacePathString + ")";
+					log.error(logMsg);
+					System.out.println("ERROR: " + logMsg);
+					argsOk = false;
+				} else {
+					if (!orgWorkspacePath.isDirectory()) {
+						logMsg = "Workspace is not a directory (" + orgWorkspacePathString + ")";
+						log.error(logMsg);
+						System.out.println("ERROR: " + logMsg);
+						argsOk = false;
+					}
+				}
+			}
+
+			final String orgConfigPathString = args[2].toString();
+			if (orgConfigPathString != null) {
+				configFile = new File(orgConfigPathString);
+				if (!configFile.exists()) {
+					logMsg = "Config File does not exist (" + orgConfigPathString + ")";
+					log.error(logMsg);
+					System.out.println("ERROR: " + logMsg);
+					argsOk = false;
+				} else {
+					if (!configFile.isFile()) {
+						logMsg = "Config is not a file (" + orgConfigPathString + ")";
+						log.error(logMsg);
+						System.out.println("ERROR: " + logMsg);
+						argsOk = false;
+					}
+				}
+			}
+
+		} else {
+			logMsg = "ArtDecor2JavaGenerator <eclipse> <workspace> <config>";
+			log.warn("Invalid or no parameter given. Usage: " + logMsg);
+			System.out.println("Usage:");
+			System.out.println("");
+			System.out.println(logMsg);
+			System.out.println("");
+			System.out.println(
+					"  eclipse:   First parameter must be the full path and filename of your eclipse application");
+			System.out.println(
+					"             (e.g. C:\\JavaProgramme\\eclipse\\rcp-2019-06\\eclipse\\eclipse.exe");
+			System.out.println("");
+			System.out.println(
+					"  workspace: Second parameter must be the full path to your current workspace directory");
+			System.out.println(
+					"             Note: It will be copied into a temp folder, as the current one is in use by Eclipse IDE");
+			System.out.println("");
+			System.out.println(
+					"  config: Third parameter must be the full path to your configuration file");
+
+			argsOk = false;
+		}
+
+		if (!argsOk) {
+			System.out.println("");
+			System.out.println("***");
+			System.out.println("Try again :-)");
+			return;
+		}
+
+		final String tempWorkspacePathString = Util.getTempDirectory()
+				+ FileUtil.getPlatformSpecificPathSeparator() + "tmpWS_"
+				+ orgWorkspacePath.getName();
+		final File tempWorkspacePath = new File(tempWorkspacePathString);
+
+		final String tempDownloadPathString = Util.getTempDirectory()
+				+ FileUtil.getPlatformSpecificPathSeparator() + "eHC_Arde_Download"
+				+ FileUtil.getPlatformSpecificPathSeparator();
+		final File tempDownloadPath = new File(tempDownloadPathString);
+
+		FileUtils.deleteDirectory(tempWorkspacePath);
+		FileUtils.deleteDirectory(tempDownloadPath);
+		FileUtils.copyDirectoryToDirectory(orgWorkspacePath, tempWorkspacePath);
+
+		logMsg = "Settings";
+		log.info(logMsg + ":");
+		System.out.println("----------------------------------------");
+		System.out.println(logMsg);
+		System.out.println("----------------------------------------");
+
+		logMsg = "Eclipse runtime: " + eclipseApp.getAbsolutePath();
+		log.info(logMsg);
+		System.out.println(logMsg);
+
+		logMsg = "Temp. workspace: " + tempWorkspacePath.getAbsolutePath();
+		log.info(logMsg);
+		System.out.println(logMsg);
+
+		logMsg = "Config file: " + configFile.getAbsolutePath();
+		log.info(logMsg);
+		System.out.println(logMsg);
+
+		// Load Config
+		logMsg = "Configuration";
+		log.info(logMsg + ":");
+		System.out.println("----------------------------------------");
+		System.out.println(logMsg);
+		System.out.println("----------------------------------------");
+		logMsg = "Loading configuration...";
+		log.info(logMsg);
+		System.out.println(logMsg);
+		ArtDecor2JavaManager artDecor2JavaManager2 = new ArtDecor2JavaManager();
+		ContentProfilePackageConfig contentProfilePackageConfig = artDecor2JavaManager2
+				.loadContentProfilePackageConfig(configFile.getAbsolutePath());
+		logMsg = "Loading configuration done.";
+		log.info(logMsg);
+		System.out.println(logMsg);
+
+		logMsg = "Loaded configuration:";
+		log.debug(logMsg);
+		System.out.println(logMsg);
+		for (ContentProfileConfig contentProfile : contentProfilePackageConfig
+				.getContentProfileConfigList()) {
+			logMsg = "- Target namespace: " + contentProfile.getTargetNamespace();
+			log.debug(logMsg);
+			System.out.println(logMsg);
+			for (String templateId : contentProfile.getArtDecorDocTemplateMap().keySet()) {
+				logMsg = "  - template id: " + templateId;
+				log.debug(logMsg);
+				System.out.println(logMsg);
+			}
+		}
+		logMsg = "Configuration done.";
+		log.info(logMsg);
+		System.out.println(logMsg);
+		System.out.println();
+
+		// Perform REST calls
+		logMsg = "Download from ART-DECOR";
+		log.info(logMsg);
+		System.out.println("----------------------------------------");
+		System.out.println(logMsg);
+		System.out.println("----------------------------------------");
+		for (ContentProfileConfig contentProfile : contentProfilePackageConfig
+				.getContentProfileConfigList()) {
+			String dir = tempDownloadPath.getAbsolutePath()
+					+ FileUtil.getPlatformSpecificPathSeparator()
+					+ contentProfile.getTargetNamespace()
+					+ FileUtil.getPlatformSpecificPathSeparator();
+			ArtDecorRestClient artDecorRestClient = new ArtDecorRestClient(
+					contentProfile.getArtDecorProjectMap(), dir);
+
+			for (String templateId : contentProfile.getArtDecorDocTemplateMap().keySet()) {
+				String effectiveTime = contentProfile.getArtDecorDocTemplateMap().get(templateId);
+				artDecorRestClient.downloadTemplateRecursive(templateId, effectiveTime);
+			}
+		}
+		logMsg = "Download from ART-DECOR done.";
+		log.info(logMsg);
+		System.out.println(logMsg);
+		System.out.println();
+
+		// Perform Java code generation
+		logMsg = "Perform Java code generation";
+		log.info(logMsg);
+		System.out.println("----------------------------------------");
+		System.out.println(logMsg);
+		System.out.println("----------------------------------------");
+		System.out.println();
+		ArrayList<String> dstPathList = new ArrayList<String>();
+		for (ContentProfileConfig contentProfile : contentProfilePackageConfig
+				.getContentProfileConfigList()) {
+			String srcFilePath = tempDownloadPath.getAbsolutePath()
+					+ FileUtil.getPlatformSpecificPathSeparator()
+					+ contentProfile.getTargetNamespace()
+					+ FileUtil.getPlatformSpecificPathSeparator();
+			HashMap<String, CdaTemplate> templateIndex = new HashMap<String, CdaTemplate>();
+			HashMap<String, String> valueSetIndex = new HashMap<String, String>();
+			ArrayList<CdaTemplate> templateList = new ArrayList<CdaTemplate>();
+			String dstFilePath = contentProfile.getTargetDir();
+			if (!(dstFilePath.startsWith("/") || dstFilePath.startsWith("\\")
+					|| ":".equals(dstFilePath.subSequence(2, 3)))) {
+				// is not an absolute path, so we adjust the relative path
+				dstFilePath = ".." + FileUtil.getPlatformSpecificPathSeparator() + ".."
+						+ FileUtil.getPlatformSpecificPathSeparator() + dstFilePath;
+			}
+			if (!dstFilePath.endsWith(FileUtil.getPlatformSpecificPathSeparator()))
+				dstFilePath += FileUtil.getPlatformSpecificPathSeparator();
+
+			String prefix = contentProfile.getArtDecorMainPrefix();
+			URL url = new URL(contentProfile.getArtDecorMainBaseUrl());
+			ArtDecor2JavaGenerator artDecor2JavaGenerator = new ArtDecor2JavaGenerator(null,
+					templateIndex, valueSetIndex, templateList, srcFilePath, dstFilePath,
+					contentProfile.getTargetNamespace(), JavaCodeGenerator.getFileHeader(), prefix,
+					url);
+			for (String templateId : contentProfile.getArtDecorDocTemplateMap().keySet()) {
+				artDecor2JavaGenerator.prepareForAnotherTemplate();
+				artDecor2JavaGenerator.doOneTemplate(templateId);
+			}
+			artDecor2JavaGenerator.createJavaClasses();
+			if (!dstPathList.contains(artDecor2JavaGenerator.getFullDstFilePath()))
+				dstPathList.add(artDecor2JavaGenerator.getFullDstFilePath());
+			if (!dstPathList.contains(artDecor2JavaGenerator.getFullDstFilePath()
+					+ FileUtil.getPlatformSpecificPathSeparator() + "enums"))
+				dstPathList.add(artDecor2JavaGenerator.getFullDstFilePath() + "enums"
+						+ FileUtil.getPlatformSpecificPathSeparator());
+		}
+		logMsg = "Java code generation done.";
+		log.info(logMsg);
+		System.out.println(logMsg);
+		System.out.println();
+
+		// Apply formatter
+		logMsg = "Applying formatter";
+		log.info(logMsg);
+		System.out.println("----------------------------------------");
+		System.out.println(logMsg);
+		System.out.println("----------------------------------------");
+		for (String path : dstPathList) {
+			try {
+				Util.runExternalCommand(
+						eclipseApp + " -application org.eclipse.jdt.core.JavaCodeFormatter -data "
+								+ tempWorkspacePath + " -config " + FORMATTER_PREFS + " " + path);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		logMsg = "Formatter applied.";
+		log.info(logMsg);
+		System.out.println(logMsg);
+		System.out.println();
+
+		FileUtils.deleteDirectory(tempWorkspacePath);
+		FileUtils.deleteDirectory(tempDownloadPath);
+
+		logMsg = "Generated Java classes and enums in the following folders:";
+		log.info(logMsg);
+		System.out.println(logMsg);
+		for (String path : dstPathList) {
+			logMsg = "- " + path;
+			log.info(logMsg);
+			System.out.println(logMsg);
+		}
+		System.out.println();
+
+		logMsg = "ArtDecor2JavaGenerator finished.";
+		log.info(logMsg);
+		System.out.println(logMsg);
+		System.out.print("===== ART-DECOR to Java Generator finished =====\n");
+
+	}
+
+	/**
 	 * Prints the given CDA attribute list to the console.
 	 *
 	 * @param intend
@@ -1772,6 +1772,563 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
+	 * Performs some data type adjustments.
+	 *
+	 * @param dataType
+	 *            the data type
+	 * @return the string
+	 */
+	@SuppressWarnings("unlikely-arg-type")
+	private String adjustDataType(String dataType) {
+		String retVal = dataType;
+		if (retVal != null) {
+
+			if (retVal.endsWith("running"))
+				retVal = null;
+			else {
+				if (retVal.startsWith("IVL_PQ"))
+					retVal = "IVLPQ";
+				if (retVal.startsWith("EIVL_TS"))
+					retVal = "EIVLTS";
+				if (retVal.startsWith("IVL_TS"))
+					retVal = "IVLTS";
+				if (retVal.startsWith("TS."))
+					retVal = "TS";
+				if (retVal.startsWith("SXPR_TS"))
+					retVal = "SXPRTS";
+				if (retVal.startsWith("SD.TEXT"))
+					retVal = "StrucDocText";
+				if (retVal.startsWith("INT.NONNEG"))
+					retVal = "INT";
+
+				if (!templateIndex.containsValue(dataType))
+					if (!retVal.contains("."))
+						retVal = "org.ehealth_connector.common.hl7cdar2." + retVal;
+			}
+		}
+		return retVal;
+	}
+
+	/**
+	 * Performs some value set adjustments.
+	 *
+	 * @param value
+	 *            the value
+	 * @return the string
+	 */
+	private String adjustValueSet(String value) {
+		String retVal = value;
+		String testEnum = value.replace(packageName + ".enums",
+				"org.ehealth_connector.common.hl7cdar2");
+		try {
+			@SuppressWarnings("rawtypes")
+			Class cl = Class.forName(adjustDataType(testEnum));
+			if (cl != null)
+				retVal = cl.getName();
+		} catch (ClassNotFoundException e) {
+			// Do nothing
+		}
+
+		return retVal;
+	}
+
+	/**
+	 * Creates the creator method for fixed attribute contents.
+	 *
+	 * @param compilationUnit
+	 *            the compilation unit
+	 * @param myClass
+	 *            the my class
+	 * @param cdaAttribute
+	 *            the cda attribute
+	 * @param setterForFixedContentsName
+	 *            the setter for fixed contents name
+	 * @return the method declaration
+	 */
+	private MethodDeclaration createCreatorForFixedContentsAttribute(
+			CompilationUnit compilationUnit, ClassOrInterfaceDeclaration myClass,
+			CdaAttribute cdaAttribute, String setterForFixedContentsName) {
+		MethodDeclaration method = myClass.addMethod(setterForFixedContentsName,
+				privateModifier().getKeyword());
+		BlockStmt body = method.createBody();
+
+		String dataType = null;
+		if (cdaAttribute.getValueSetId() != null) {
+			dataType = adjustValueSet(valueSetIndex.get(cdaAttribute.getValueSetId()));
+		} else {
+			dataType = "String";
+		}
+
+		String attrName = cdaAttribute.getName().replace("hl7:", "").replace("pharm:", "")
+				.replace("xsi:", "");
+		String memberName = "my" + JavaCodeGenerator.toPascalCase(attrName);
+
+		String methodName = "getPredefined" + JavaCodeGenerator.toPascalCase(attrName);
+		createMemberAndGetter(compilationUnit, myClass, dataType, memberName, methodName);
+
+		method.addAndGetParameter(dataType, "value");
+		method.setJavadocComment(
+				"Creates fixed contents for CDA Attribute " + cdaAttribute.getName() + "\n\n");
+
+		body.addStatement("this." + memberName + " = value;");
+
+		return method;
+	}
+
+	/**
+	 * Creates the creator method for fixed element contents.
+	 *
+	 * @param compilationUnit
+	 *            the compilation unit
+	 * @param myClass
+	 *            the my class
+	 * @param cdaElement
+	 *            the cda element
+	 * @param setterForFixedContentsName
+	 *            the setter for fixed contents name
+	 * @return the method declaration
+	 */
+	private MethodDeclaration createCreatorForFixedContentsElement(CompilationUnit compilationUnit,
+			ClassOrInterfaceDeclaration myClass, CdaElement cdaElement,
+			String setterForFixedContentsName) {
+
+		MethodDeclaration method = myClass.addMethod(setterForFixedContentsName,
+				privateModifier().getKeyword(), staticModifier().getKeyword());
+		method.setJavadocComment(
+				"Creates fixed contents for CDA Element " + cdaElement.getJavaName() + "\n\n");
+
+		compilationUnit.addImport("org.ehealth_connector.common.hl7cdar2.ObjectFactory");
+
+		BlockStmt body = method.createBody();
+
+		String dataType = adjustDataType(cdaElement.getDataType());
+
+		String name = cdaElement.getXmlName().replace("hl7:", "").replace("pharm:", "")
+				.replace("xsi:", "");
+		@SuppressWarnings("rawtypes")
+		Class memberType = getFieldDatatype(cdaElement.getParentCdaElement().getDataType(), name);
+		boolean isField = (memberType != null);
+		boolean isMethod = false;
+		if (!isField) {
+			memberType = getMethodDatatype(cdaElement.getParentCdaElement().getDataType(), name);
+			isMethod = (memberType != null);
+		}
+		if (!(isField || isMethod)) {
+			if (cdaElement.getDataType().endsWith(".ENXP")) {
+				method.setType(dataType);
+
+				String enPartL = name;
+				String enPartU = toUpperFirstChar(enPartL);
+
+				addImport(compilationUnit, "org.ehealth_connector.common.hl7cdar2.En" + enPartU);
+
+				body.addStatement("En" + enPartU + " retVal = new En" + enPartU + "();");
+			} else
+				throw new RuntimeException(
+						name + " is neither an accesible field nor an accessible getter");
+		} else {
+			if (memberType.getName().endsWith("POCDMT000040InfrastructureRootTypeId")) {
+				dataType = memberType.getName();
+			}
+			method.setType(dataType);
+			body.addStatement("ObjectFactory factory = new ObjectFactory();");
+			body.addStatement(dataType + " retVal = factory.create"
+					+ dataType.replace("org.ehealth_connector.common.hl7cdar2.", "") + "();");
+		}
+		return method;
+	}
+
+	/**
+	 * Creates the assignment if fixed attribute value.
+	 *
+	 * @param compilationUnit
+	 *            the compilation unit
+	 * @param myClass
+	 *            the my class
+	 * @param cdaElement
+	 *            the cda element
+	 */
+	private void createFixedAttributeValues(CompilationUnit compilationUnit,
+			ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
+
+		if (cdaElement.getCdaAttributeList() != null) {
+
+			ConstructorDeclaration constructor = null;
+			MethodDeclaration creatorForFixedContentsMethod = null;
+			ArrayList<String> arguments = new ArrayList<String>();
+			StringBuilder sb = new StringBuilder();
+
+			boolean isAttributeOfTemplateRootElement = false;
+			if (cdaElement.getTemplate().getCdaElementList().size() == 1)
+				isAttributeOfTemplateRootElement = (cdaElement
+						.equals(cdaElement.getTemplate().getCdaElementList().get(0)));
+
+			int i = 0;
+			for (CdaAttribute cdaAttribute : cdaElement.getCdaAttributeList()) {
+				String attrName = cdaAttribute.getName().replace("hl7:", "").replace("pharm:", "")
+						.replace("xsi:", "");
+				Optional<ConstructorDeclaration> constructorOpt = myClass
+						.getConstructorByParameterTypes(new String[] {});
+				boolean constructorExist = constructorOpt.isPresent();
+				if (!constructorExist) {
+					constructor = createDefaultConstructor(compilationUnit, myClass);
+				} else
+					constructor = constructorOpt.get();
+
+				if ((cdaAttribute.getValue() != null) || (cdaAttribute.getValueSetId() != null)) {
+					if (cdaElement.getJavaName() == null)
+						cdaElement.setJavaName(
+								JavaCodeGenerator.toCamelCase(cdaElement.getXmlName()));
+
+					String creatorForFixedContentsName;
+					if (isAttributeOfTemplateRootElement) {
+						creatorForFixedContentsName = "create"
+								+ JavaCodeGenerator.toPascalCase(attrName) + "FixedValue";
+
+					} else {
+						creatorForFixedContentsName = "create"
+								+ JavaCodeGenerator.toPascalCase(cdaElement.getJavaName())
+								+ "FixedValue";
+					}
+					List<MethodDeclaration> creatorForFixedContentsMethodList = myClass
+							.getMethodsByName(creatorForFixedContentsName);
+
+					if (!isAttributeOfTemplateRootElement) {
+						boolean creatorForFixedContentsExist = (creatorForFixedContentsMethodList
+								.size() > 0);
+						if (!creatorForFixedContentsExist) {
+							if (isAttributeOfTemplateRootElement)
+								creatorForFixedContentsMethod = createCreatorForFixedContentsAttribute(
+										compilationUnit, myClass, cdaAttribute,
+										creatorForFixedContentsName);
+							else
+								creatorForFixedContentsMethod = createCreatorForFixedContentsElement(
+										compilationUnit, myClass, cdaElement,
+										creatorForFixedContentsName);
+						} else
+							creatorForFixedContentsMethod = creatorForFixedContentsMethodList
+									.get(0);
+
+						if (cdaAttribute.getValue() != null) {
+							boolean ignoreAttr = false;
+							// fix for createHl7EffectiveTimeFixedValue: there
+							// is no type in the ART-DECOR model
+							if ("createHl7EffectiveTimeFixedValue"
+									.equals(creatorForFixedContentsMethod.getNameAsString())) {
+								ignoreAttr = ("xsi:type".contentEquals(cdaAttribute.getName()));
+							}
+							// end of fix
+
+							if (!ignoreAttr) {
+								if (!isAttributeOfTemplateRootElement)
+									updateCreatorForFixedContentsMethod(compilationUnit,
+											creatorForFixedContentsMethod, cdaElement,
+											cdaAttribute);
+
+								if (i >= creatorForFixedContentsMethod.getParameters().size()) {
+									arguments.add(sb.toString());
+									sb = new StringBuilder();
+									i = 0;
+								}
+								if (i < creatorForFixedContentsMethod.getParameters().size()) {
+									i++;
+									if (sb.length() != 0)
+										sb.append(", ");
+									if (cdaAttribute.getCode() != null) {
+										String temp;
+										temp = "null";
+										if (cdaAttribute.getCode().getCode() != null)
+											temp = "\"" + cdaAttribute.getCode().getCode() + "\"";
+										sb.append(temp);
+
+										i++;
+										sb.append(", ");
+										temp = "null";
+										if (cdaAttribute.getCode().getCodeSystem() != null)
+											temp = "\"" + cdaAttribute.getCode().getCodeSystem()
+													+ "\"";
+										sb.append(temp);
+
+										i++;
+										sb.append(", ");
+										temp = "null";
+										if (cdaAttribute.getCode().getCodeSystemName() != null)
+											temp = "\"" + cdaAttribute.getCode().getCodeSystemName()
+													+ "\"";
+										sb.append(temp);
+
+										i++;
+										sb.append(", ");
+										temp = "null";
+										if (cdaAttribute.getCode().getDisplayName() != null)
+											temp = "\"" + cdaAttribute.getCode().getDisplayName()
+													+ "\"";
+										sb.append(temp);
+
+									} else
+										sb.append("\"" + cdaAttribute.getValue() + "\"");
+								}
+							}
+						}
+					}
+				}
+
+				String templateClassName = JavaCodeGenerator
+						.toPascalCase(cdaElement.getTemplate().getName());
+				if (templateClassName.contentEquals(myClass.getNameAsString())) {
+					if (cdaAttribute.getValue() != null) {
+						// This is for debugging purposes, only:
+						// String vocabString = "";
+						// if (cdaAttribute.isVocab())
+						// vocabString = " (isVocab)";
+						// if (cdaAttribute.getCode() != null)
+						// addBodyComment(constructor,
+						// cdaElement.getTemplate().getName() + "/"
+						// + cdaElement.getXmlName() + ":" +
+						// cdaAttribute.getDataType()
+						// + " " + attrName + " = \"" +
+						// cdaAttribute.getCode().toString()
+						// + "\";" + vocabString);
+						// else
+						// addBodyComment(constructor,
+						// cdaElement.getTemplate().getName() + "/"
+						// + cdaElement.getXmlName() + ":"
+						// + cdaAttribute.getDataType() + " " + attrName + " =
+						// \""
+						// + cdaAttribute.getValue() + "\";" + vocabString);
+
+						boolean isTemp = false;
+						if (cdaElement.getTemplate().getCdaElementList().size() == 1)
+							isTemp = (cdaElement
+									.equals(cdaElement.getTemplate().getCdaElementList().get(0)));
+						if (isTemp) {
+							@SuppressWarnings("rawtypes")
+							Class memberType = getDeclaredFieldDatatype(cdaElement.getDataType(),
+									attrName);
+							String statement = "";
+
+							boolean isLocalField = (myClass.getExtendedTypes().size() == 0);
+							if (isClassCollection(memberType)) {
+								if (isLocalField) {
+									statement = attrName + ".add(" + "\"" + cdaAttribute.getValue()
+											+ "\"" + ");";
+								} else {
+									statement = "super.get" + toUpperFirstChar(attrName) + "().add("
+											+ "\"" + cdaAttribute.getValue() + "\"" + ");";
+								}
+							} else {
+								if (isLocalField) {
+									statement = "this." + attrName + " = " + "\""
+											+ cdaAttribute.getValue() + "\"" + ";";
+								} else {
+									String dataType = null;
+									try {
+										dataType = getDataType(cdaElement.getDataType(), attrName);
+									} catch (InstantiationException | IllegalAccessException
+											| ClassNotFoundException | NoSuchFieldException
+											| SecurityException e) {
+										throw new RuntimeException(
+												"Unhandled exception while getting Datatype for "
+														+ attrName + "("
+														+ cdaElement.getFullXmlName() + ")");
+									}
+
+									boolean isEnum = false;
+									if (dataType != null)
+										isEnum = (!"java.lang.String".contentEquals(dataType));
+									if (isEnum) {
+										String enumName = memberType.getName();
+										statement = "super.set" + toUpperFirstChar(attrName) + "("
+												+ enumName + ".fromValue(" + "\""
+												+ cdaAttribute.getValue() + "\"" + "));";
+									} else {
+										if (cdaAttribute.getCode() != null) {
+											if (cdaAttribute.getCode().getCode() != null) {
+												statement = "super.setCode" + "(" + "\""
+														+ cdaAttribute.getCode().getCode() + "\""
+														+ ");";
+												addBodyStatement(constructor, statement);
+											}
+											if (cdaAttribute.getCode().getCodeSystem() != null) {
+												statement = "super.setCodeSystem" + "(" + "\""
+														+ cdaAttribute.getCode().getCodeSystem()
+														+ "\"" + ");";
+												addBodyStatement(constructor, statement);
+											}
+											if (cdaAttribute.getCode()
+													.getCodeSystemName() != null) {
+												statement = "super.setCodeSystemName" + "(" + "\""
+														+ cdaAttribute.getCode().getCodeSystemName()
+														+ "\"" + ");";
+												addBodyStatement(constructor, statement);
+											}
+											if (cdaAttribute.getCode().getDisplayName() != null) {
+												statement = "super.setDisplayName" + "(" + "\""
+														+ cdaAttribute.getCode().getDisplayName()
+														+ "\"" + ");";
+												addBodyStatement(constructor, statement);
+											}
+											statement = null;
+										} else
+											statement = "super.set" + toUpperFirstChar(attrName)
+													+ "(" + "\"" + cdaAttribute.getValue() + "\""
+													+ ");";
+									}
+								}
+							}
+							if (statement != null)
+								addBodyStatement(constructor, statement);
+						}
+					}
+					if (cdaAttribute.getValueSetId() != null) {
+						// this is for debugging purposes, only
+						// String enumName = adjustValueSet(
+						// valueSetIndex.get(cdaAttribute.getValueSetId()));
+						// addBodyComment(constructor,
+						// cdaElement.getTemplate().getName() + "/" +
+						// cdaElement.getXmlName()
+						// + ":" + cdaAttribute.getDataType() + " " + attrName
+						// + " = valueSet(\"" + cdaAttribute.getValueSetId()
+						// + "\"); --> " + enumName);
+					}
+				}
+			}
+
+			arguments.add(sb.toString());
+			sb = null;
+
+			if ((creatorForFixedContentsMethod != null)) {
+
+				for (String argsForThisCall : arguments) {
+
+					// fix for setHl7EntryRelationshipFixedValue:
+					// sometimes in the first occurrence, there is no
+					// inversionInd in the ART-DECOR model
+					int argCountMethod = creatorForFixedContentsMethod.getParameters().size();
+					if ("createHl7EntryRelationshipFixedValue"
+							.contentEquals(creatorForFixedContentsMethod.getNameAsString())) {
+						if (argCountMethod == 1) {
+							CdaAttribute attr = new CdaAttribute();
+							attr.setCdaElement(cdaElement);
+							attr.setName("inversionInd");
+							updateCreatorForFixedContentsMethod(compilationUnit,
+									creatorForFixedContentsMethod, cdaElement, attr);
+
+						}
+						argCountMethod = 2;
+					}
+					int argCountGiven = org.apache.commons.lang3.StringUtils
+							.countMatches(argsForThisCall, ",") + 1;
+
+					while (argCountGiven < argCountMethod) {
+						argsForThisCall += ", ";
+						argsForThisCall += "null";
+						argCountGiven = org.apache.commons.lang3.StringUtils
+								.countMatches(argsForThisCall, ",") + 1;
+					}
+					// end of fixes
+
+					if (!isAttributeOfTemplateRootElement) {
+						if (!isCompleteCreatorForFixedContentsMethod(creatorForFixedContentsMethod))
+							completeCreatorForFixedContentsMethod(creatorForFixedContentsMethod,
+									cdaElement);
+
+						String creator = creatorForFixedContentsMethod.getNameAsString() + "("
+								+ argsForThisCall + ")";
+
+						if (cdaElement.getMinOccurs() == 1) {
+							// This is fixed content for a required element
+
+							String name = cdaElement.getXmlName().replace("hl7:", "")
+									.replace("pharm:", "").replace("xsi:", "");
+
+							@SuppressWarnings("rawtypes")
+							Class memberType = getDeclaredFieldDatatype(
+									cdaElement.getParentCdaElement().getDataType(), name);
+							String statement = "";
+
+							boolean isLocalField = (myClass.getExtendedTypes().size() == 0);
+							if (isClassCollection(memberType)) {
+								if (isLocalField) {
+									statement = cdaElement.getXmlName().replace("hl7:", "")
+											.replace("pharm:", "") + ".add(" + creator + ");";
+								} else {
+									statement = "super.get"
+											+ toUpperFirstChar(cdaElement.getXmlName()
+													.replace("hl7:", "").replace("pharm:", "")
+													.replace("xsi:", ""))
+											+ "().add(" + creator + ");";
+								}
+							} else {
+								if (isLocalField) {
+									statement = "this." + cdaElement.getXmlName()
+											.replace("hl7:", "").replace("pharm:", "") + " = "
+											+ creator + ";";
+								} else {
+									statement = "super.set" + toUpperFirstChar(
+											cdaElement.getXmlName().replace("hl7:", "")
+													.replace("pharm:", "").replace("xsi:", ""))
+											+ "(" + creator + ");";
+								}
+							}
+
+							addBodyStatement(constructor, statement);
+						}
+
+						if ((cdaElement.getMinOccurs() == 0) || (arguments.size() > 1)) {
+							// This is fixed content for an optional element
+							String methodName = "getPredefined"
+									+ JavaCodeGenerator.toPascalCase(
+											cdaElement.getXmlName().replace("hl7:", "")
+													.replace("pharm:", "").replace("xsi:", ""))
+									+ JavaCodeGenerator.toPascalCase(argsForThisCall);
+							List<MethodDeclaration> existingMethods = myClass
+									.getMethodsByName(methodName);
+							if (existingMethods.size() == 0) {
+								// This is for debugging purposes, only:
+								// addBodyComment(constructor,
+								// "This is fixed content for an optional
+								// element: "
+								// +
+								// creatorForFixedContentsMethod.getNameAsString()
+								// + "("
+								// + argsForThisCall + ") --> Creating " +
+								// methodName
+								// + "();");
+
+								MethodDeclaration method = myClass.addMethod(methodName,
+										publicModifier().getKeyword(),
+										staticModifier().getKeyword());
+								method.setType(creatorForFixedContentsMethod.getType());
+
+								String comment = "Adds a predefined "
+										+ creatorForFixedContentsMethod.getTypeAsString()
+										+ ", filled by: " + argsForThisCall
+										+ "\n@return the predefined element.";
+								method.setJavadocComment(comment);
+
+								BlockStmt body = method.createBody();
+								body.addStatement("return " + creator + ";");
+							}
+
+						}
+
+						if (cdaElement.getMinOccurs() > 1) {
+							// This is fixed content for an element with
+							// multiple
+							// required elements
+							addBodyComment(constructor,
+									"TODO: fixed content for an element with multiple required elements not handled, yet: "
+											+ creatorForFixedContentsMethod.getNameAsString() + "("
+											+ argsForThisCall + ")");
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
 	 *
 	 * <div class="en">Creates all Java Classes as files.</div>
 	 *
@@ -1796,6 +2353,167 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		logMsg = "Writing Java Class files done.";
 		log.debug(logMsg);
 		System.out.println(logMsg);
+	}
+
+	/**
+	 * Creates the Java class for the given CDA Template and writes it to file.
+	 *
+	 * @param cdaTemplate
+	 *            the cda template
+	 * @param packageName
+	 *            the package name
+	 * @param dstFilePath
+	 *            the dst file path
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
+	 */
+	private void createJavaClassFile(CdaTemplate cdaTemplate, String packageName,
+			String dstFilePath) throws IOException {
+
+		// Save the current CDA Element as Java Class File
+		CompilationUnit compilationUnit = new CompilationUnit();
+		compilationUnit.setPackageDeclaration(packageName);
+
+		String className = JavaCodeGenerator.toPascalCase(cdaTemplate.getName());
+
+		boolean isSingleElementTemplate = (cdaTemplate.getCdaElementList().size() == 1);
+
+		for (CdaElement cdaElement : cdaTemplate.getCdaElementList()) {
+
+			String dataType = adjustDataType(cdaElement.getDataType());
+
+			cdaElement.setDataType(dataType);
+
+			ClassOrInterfaceDeclaration myClass = null;
+			Optional<ClassOrInterfaceDeclaration> classOpt = compilationUnit
+					.getClassByName(className);
+			if (classOpt.isPresent())
+				myClass = classOpt.get();
+			if (myClass == null)
+				myClass = compilationUnit.addClass(className).setPublic(true);
+			boolean isCdaRootElement = "org.ehealth_connector.common.hl7cdar2.POCDMT000040ClinicalDocument"
+					.equals(cdaElement.getDataType());
+
+			if (isCdaRootElement) {
+				addImport(compilationUnit, "javax.xml.bind.annotation.XmlRootElement");
+				myClass.addAnnotation(createXmlRootElementAnnotation("ClinicalDocument"));
+			}
+
+			String descTemplate = cdaTemplate.getDescription();
+			if (descTemplate == null)
+				descTemplate = "";
+			else
+				descTemplate = "Template description: " + descTemplate;
+
+			descTemplate = "Original ART-DECOR template id: " + cdaTemplate.getId()
+					+ Util.getPlatformSpecificLineBreak() + descTemplate
+					+ Util.getPlatformSpecificLineBreak() + Util.getPlatformSpecificLineBreak();
+
+			String descElement = cdaElement.getDescription();
+			if (descElement == null)
+				descElement = "";
+			else
+				descElement = "Element description: " + descElement;
+
+			myClass.setJavadocComment(descTemplate + descElement);
+			String inheritenceOf = cdaTemplate.getDataType();
+
+			// This is for Templates used as contains:
+			if (inheritenceOf == null)
+				inheritenceOf = cdaElement.getParentCdaElement().getDataType();
+
+			// Inheritence does not work for AD elements.
+			// This is by HL7 CDA Schema design ...
+			if ("org.ehealth_connector.common.hl7cdar2.AD".equals(inheritenceOf))
+				inheritenceOf = null;
+
+			if (inheritenceOf != null)
+				myClass.setExtendedTypes(new NodeList<ClassOrInterfaceType>(
+						new ClassOrInterfaceType(null, inheritenceOf)));
+
+			if (isSingleElementTemplate) {
+				createFixedAttributeValues(compilationUnit, myClass, cdaElement);
+				for (CdaElement cdaElement1 : cdaElement.getChildrenCdaElementList()) {
+					createMembers(compilationUnit, myClass, cdaElement1, (inheritenceOf == null));
+					createFixedAttributeValues(compilationUnit, myClass, cdaElement1);
+				}
+			} else {
+				createMembers(compilationUnit, myClass, cdaElement, (inheritenceOf == null));
+				createFixedAttributeValues(compilationUnit, myClass, cdaElement);
+			}
+
+			if ("org.ehealth_connector.common.hl7cdar2.POCDMT000040ClinicalDocument"
+					.equals(cdaElement.getDataType())) {
+				createLoaderMethods(compilationUnit, myClass);
+				createSaverMethods(compilationUnit, myClass);
+				createInitVersionMethods(compilationUnit, myClass);
+			}
+
+			// complete pending actions
+			for (MethodDeclaration method : myClass.getMethods()) {
+				if (existBodyComment(method, PENDING_ACTIONS)) {
+					Optional<BlockStmt> bodyOpt = method.getBody();
+					if (bodyOpt.isPresent()) {
+						for (Comment c : bodyOpt.get().getOrphanComments()) {
+							if (c.asLineComment().getContent().equals(PENDING_ACTIONS))
+								bodyOpt.get().removeOrphanComment(c);
+							if (c.asLineComment().getContent()
+									.startsWith(PENDING_ACTIONS_ADJUST_NAME)) {
+								bodyOpt.get().removeOrphanComment(c);
+								String methodName = c.getContent().substring(
+										PENDING_ACTIONS_ADJUST_NAME.length(),
+										c.getContent().length());
+								method.setName(methodName);
+							}
+						}
+					}
+				}
+			}
+
+			File outFile = new File(fullDstFilePath + className + ".java");
+			JavaCodeGenerator.completeAndSave(compilationUnit, outFile);
+		}
+
+	}
+
+	/**
+	 * Creates the members of the given CDA element to the resulting class.
+	 *
+	 * @param compilationUnit
+	 *            the compilation unit
+	 * @param myClass
+	 *            the my class
+	 * @param cdaElement
+	 *            the cda element
+	 * @param createOwnProperty
+	 *            the create own property
+	 */
+	private void createMembers(CompilationUnit compilationUnit, ClassOrInterfaceDeclaration myClass,
+			CdaElement cdaElement, boolean createOwnProperty) {
+
+		if (cdaElement.getDataType() == null)
+			throw new NotImplementedException("Type undefined for " + cdaElement.getXmlName());
+
+		String dataType = adjustDataType(cdaElement.getDataType());
+		cdaElement.setDataType(dataType);
+
+		String xmlName = cdaElement.getXmlName();
+		String javaName = JavaCodeGenerator.toCamelCase(xmlName);
+		cdaElement.setJavaName(javaName);
+
+		boolean elementExist = existAdderOrSetter(myClass, cdaElement);
+
+		if (!elementExist) {
+			if (createOwnProperty)
+				createField(compilationUnit, myClass, cdaElement);
+			if (cdaElement.getMaxOccurs() > 1) {
+				createAdder(compilationUnit, myClass, cdaElement);
+				createClearer(compilationUnit, myClass, cdaElement);
+			} else {
+				createGetter(compilationUnit, myClass, cdaElement);
+				createSetter(compilationUnit, myClass, cdaElement);
+			}
+		}
 	}
 
 	/**
@@ -2523,6 +3241,64 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
+	 * Checks whether the adder or setter already exists in the resulting class.
+	 *
+	 * @param myClass
+	 *            the my class
+	 * @param cdaElement
+	 *            the cda element
+	 * @return true, if successful
+	 */
+	private boolean existAdderOrSetter(ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
+		boolean retVal = false;
+		String xmlName = cdaElement.getXmlName();
+		String javaName = JavaCodeGenerator.toCamelCase(xmlName);
+		cdaElement.setJavaName(javaName);
+
+		List<MethodDeclaration> setterList = myClass
+				.getMethodsByName(createSetterNamePascalCase(javaName));
+		List<MethodDeclaration> adderList = myClass
+				.getMethodsByName(createAdderNamePascalCase(javaName));
+
+		if (!setterList.isEmpty() || !adderList.isEmpty()) {
+			String name = cdaElement.getXmlName().replace("hl7:", "").replace("pharm:", "")
+					.replace("xsi:", "");
+
+			String dataType = null;
+			CdaElement elForType = cdaElement.getParentCdaElement();
+			if (elForType == null)
+				elForType = cdaElement;
+			try {
+				dataType = getDataType(elForType.getDataType(), name);
+			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException
+					| NoSuchFieldException | SecurityException e) {
+				// Do nothing
+			}
+			if ("effectiveTime".equals(name)) {
+				dataType = "org.ehealth_connector.common.hl7cdar2.IVLTS";
+			}
+			if (!retVal) {
+				for (MethodDeclaration methodDeclaration : setterList) {
+					if (methodDeclaration.getParameterByType(dataType).isPresent()) {
+						retVal = true;
+						break;
+					}
+				}
+			}
+			if (!retVal) {
+				for (MethodDeclaration methodDeclaration : adderList) {
+					if (methodDeclaration.getParameterByType(dataType).isPresent()) {
+						retVal = true;
+						break;
+					}
+				}
+			}
+		}
+
+		return retVal;
+	}
+
+	/**
 	 * <div class="en">Overrides the given Method of the ANTL4 parser for the
 	 * ART-DECOR to Java Generator.</div>
 	 *
@@ -2584,804 +3360,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	@Override
 	public void exitTemplate(Hl7ItsParser.TemplateContext ctx) {
 		processingTemplate--;
-	}
-
-	/**
-	 *
-	 * <div class="en">Prepares the current ART-DECOR to Java Generator instance
-	 * for another Document Template (reset of module variables for a next
-	 * iteration).</div>
-	 *
-	 * <div class="de">Bereitet die aktuelle Instanz des ART-DECOR to Java
-	 * Generators vor für ein nächstes Document Template (reset von
-	 * Modulvariablen für eine nächste Iteration).</div>
-	 *
-	 * Prepare for another template.
-	 */
-	public void prepareForAnotherTemplate() {
-		this.callingCdaElement = null;
-		this.currentCdaAttribute = null;
-		this.currentCdaElement = null;
-		this.currentCdaTemplate = null;
-		this.mainCdaTemplate = null;
-		this.parentForContains = null;
-		this.parentForIncludes = null;
-	}
-
-	/**
-	 * Performs some data type adjustments.
-	 *
-	 * @param dataType
-	 *            the data type
-	 * @return the string
-	 */
-	@SuppressWarnings("unlikely-arg-type")
-	private String adjustDataType(String dataType) {
-		String retVal = dataType;
-		if (retVal != null) {
-
-			if (retVal.endsWith("running"))
-				retVal = null;
-			else {
-				if (retVal.startsWith("IVL_PQ"))
-					retVal = "IVLPQ";
-				if (retVal.startsWith("EIVL_TS"))
-					retVal = "EIVLTS";
-				if (retVal.startsWith("IVL_TS"))
-					retVal = "IVLTS";
-				if (retVal.startsWith("TS."))
-					retVal = "TS";
-				if (retVal.startsWith("SXPR_TS"))
-					retVal = "SXPRTS";
-				if (retVal.startsWith("SD.TEXT"))
-					retVal = "StrucDocText";
-				if (retVal.startsWith("INT.NONNEG"))
-					retVal = "INT";
-
-				if (!templateIndex.containsValue(dataType))
-					if (!retVal.contains("."))
-						retVal = "org.ehealth_connector.common.hl7cdar2." + retVal;
-			}
-		}
-		return retVal;
-	}
-
-	/**
-	 * Performs some value set adjustments.
-	 *
-	 * @param value
-	 *            the value
-	 * @return the string
-	 */
-	private String adjustValueSet(String value) {
-		String retVal = value;
-		String testEnum = value.replace(packageName + ".enums",
-				"org.ehealth_connector.common.hl7cdar2");
-		try {
-			@SuppressWarnings("rawtypes")
-			Class cl = Class.forName(adjustDataType(testEnum));
-			if (cl != null)
-				retVal = cl.getName();
-		} catch (ClassNotFoundException e) {
-			// Do nothing
-		}
-
-		return retVal;
-	}
-
-	/**
-	 * Creates the creator method for fixed attribute contents.
-	 *
-	 * @param compilationUnit
-	 *            the compilation unit
-	 * @param myClass
-	 *            the my class
-	 * @param cdaAttribute
-	 *            the cda attribute
-	 * @param setterForFixedContentsName
-	 *            the setter for fixed contents name
-	 * @return the method declaration
-	 */
-	private MethodDeclaration createCreatorForFixedContentsAttribute(
-			CompilationUnit compilationUnit, ClassOrInterfaceDeclaration myClass,
-			CdaAttribute cdaAttribute, String setterForFixedContentsName) {
-		MethodDeclaration method = myClass.addMethod(setterForFixedContentsName,
-				privateModifier().getKeyword());
-		BlockStmt body = method.createBody();
-
-		String dataType = null;
-		if (cdaAttribute.getValueSetId() != null) {
-			dataType = adjustValueSet(valueSetIndex.get(cdaAttribute.getValueSetId()));
-		} else {
-			dataType = "String";
-		}
-
-		String attrName = cdaAttribute.getName().replace("hl7:", "").replace("pharm:", "")
-				.replace("xsi:", "");
-		String memberName = "my" + JavaCodeGenerator.toPascalCase(attrName);
-
-		String methodName = "getPredefined" + JavaCodeGenerator.toPascalCase(attrName);
-		createMemberAndGetter(compilationUnit, myClass, dataType, memberName, methodName);
-
-		method.addAndGetParameter(dataType, "value");
-		method.setJavadocComment(
-				"Creates fixed contents for CDA Attribute " + cdaAttribute.getName() + "\n\n");
-
-		body.addStatement("this." + memberName + " = value;");
-
-		return method;
-	}
-
-	/**
-	 * Creates the creator method for fixed element contents.
-	 *
-	 * @param compilationUnit
-	 *            the compilation unit
-	 * @param myClass
-	 *            the my class
-	 * @param cdaElement
-	 *            the cda element
-	 * @param setterForFixedContentsName
-	 *            the setter for fixed contents name
-	 * @return the method declaration
-	 */
-	private MethodDeclaration createCreatorForFixedContentsElement(CompilationUnit compilationUnit,
-			ClassOrInterfaceDeclaration myClass, CdaElement cdaElement,
-			String setterForFixedContentsName) {
-
-		MethodDeclaration method = myClass.addMethod(setterForFixedContentsName,
-				privateModifier().getKeyword(), staticModifier().getKeyword());
-		method.setJavadocComment(
-				"Creates fixed contents for CDA Element " + cdaElement.getJavaName() + "\n\n");
-
-		compilationUnit.addImport("org.ehealth_connector.common.hl7cdar2.ObjectFactory");
-
-		BlockStmt body = method.createBody();
-
-		String dataType = adjustDataType(cdaElement.getDataType());
-
-		String name = cdaElement.getXmlName().replace("hl7:", "").replace("pharm:", "")
-				.replace("xsi:", "");
-		@SuppressWarnings("rawtypes")
-		Class memberType = getFieldDatatype(cdaElement.getParentCdaElement().getDataType(), name);
-		boolean isField = (memberType != null);
-		boolean isMethod = false;
-		if (!isField) {
-			memberType = getMethodDatatype(cdaElement.getParentCdaElement().getDataType(), name);
-			isMethod = (memberType != null);
-		}
-		if (!(isField || isMethod)) {
-			if (cdaElement.getDataType().endsWith(".ENXP")) {
-				method.setType(dataType);
-
-				String enPartL = name;
-				String enPartU = toUpperFirstChar(enPartL);
-
-				addImport(compilationUnit, "org.ehealth_connector.common.hl7cdar2.En" + enPartU);
-
-				body.addStatement("En" + enPartU + " retVal = new En" + enPartU + "();");
-			} else
-				throw new RuntimeException(
-						name + " is neither an accesible field nor an accessible getter");
-		} else {
-			if (memberType.getName().endsWith("POCDMT000040InfrastructureRootTypeId")) {
-				dataType = memberType.getName();
-			}
-			method.setType(dataType);
-			body.addStatement("ObjectFactory factory = new ObjectFactory();");
-			body.addStatement(dataType + " retVal = factory.create"
-					+ dataType.replace("org.ehealth_connector.common.hl7cdar2.", "") + "();");
-		}
-		return method;
-	}
-
-	/**
-	 * Creates the assignment if fixed attribute value.
-	 *
-	 * @param compilationUnit
-	 *            the compilation unit
-	 * @param myClass
-	 *            the my class
-	 * @param cdaElement
-	 *            the cda element
-	 */
-	private void createFixedAttributeValues(CompilationUnit compilationUnit,
-			ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
-
-		if (cdaElement.getCdaAttributeList() != null) {
-
-			ConstructorDeclaration constructor = null;
-			MethodDeclaration creatorForFixedContentsMethod = null;
-			ArrayList<String> arguments = new ArrayList<String>();
-			StringBuilder sb = new StringBuilder();
-
-			boolean isAttributeOfTemplateRootElement = false;
-			if (cdaElement.getTemplate().getCdaElementList().size() == 1)
-				isAttributeOfTemplateRootElement = (cdaElement
-						.equals(cdaElement.getTemplate().getCdaElementList().get(0)));
-
-			int i = 0;
-			for (CdaAttribute cdaAttribute : cdaElement.getCdaAttributeList()) {
-				String attrName = cdaAttribute.getName().replace("hl7:", "").replace("pharm:", "")
-						.replace("xsi:", "");
-				Optional<ConstructorDeclaration> constructorOpt = myClass
-						.getConstructorByParameterTypes(new String[] {});
-				boolean constructorExist = constructorOpt.isPresent();
-				if (!constructorExist) {
-					constructor = createDefaultConstructor(compilationUnit, myClass);
-				} else
-					constructor = constructorOpt.get();
-
-				if ((cdaAttribute.getValue() != null) || (cdaAttribute.getValueSetId() != null)) {
-					if (cdaElement.getJavaName() == null)
-						cdaElement.setJavaName(
-								JavaCodeGenerator.toCamelCase(cdaElement.getXmlName()));
-
-					String creatorForFixedContentsName;
-					if (isAttributeOfTemplateRootElement) {
-						creatorForFixedContentsName = "create"
-								+ JavaCodeGenerator.toPascalCase(attrName) + "FixedValue";
-
-					} else {
-						creatorForFixedContentsName = "create"
-								+ JavaCodeGenerator.toPascalCase(cdaElement.getJavaName())
-								+ "FixedValue";
-					}
-					List<MethodDeclaration> creatorForFixedContentsMethodList = myClass
-							.getMethodsByName(creatorForFixedContentsName);
-
-					if (!isAttributeOfTemplateRootElement) {
-						boolean creatorForFixedContentsExist = (creatorForFixedContentsMethodList
-								.size() > 0);
-						if (!creatorForFixedContentsExist) {
-							if (isAttributeOfTemplateRootElement)
-								creatorForFixedContentsMethod = createCreatorForFixedContentsAttribute(
-										compilationUnit, myClass, cdaAttribute,
-										creatorForFixedContentsName);
-							else
-								creatorForFixedContentsMethod = createCreatorForFixedContentsElement(
-										compilationUnit, myClass, cdaElement,
-										creatorForFixedContentsName);
-						} else
-							creatorForFixedContentsMethod = creatorForFixedContentsMethodList
-									.get(0);
-
-						if (cdaAttribute.getValue() != null) {
-							boolean ignoreAttr = false;
-							// fix for createHl7EffectiveTimeFixedValue: there
-							// is no type in the ART-DECOR model
-							if ("createHl7EffectiveTimeFixedValue"
-									.equals(creatorForFixedContentsMethod.getNameAsString())) {
-								ignoreAttr = ("xsi:type".contentEquals(cdaAttribute.getName()));
-							}
-							// end of fix
-
-							if (!ignoreAttr) {
-								if (!isAttributeOfTemplateRootElement)
-									updateCreatorForFixedContentsMethod(compilationUnit,
-											creatorForFixedContentsMethod, cdaElement,
-											cdaAttribute);
-
-								if (i >= creatorForFixedContentsMethod.getParameters().size()) {
-									arguments.add(sb.toString());
-									sb = new StringBuilder();
-									i = 0;
-								}
-								if (i < creatorForFixedContentsMethod.getParameters().size()) {
-									i++;
-									if (sb.length() != 0)
-										sb.append(", ");
-									if (cdaAttribute.getCode() != null) {
-										String temp;
-										temp = "null";
-										if (cdaAttribute.getCode().getCode() != null)
-											temp = "\"" + cdaAttribute.getCode().getCode() + "\"";
-										sb.append(temp);
-
-										i++;
-										sb.append(", ");
-										temp = "null";
-										if (cdaAttribute.getCode().getCodeSystem() != null)
-											temp = "\"" + cdaAttribute.getCode().getCodeSystem()
-													+ "\"";
-										sb.append(temp);
-
-										i++;
-										sb.append(", ");
-										temp = "null";
-										if (cdaAttribute.getCode().getCodeSystemName() != null)
-											temp = "\"" + cdaAttribute.getCode().getCodeSystemName()
-													+ "\"";
-										sb.append(temp);
-
-										i++;
-										sb.append(", ");
-										temp = "null";
-										if (cdaAttribute.getCode().getDisplayName() != null)
-											temp = "\"" + cdaAttribute.getCode().getDisplayName()
-													+ "\"";
-										sb.append(temp);
-
-									} else
-										sb.append("\"" + cdaAttribute.getValue() + "\"");
-								}
-							}
-						}
-					}
-				}
-
-				String templateClassName = JavaCodeGenerator
-						.toPascalCase(cdaElement.getTemplate().getName());
-				if (templateClassName.contentEquals(myClass.getNameAsString())) {
-					if (cdaAttribute.getValue() != null) {
-						// This is for debugging purposes, only:
-						// String vocabString = "";
-						// if (cdaAttribute.isVocab())
-						// vocabString = " (isVocab)";
-						// if (cdaAttribute.getCode() != null)
-						// addBodyComment(constructor,
-						// cdaElement.getTemplate().getName() + "/"
-						// + cdaElement.getXmlName() + ":" +
-						// cdaAttribute.getDataType()
-						// + " " + attrName + " = \"" +
-						// cdaAttribute.getCode().toString()
-						// + "\";" + vocabString);
-						// else
-						// addBodyComment(constructor,
-						// cdaElement.getTemplate().getName() + "/"
-						// + cdaElement.getXmlName() + ":"
-						// + cdaAttribute.getDataType() + " " + attrName + " =
-						// \""
-						// + cdaAttribute.getValue() + "\";" + vocabString);
-
-						boolean isTemp = false;
-						if (cdaElement.getTemplate().getCdaElementList().size() == 1)
-							isTemp = (cdaElement
-									.equals(cdaElement.getTemplate().getCdaElementList().get(0)));
-						if (isTemp) {
-							@SuppressWarnings("rawtypes")
-							Class memberType = getDeclaredFieldDatatype(cdaElement.getDataType(),
-									attrName);
-							String statement = "";
-
-							boolean isLocalField = (myClass.getExtendedTypes().size() == 0);
-							if (isClassCollection(memberType)) {
-								if (isLocalField) {
-									statement = attrName + ".add(" + "\"" + cdaAttribute.getValue()
-											+ "\"" + ");";
-								} else {
-									statement = "super.get" + toUpperFirstChar(attrName) + "().add("
-											+ "\"" + cdaAttribute.getValue() + "\"" + ");";
-								}
-							} else {
-								if (isLocalField) {
-									statement = "this." + attrName + " = " + "\""
-											+ cdaAttribute.getValue() + "\"" + ";";
-								} else {
-									String dataType = null;
-									try {
-										dataType = getDataType(cdaElement.getDataType(), attrName);
-									} catch (InstantiationException | IllegalAccessException
-											| ClassNotFoundException | NoSuchFieldException
-											| SecurityException e) {
-										throw new RuntimeException(
-												"Unhandled exception while getting Datatype for "
-														+ attrName + "("
-														+ cdaElement.getFullXmlName() + ")");
-									}
-
-									boolean isEnum = false;
-									if (dataType != null)
-										isEnum = (!"java.lang.String".contentEquals(dataType));
-									if (isEnum) {
-										String enumName = memberType.getName();
-										statement = "super.set" + toUpperFirstChar(attrName) + "("
-												+ enumName + ".fromValue(" + "\""
-												+ cdaAttribute.getValue() + "\"" + "));";
-									} else {
-										if (cdaAttribute.getCode() != null) {
-											if (cdaAttribute.getCode().getCode() != null) {
-												statement = "super.setCode" + "(" + "\""
-														+ cdaAttribute.getCode().getCode() + "\""
-														+ ");";
-												addBodyStatement(constructor, statement);
-											}
-											if (cdaAttribute.getCode().getCodeSystem() != null) {
-												statement = "super.setCodeSystem" + "(" + "\""
-														+ cdaAttribute.getCode().getCodeSystem()
-														+ "\"" + ");";
-												addBodyStatement(constructor, statement);
-											}
-											if (cdaAttribute.getCode()
-													.getCodeSystemName() != null) {
-												statement = "super.setCodeSystemName" + "(" + "\""
-														+ cdaAttribute.getCode().getCodeSystemName()
-														+ "\"" + ");";
-												addBodyStatement(constructor, statement);
-											}
-											if (cdaAttribute.getCode().getDisplayName() != null) {
-												statement = "super.setDisplayName" + "(" + "\""
-														+ cdaAttribute.getCode().getDisplayName()
-														+ "\"" + ");";
-												addBodyStatement(constructor, statement);
-											}
-											statement = null;
-										} else
-											statement = "super.set" + toUpperFirstChar(attrName)
-													+ "(" + "\"" + cdaAttribute.getValue() + "\""
-													+ ");";
-									}
-								}
-							}
-							if (statement != null)
-								addBodyStatement(constructor, statement);
-						}
-					}
-					if (cdaAttribute.getValueSetId() != null) {
-						// this is for debugging purposes, only
-						// String enumName = adjustValueSet(
-						// valueSetIndex.get(cdaAttribute.getValueSetId()));
-						// addBodyComment(constructor,
-						// cdaElement.getTemplate().getName() + "/" +
-						// cdaElement.getXmlName()
-						// + ":" + cdaAttribute.getDataType() + " " + attrName
-						// + " = valueSet(\"" + cdaAttribute.getValueSetId()
-						// + "\"); --> " + enumName);
-					}
-				}
-			}
-
-			arguments.add(sb.toString());
-			sb = null;
-
-			if ((creatorForFixedContentsMethod != null)) {
-
-				for (String argsForThisCall : arguments) {
-
-					// fix for setHl7EntryRelationshipFixedValue:
-					// sometimes in the first occurrence, there is no
-					// inversionInd in the ART-DECOR model
-					int argCountMethod = creatorForFixedContentsMethod.getParameters().size();
-					if ("createHl7EntryRelationshipFixedValue"
-							.contentEquals(creatorForFixedContentsMethod.getNameAsString())) {
-						if (argCountMethod == 1) {
-							CdaAttribute attr = new CdaAttribute();
-							attr.setCdaElement(cdaElement);
-							attr.setName("inversionInd");
-							updateCreatorForFixedContentsMethod(compilationUnit,
-									creatorForFixedContentsMethod, cdaElement, attr);
-
-						}
-						argCountMethod = 2;
-					}
-					int argCountGiven = org.apache.commons.lang3.StringUtils
-							.countMatches(argsForThisCall, ",") + 1;
-
-					while (argCountGiven < argCountMethod) {
-						argsForThisCall += ", ";
-						argsForThisCall += "null";
-						argCountGiven = org.apache.commons.lang3.StringUtils
-								.countMatches(argsForThisCall, ",") + 1;
-					}
-					// end of fixes
-
-					if (!isAttributeOfTemplateRootElement) {
-						if (!isCompleteCreatorForFixedContentsMethod(creatorForFixedContentsMethod))
-							completeCreatorForFixedContentsMethod(creatorForFixedContentsMethod,
-									cdaElement);
-
-						String creator = creatorForFixedContentsMethod.getNameAsString() + "("
-								+ argsForThisCall + ")";
-
-						if (cdaElement.getMinOccurs() == 1) {
-							// This is fixed content for a required element
-
-							String name = cdaElement.getXmlName().replace("hl7:", "")
-									.replace("pharm:", "").replace("xsi:", "");
-
-							@SuppressWarnings("rawtypes")
-							Class memberType = getDeclaredFieldDatatype(
-									cdaElement.getParentCdaElement().getDataType(), name);
-							String statement = "";
-
-							boolean isLocalField = (myClass.getExtendedTypes().size() == 0);
-							if (isClassCollection(memberType)) {
-								if (isLocalField) {
-									statement = cdaElement.getXmlName().replace("hl7:", "")
-											.replace("pharm:", "") + ".add(" + creator + ");";
-								} else {
-									statement = "super.get"
-											+ toUpperFirstChar(cdaElement.getXmlName()
-													.replace("hl7:", "").replace("pharm:", "")
-													.replace("xsi:", ""))
-											+ "().add(" + creator + ");";
-								}
-							} else {
-								if (isLocalField) {
-									statement = "this." + cdaElement.getXmlName()
-											.replace("hl7:", "").replace("pharm:", "") + " = "
-											+ creator + ";";
-								} else {
-									statement = "super.set" + toUpperFirstChar(
-											cdaElement.getXmlName().replace("hl7:", "")
-													.replace("pharm:", "").replace("xsi:", ""))
-											+ "(" + creator + ");";
-								}
-							}
-
-							addBodyStatement(constructor, statement);
-						}
-
-						if ((cdaElement.getMinOccurs() == 0) || (arguments.size() > 1)) {
-							// This is fixed content for an optional element
-							String methodName = "getPredefined"
-									+ JavaCodeGenerator.toPascalCase(
-											cdaElement.getXmlName().replace("hl7:", "")
-													.replace("pharm:", "").replace("xsi:", ""))
-									+ JavaCodeGenerator.toPascalCase(argsForThisCall);
-							List<MethodDeclaration> existingMethods = myClass
-									.getMethodsByName(methodName);
-							if (existingMethods.size() == 0) {
-								// This is for debugging purposes, only:
-								// addBodyComment(constructor,
-								// "This is fixed content for an optional
-								// element: "
-								// +
-								// creatorForFixedContentsMethod.getNameAsString()
-								// + "("
-								// + argsForThisCall + ") --> Creating " +
-								// methodName
-								// + "();");
-
-								MethodDeclaration method = myClass.addMethod(methodName,
-										publicModifier().getKeyword(),
-										staticModifier().getKeyword());
-								method.setType(creatorForFixedContentsMethod.getType());
-
-								String comment = "Adds a predefined "
-										+ creatorForFixedContentsMethod.getTypeAsString()
-										+ ", filled by: " + argsForThisCall
-										+ "\n@return the predefined element.";
-								method.setJavadocComment(comment);
-
-								BlockStmt body = method.createBody();
-								body.addStatement("return " + creator + ";");
-							}
-
-						}
-
-						if (cdaElement.getMinOccurs() > 1) {
-							// This is fixed content for an element with
-							// multiple
-							// required elements
-							addBodyComment(constructor,
-									"TODO: fixed content for an element with multiple required elements not handled, yet: "
-											+ creatorForFixedContentsMethod.getNameAsString() + "("
-											+ argsForThisCall + ")");
-						}
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Creates the Java class for the given CDA Template and writes it to file.
-	 *
-	 * @param cdaTemplate
-	 *            the cda template
-	 * @param packageName
-	 *            the package name
-	 * @param dstFilePath
-	 *            the dst file path
-	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
-	 */
-	private void createJavaClassFile(CdaTemplate cdaTemplate, String packageName,
-			String dstFilePath) throws IOException {
-
-		// Save the current CDA Element as Java Class File
-		CompilationUnit compilationUnit = new CompilationUnit();
-		compilationUnit.setPackageDeclaration(packageName);
-
-		String className = JavaCodeGenerator.toPascalCase(cdaTemplate.getName());
-
-		boolean isSingleElementTemplate = (cdaTemplate.getCdaElementList().size() == 1);
-
-		for (CdaElement cdaElement : cdaTemplate.getCdaElementList()) {
-
-			String dataType = adjustDataType(cdaElement.getDataType());
-
-			cdaElement.setDataType(dataType);
-
-			ClassOrInterfaceDeclaration myClass = null;
-			Optional<ClassOrInterfaceDeclaration> classOpt = compilationUnit
-					.getClassByName(className);
-			if (classOpt.isPresent())
-				myClass = classOpt.get();
-			if (myClass == null)
-				myClass = compilationUnit.addClass(className).setPublic(true);
-			boolean isCdaRootElement = "org.ehealth_connector.common.hl7cdar2.POCDMT000040ClinicalDocument"
-					.equals(cdaElement.getDataType());
-
-			if (isCdaRootElement) {
-				addImport(compilationUnit, "javax.xml.bind.annotation.XmlRootElement");
-				myClass.addAnnotation(createXmlRootElementAnnotation("ClinicalDocument"));
-			}
-
-			String descTemplate = cdaTemplate.getDescription();
-			if (descTemplate == null)
-				descTemplate = "";
-			else
-				descTemplate = "Template description: " + descTemplate;
-
-			descTemplate = "Original ART-DECOR template id: " + cdaTemplate.getId()
-					+ Util.getPlatformSpecificLineBreak() + descTemplate
-					+ Util.getPlatformSpecificLineBreak() + Util.getPlatformSpecificLineBreak();
-
-			String descElement = cdaElement.getDescription();
-			if (descElement == null)
-				descElement = "";
-			else
-				descElement = "Element description: " + descElement;
-
-			myClass.setJavadocComment(descTemplate + descElement);
-			String inheritenceOf = cdaTemplate.getDataType();
-
-			// This is for Templates used as contains:
-			if (inheritenceOf == null)
-				inheritenceOf = cdaElement.getParentCdaElement().getDataType();
-
-			// Inheritence does not work for AD elements.
-			// This is by HL7 CDA Schema design ...
-			if ("org.ehealth_connector.common.hl7cdar2.AD".equals(inheritenceOf))
-				inheritenceOf = null;
-
-			if (inheritenceOf != null)
-				myClass.setExtendedTypes(new NodeList<ClassOrInterfaceType>(
-						new ClassOrInterfaceType(null, inheritenceOf)));
-
-			if (isSingleElementTemplate) {
-				createFixedAttributeValues(compilationUnit, myClass, cdaElement);
-				for (CdaElement cdaElement1 : cdaElement.getChildrenCdaElementList()) {
-					createMembers(compilationUnit, myClass, cdaElement1, (inheritenceOf == null));
-					createFixedAttributeValues(compilationUnit, myClass, cdaElement1);
-				}
-			} else {
-				createMembers(compilationUnit, myClass, cdaElement, (inheritenceOf == null));
-				createFixedAttributeValues(compilationUnit, myClass, cdaElement);
-			}
-
-			if ("org.ehealth_connector.common.hl7cdar2.POCDMT000040ClinicalDocument"
-					.equals(cdaElement.getDataType())) {
-				createLoaderMethods(compilationUnit, myClass);
-				createSaverMethods(compilationUnit, myClass);
-				createInitVersionMethods(compilationUnit, myClass);
-			}
-
-			// complete pending actions
-			for (MethodDeclaration method : myClass.getMethods()) {
-				if (existBodyComment(method, PENDING_ACTIONS)) {
-					Optional<BlockStmt> bodyOpt = method.getBody();
-					if (bodyOpt.isPresent()) {
-						for (Comment c : bodyOpt.get().getOrphanComments()) {
-							if (c.asLineComment().getContent().equals(PENDING_ACTIONS))
-								bodyOpt.get().removeOrphanComment(c);
-							if (c.asLineComment().getContent()
-									.startsWith(PENDING_ACTIONS_ADJUST_NAME)) {
-								bodyOpt.get().removeOrphanComment(c);
-								String methodName = c.getContent().substring(
-										PENDING_ACTIONS_ADJUST_NAME.length(),
-										c.getContent().length());
-								method.setName(methodName);
-							}
-						}
-					}
-				}
-			}
-
-			File outFile = new File(fullDstFilePath + className + ".java");
-			JavaCodeGenerator.completeAndSave(compilationUnit, outFile);
-		}
-
-	}
-
-	/**
-	 * Creates the members of the given CDA element to the resulting class.
-	 *
-	 * @param compilationUnit
-	 *            the compilation unit
-	 * @param myClass
-	 *            the my class
-	 * @param cdaElement
-	 *            the cda element
-	 * @param createOwnProperty
-	 *            the create own property
-	 */
-	private void createMembers(CompilationUnit compilationUnit, ClassOrInterfaceDeclaration myClass,
-			CdaElement cdaElement, boolean createOwnProperty) {
-
-		if (cdaElement.getDataType() == null)
-			throw new NotImplementedException("Type undefined for " + cdaElement.getXmlName());
-
-		String dataType = adjustDataType(cdaElement.getDataType());
-		cdaElement.setDataType(dataType);
-
-		String xmlName = cdaElement.getXmlName();
-		String javaName = JavaCodeGenerator.toCamelCase(xmlName);
-		cdaElement.setJavaName(javaName);
-
-		boolean elementExist = existAdderOrSetter(myClass, cdaElement);
-
-		if (!elementExist) {
-			if (createOwnProperty)
-				createField(compilationUnit, myClass, cdaElement);
-			if (cdaElement.getMaxOccurs() > 1) {
-				createAdder(compilationUnit, myClass, cdaElement);
-				createClearer(compilationUnit, myClass, cdaElement);
-			} else {
-				createGetter(compilationUnit, myClass, cdaElement);
-				createSetter(compilationUnit, myClass, cdaElement);
-			}
-		}
-	}
-
-	/**
-	 * Checks whether the adder or setter already exists in the resulting class.
-	 *
-	 * @param myClass
-	 *            the my class
-	 * @param cdaElement
-	 *            the cda element
-	 * @return true, if successful
-	 */
-	private boolean existAdderOrSetter(ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
-		boolean retVal = false;
-		String xmlName = cdaElement.getXmlName();
-		String javaName = JavaCodeGenerator.toCamelCase(xmlName);
-		cdaElement.setJavaName(javaName);
-
-		List<MethodDeclaration> setterList = myClass
-				.getMethodsByName(createSetterNamePascalCase(javaName));
-		List<MethodDeclaration> adderList = myClass
-				.getMethodsByName(createAdderNamePascalCase(javaName));
-
-		if (!setterList.isEmpty() || !adderList.isEmpty()) {
-			String name = cdaElement.getXmlName().replace("hl7:", "").replace("pharm:", "")
-					.replace("xsi:", "");
-
-			String dataType = null;
-			CdaElement elForType = cdaElement.getParentCdaElement();
-			if (elForType == null)
-				elForType = cdaElement;
-			try {
-				dataType = getDataType(elForType.getDataType(), name);
-			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException
-					| NoSuchFieldException | SecurityException e) {
-				// Do nothing
-			}
-			if ("effectiveTime".equals(name)) {
-				dataType = "org.ehealth_connector.common.hl7cdar2.IVLTS";
-			}
-			if (!retVal) {
-				for (MethodDeclaration methodDeclaration : setterList) {
-					if (methodDeclaration.getParameterByType(dataType).isPresent()) {
-						retVal = true;
-						break;
-					}
-				}
-			}
-			if (!retVal) {
-				for (MethodDeclaration methodDeclaration : adderList) {
-					if (methodDeclaration.getParameterByType(dataType).isPresent()) {
-						retVal = true;
-						break;
-					}
-				}
-			}
-		}
-
-		return retVal;
 	}
 
 	/**
@@ -3703,6 +3681,28 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		// });
 
 		return retVal;
+	}
+
+	/**
+	 *
+	 * <div class="en">Prepares the current ART-DECOR to Java Generator instance
+	 * for another Document Template (reset of module variables for a next
+	 * iteration).</div>
+	 *
+	 * <div class="de">Bereitet die aktuelle Instanz des ART-DECOR to Java
+	 * Generators vor für ein nächstes Document Template (reset von
+	 * Modulvariablen für eine nächste Iteration).</div>
+	 *
+	 * Prepare for another template.
+	 */
+	public void prepareForAnotherTemplate() {
+		this.callingCdaElement = null;
+		this.currentCdaAttribute = null;
+		this.currentCdaElement = null;
+		this.currentCdaTemplate = null;
+		this.mainCdaTemplate = null;
+		this.parentForContains = null;
+		this.parentForIncludes = null;
 	}
 
 	/**

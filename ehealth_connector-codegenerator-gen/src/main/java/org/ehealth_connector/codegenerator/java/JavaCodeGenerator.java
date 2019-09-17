@@ -158,6 +158,28 @@ public class JavaCodeGenerator {
 	}
 
 	/**
+	 * <div class="en">Prepares the given String for Pascal, camel, kebab and
+	 * snake casing.</div>
+	 *
+	 * <div class="de">Bereitet den angegebenen String vor für Pascal-, Kamel-,
+	 * Kebab- und Snake Notationen.</div>
+	 *
+	 * @param value
+	 *            the value
+	 * @return the string
+	 */
+	private static String toEssentials(String value) {
+		String temp = value.replaceAll("[^A-Za-z0-9]", " ");
+		Matcher m = Pattern.compile(REGEX).matcher(temp);
+		StringBuffer sb = new StringBuffer();
+		while (m.find()) {
+			m.appendReplacement(sb, " " + m.group().toLowerCase());
+		}
+		m.appendTail(sb);
+		return sb.toString();
+	}
+
+	/**
 	 * <div class="en">Converts the given String to kebab-case notation
 	 * (lowercase letters).</div>
 	 *
@@ -241,28 +263,6 @@ public class JavaCodeGenerator {
 	 */
 	public static String toSnakeCaseCaps(String value) {
 		return toSnakeCase(value).toUpperCase();
-	}
-
-	/**
-	 * <div class="en">Prepares the given String for Pascal, camel, kebab and
-	 * snake casing.</div>
-	 *
-	 * <div class="de">Bereitet den angegebenen String vor für Pascal-, Kamel-,
-	 * Kebab- und Snake Notationen.</div>
-	 *
-	 * @param value
-	 *            the value
-	 * @return the string
-	 */
-	private static String toEssentials(String value) {
-		String temp = value.replaceAll("[^A-Za-z0-9]", " ");
-		Matcher m = Pattern.compile(REGEX).matcher(temp);
-		StringBuffer sb = new StringBuffer();
-		while (m.find()) {
-			m.appendReplacement(sb, " " + m.group().toLowerCase());
-		}
-		m.appendTail(sb);
-		return sb.toString();
 	}
 
 }
