@@ -1277,8 +1277,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	 */
 	public static void main(String[] args) throws Exception {
 
-		Util.initLogger(ArtDecor2JavaGenerator.class);
-
 		String logMsg;
 		logMsg = "ArtDecor2JavaGenerator started";
 		log.info(logMsg);
@@ -1287,10 +1285,11 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		File eclipseApp = null;
 		File orgWorkspacePath = null;
 		File configFile = null;
+		File rscDir = null;
 
 		boolean argsOk = false;
 
-		if (args.clone().length >= 3) {
+		if (args.clone().length >= 4) {
 			argsOk = true;
 			final String eclipseApplicationPath = args[0].toString();
 			if (eclipseApplicationPath != null) {
@@ -1347,8 +1346,23 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				}
 			}
 
+			final String rscDirString = args[3].toString();
+			if (rscDirString != null) {
+				rscDir = new File(rscDirString);
+				if (!rscDir.exists()) {
+					System.out.println("ERROR: Workspace does not exist (" + rscDirString + ")");
+					argsOk = false;
+				} else {
+					if (!rscDir.isDirectory()) {
+						System.out.println(
+								"ERROR: Workspace is not a directory (" + rscDirString + ")");
+						argsOk = false;
+					}
+				}
+			}
+
 		} else {
-			logMsg = "ArtDecor2JavaGenerator <eclipse> <workspace> <config>";
+			logMsg = "ArtDecor2JavaGenerator <eclipse> <workspace> <config> <rscDir>";
 			log.warn("Invalid or no parameter given. Usage: " + logMsg);
 			System.out.println("Usage:");
 			System.out.println("");
@@ -1366,6 +1380,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			System.out.println("");
 			System.out.println(
 					"  config: Third parameter must be the full path to your configuration file");
+			System.out.println("");
+			System.out.println(
+					"  rscDir: Fourth parameter must be the full path to any rscDir (e.g. .../demo-java/rsc)");
 
 			argsOk = false;
 		}
@@ -1376,6 +1393,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			System.out.println("Try again :-)");
 			return;
 		}
+
+		Util.initLogger(rscDir.getAbsolutePath(), ArtDecor2JavaGenerator.class);
 
 		final String tempWorkspacePathString = Util.getTempDirectory()
 				+ FileUtil.getPlatformSpecificPathSeparator() + "tmpWS_"

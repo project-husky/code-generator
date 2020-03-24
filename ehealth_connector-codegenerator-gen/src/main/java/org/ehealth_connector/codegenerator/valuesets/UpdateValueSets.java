@@ -339,7 +339,7 @@ public class UpdateValueSets {
 		} else {
 			System.out.println("Usage:");
 			System.out.println("");
-			System.out.println("UpdateValueSets <eclipse> <workspace>");
+			System.out.println("UpdateValueSets <eclipse> <workspace> <rscDir>");
 			System.out.println("");
 			System.out.println(
 					"  eclipse:   First parameter must be the full path and filename of your eclipse application");
@@ -350,6 +350,9 @@ public class UpdateValueSets {
 					"  workspace: Second parameter must be the full path to your current workspace directory");
 			System.out.println(
 					"             Note: It will be copied into a temp folder, as the current one is in use by Eclipse IDE");
+			System.out.println("");
+			System.out.println(
+					"  rscDir: Third parameter must be the full path to any rscDir (e.g. .../demo-java/rsc)");
 			argsOk = false;
 		}
 
