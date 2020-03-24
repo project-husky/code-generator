@@ -279,16 +279,15 @@ public class UpdateValueSets {
 	 */
 	public static void main(String[] args) throws Exception {
 
-		Util.initLogger(UpdateValueSets.class);
-
 		log.debug("Update value sets");
 		System.out.print("===== Update value sets =====\n");
 
 		File eclipseApp = null;
 		File orgWorkspacePath = null;
+		File rscDir = null;
 		boolean argsOk = false;
 
-		if (args.clone().length >= 2) {
+		if (args.clone().length >= 3) {
 			argsOk = true;
 			final String eclipseApplicationPath = args[0].toString();
 			if (eclipseApplicationPath != null) {
@@ -321,6 +320,22 @@ public class UpdateValueSets {
 					}
 				}
 			}
+
+			final String rscDirString = args[2].toString();
+			if (rscDirString != null) {
+				rscDir = new File(rscDirString);
+				if (!rscDir.exists()) {
+					System.out.println("ERROR: Workspace does not exist (" + rscDirString + ")");
+					argsOk = false;
+				} else {
+					if (!rscDir.isDirectory()) {
+						System.out.println(
+								"ERROR: Workspace is not a directory (" + rscDirString + ")");
+						argsOk = false;
+					}
+				}
+			}
+
 		} else {
 			System.out.println("Usage:");
 			System.out.println("");
@@ -345,6 +360,8 @@ public class UpdateValueSets {
 			return;
 		}
 
+		Util.initLogger(rscDir.getAbsolutePath(), UpdateValueSets.class);
+
 		final String tempWorkspacePathString = Util.getTempDirectory()
 				+ FileUtil.getPlatformSpecificPathSeparator() + "tmpWS_"
 				+ orgWorkspacePath.getName();
@@ -356,6 +373,7 @@ public class UpdateValueSets {
 		System.out.println("Config base dir: " + new File(CONFIG_FILE_BASE_PATH).getAbsolutePath());
 		System.out.println("Eclipse runtime: " + eclipseApp.getAbsolutePath());
 		System.out.println("Temp. workspace: " + tempWorkspacePath.getAbsolutePath());
+		System.out.println("rscDir: " + rscDir.getAbsolutePath());
 
 		String fnPackageConfig = CONFIG_FILE_BASE_PATH + SWISS_EPR_VALUE_SET_PACKAGE_CONFIG;
 		// String fnPackageConfig = CONFIG_FILE_BASE_PATH +
