@@ -3205,8 +3205,11 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 						valueSet = valueSetManager.downloadValueSet(valueSetConfig);
 					} catch (IOException | ParserConfigurationException | SAXException
 							| InitializationException e) {
-						throw new RuntimeException("valueSet (" + valueSetId
-								+ ") cannot be downloaded: " + e.getMessage());
+						String msg = "valueSet (" + valueSetId + ") cannot be downloaded: "
+								+ e.getMessage();
+						log.error(msg);
+						System.out.println("ERROR: " + msg);
+						throw new RuntimeException(msg);
 					}
 					if (valueSet != null) {
 						logMsg = "  creating enum class file ...";
