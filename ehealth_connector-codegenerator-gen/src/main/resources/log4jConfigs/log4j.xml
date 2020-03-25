@@ -20,14 +20,14 @@
 	</appender>
 	<appender name="LogFileAppender" class="org.apache.log4j.FileAppender">
 		<param name="File" value="logs/ehealthconnectordemo.log" />
-		<param name="Threshold" value="DEBUG" />
+		<param name="Threshold" value="ALL" />
 		<layout class="org.apache.log4j.PatternLayout">
 			<param name="ConversionPattern" value="%d %r [%t] %-5p %c %x - %m%n"/>
 		</layout>
 	</appender>
 	<appender name="httpclient" class="org.apache.log4j.FileAppender">
 		<param name="File" value="logs/http-client.log" />
-		<param name="Threshold" value="INFO" />
+		<param name="Threshold" value="ALL" />
 		<layout class="org.apache.log4j.PatternLayout">
 			<param name="ConversionPattern" value="%d %r [%t] %-5p %c %x - %m%n"/>
 		</layout>
@@ -39,6 +39,7 @@
 	</category>
 
 	<root>
+		<!-- change the behavior here, if you want to have DEBUG information in the Logs -->
 		<priority value="INFO" />
 		<appender-ref ref="LogFileAppender" />
 		<!-- ignore STDOUT appender in order to switch off console logging 
