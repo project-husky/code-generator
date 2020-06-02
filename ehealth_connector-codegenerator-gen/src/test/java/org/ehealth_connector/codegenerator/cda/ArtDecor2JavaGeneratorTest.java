@@ -164,7 +164,7 @@ public class ArtDecor2JavaGeneratorTest {
 
 		// Common properties
 		String prefix = "cdachlrep-";
-		String packageName = "org.ehealth_connector.cda.ch.lrep.v133";
+		String packageName = "org.ehealth_connector.cda.ch.lrep.v140";
 		String dstFilePath = Util.getCurrentDirectory()
 				+ "../../api-java/ehealth_connector-cda/ehealth_connector-cda-ch".replace("/",
 						FileUtil.getPlatformSpecificPathSeparator());
@@ -178,6 +178,63 @@ public class ArtDecor2JavaGeneratorTest {
 				templateList, srcFilePath, dstFilePath, packageName, fileHeader, prefix,
 				new URL(ArtDecor2JavaManager.ART_DECOR_DEFAULT_SERVER_BASE_URL));
 		artDecor2JavaGenerator.doOneTemplate(templateId);
+		artDecor2JavaGenerator.createJavaClasses();
+
+	}
+
+	// This is for debugging purposes, only. Do not commit this test with the
+	// test annotation enabled!
+	// @Test
+	public void doVacdTest()
+			throws SaxonApiException, IOException, JAXBException, ClassNotFoundException,
+			IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+			InstantiationException, NoSuchFieldException, SecurityException {
+
+		// Initialization
+		ArtDecor2JavaGenerator artDecor2JavaGenerator = null;
+		HashMap<String, CdaTemplate> templateIndex = new HashMap<String, CdaTemplate>();
+		HashMap<String, String> valueSetIndex = new HashMap<String, String>();
+		ArrayList<CdaTemplate> templateList = new ArrayList<CdaTemplate>();
+		String srcFilePath;
+		String templateId;
+
+		// Common properties
+		String prefix = "cdachvacd-";
+		String packageName = "org.ehealth_connector.cda.ch.vacd.v210";
+		String dstFilePath = Util.getCurrentDirectory()
+				+ "../../api-java/ehealth_connector-cda/ehealth_connector-cda-ch".replace("/",
+						FileUtil.getPlatformSpecificPathSeparator());
+		String fileHeader = JavaCodeGenerator.getFileHeader();
+		srcFilePath = Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator() + "test"
+				+ FileUtil.getPlatformSpecificPathSeparator();
+
+		// Immunization Certificate
+		templateId = "2.16.756.5.30.1.1.10.1.15";
+		artDecor2JavaGenerator = new ArtDecor2JavaGenerator(null, templateIndex, valueSetIndex,
+				templateList, srcFilePath, dstFilePath, packageName, fileHeader, prefix,
+				new URL(ArtDecor2JavaManager.ART_DECOR_DEFAULT_SERVER_BASE_URL));
+		artDecor2JavaGenerator.doOneTemplate(templateId);
+
+		// Immunization Administration
+		templateId = "2.16.756.5.30.1.1.10.1.16";
+		artDecor2JavaGenerator.prepareForAnotherTemplate();
+		artDecor2JavaGenerator.doOneTemplate(templateId);
+
+		// Immunization Recommendation Request
+		templateId = "2.16.756.5.30.1.1.10.1.17";
+		artDecor2JavaGenerator.prepareForAnotherTemplate();
+		artDecor2JavaGenerator.doOneTemplate(templateId);
+
+		// Immunization Recommendation Response
+		templateId = "2.16.756.5.30.1.1.10.1.18";
+		artDecor2JavaGenerator.prepareForAnotherTemplate();
+		artDecor2JavaGenerator.doOneTemplate(templateId);
+
+		// Vaccination Record
+		templateId = "	2.16.756.5.30.1.1.10.1.19";
+		artDecor2JavaGenerator.prepareForAnotherTemplate();
+		artDecor2JavaGenerator.doOneTemplate(templateId);
+
 		artDecor2JavaGenerator.createJavaClasses();
 
 	}
