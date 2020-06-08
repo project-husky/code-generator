@@ -3156,6 +3156,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				currentCdaAttribute = new CdaAttribute();
 				currentCdaAttribute.setCdaElement(currentCdaElement);
 				currentCdaAttribute.setDataType("cs");
+				currentCdaAttribute.setName("code");
 			}
 			currentCdaAttribute.setVocab(true);
 			if (code != null || codeSystem != null) {
