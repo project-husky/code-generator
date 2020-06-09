@@ -16,6 +16,8 @@
  */
 package org.ehealth_connector.codegenerator.cda.model;
 
+import java.util.ArrayList;
+
 import org.ehealth_connector.common.Code;
 
 /**
@@ -36,7 +38,7 @@ public class CdaAttribute {
 	private String description;
 
 	/** The name of this attribute. */
-	private String name;
+	private String name = null;
 
 	/** The value of this attribute. */
 	private String value;
@@ -45,7 +47,10 @@ public class CdaAttribute {
 	private String valueSetId;
 
 	/** The code of this attribute. */
-	private Code code;
+	private Code code = null;
+
+	/** The list code of codes of this attribute. */
+	private ArrayList<Code> codes = null;
 
 	/** The element, in which this attribute is declared. */
 	private CdaElement cdaElement;
@@ -64,6 +69,20 @@ public class CdaAttribute {
 	 *
 	 */
 	public CdaAttribute() {
+	}
+
+	/**
+	 * <div class="en">Adds the code of this attribute.</div>
+	 *
+	 * <div class="de">Fügt den Code dieses Attributs hinzu.</div>
+	 *
+	 * @param code
+	 *            the new code
+	 */
+	public void addCode(Code code) {
+		if (this.codes == null)
+			this.codes = new ArrayList<Code>();
+		this.codes.add(code);
 	}
 
 	/**
@@ -101,6 +120,17 @@ public class CdaAttribute {
 	 */
 	public Code getCode() {
 		return code;
+	}
+
+	/**
+	 * <div class="en">Gets the code of this attribute.</div>
+	 *
+	 * <div class="de">Ruft den Code dieses Attributs ab.</div>
+	 *
+	 * @return the code
+	 */
+	public ArrayList<Code> getCodeList() {
+		return codes;
 	}
 
 	/**
