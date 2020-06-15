@@ -162,8 +162,21 @@ public class UpdateValueSets {
 		ArrayList<ValueSetEntry> list;
 		list = valueSet.getSortedEntryList();
 
-		// TODO: nested lists not supported, yet (due to duplicate enum names).
+		// TODO: nested lists not supported, yet.
 		// list = valueSet.getSortedEntryListRecursive();
+
+		ArrayList<ValueSetEntry> duplicates = ValueSetUtil.getDuplicates(list);
+		if (duplicates.size() > 0) {
+			String temp = "";
+			for (ValueSetEntry valueSetEntry : duplicates) {
+				if (!"".equals(temp))
+					temp = temp + ", ";
+				temp = temp + valueSetEntry.getCodeBaseType().getDisplayName();
+			}
+			System.out.println("WARNING: ValueSet '" + valueSet.getDisplayName()
+					+ "' contains duplicate(s): " + temp);
+			list = ValueSetUtil.removeDuplicates(list);
+		}
 
 		for (ValueSetEntry valueSetEntry : list) {
 			String enumConstantName = ValueSet

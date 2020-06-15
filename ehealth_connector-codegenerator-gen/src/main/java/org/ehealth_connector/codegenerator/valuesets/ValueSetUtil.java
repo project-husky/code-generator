@@ -22,6 +22,7 @@ import static org.ehealth_connector.common.enums.LanguageCode.ENGLISH;
 import java.io.File;
 import java.io.IOException;
 import java.io.InvalidClassException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -84,6 +85,36 @@ public final class ValueSetUtil {
 	}
 
 	/**
+	 * Returns all duplicates in the list.
+	 *
+	 * @param <T>
+	 *            the generic type
+	 * @param list
+	 *            the list
+	 * @return the array list
+	 */
+	public static <T> ArrayList<T> getDuplicates(ArrayList<T> list) {
+
+		// Create a new ArrayList
+		ArrayList<T> newList = new ArrayList<T>();
+		ArrayList<T> duplicatesList = new ArrayList<T>();
+
+		// Traverse through the first list
+		for (T element : list) {
+
+			// If this element is not present in newList
+			// then add it
+			if (newList.contains(element)) {
+				duplicatesList.add(element);
+			}
+			newList.add(element);
+		}
+
+		// return the new list
+		return duplicatesList;
+	}
+
+	/**
 	 * <div class="en">Create a file instance to a Java source file by its fully
 	 * qualified class name and a base folder.</div>
 	 *
@@ -118,4 +149,31 @@ public final class ValueSetUtil {
 				"Failed to load primary type from compilation unit"));
 	}
 
+	/**
+	 * Removes the duplicates from the list.
+	 *
+	 * @param <T>
+	 *            the generic type
+	 * @param list
+	 *            the list
+	 * @return the array list
+	 */
+	public static <T> ArrayList<T> removeDuplicates(ArrayList<T> list) {
+
+		// Create a new ArrayList
+		ArrayList<T> newList = new ArrayList<T>();
+
+		// Traverse through the first list
+		for (T element : list) {
+
+			// If this element is not present in newList
+			// then add it
+			if (!newList.contains(element)) {
+				newList.add(element);
+			}
+		}
+
+		// return the new list
+		return newList;
+	}
 }
