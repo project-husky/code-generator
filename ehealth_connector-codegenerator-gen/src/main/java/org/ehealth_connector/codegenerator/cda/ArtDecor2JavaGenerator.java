@@ -3400,7 +3400,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 					| NoSuchFieldException | SecurityException e) {
 				// Do nothing
 			}
-			if ("effectiveTime".equals(name)) {
+			if ("org.ehealth_connector.common.hl7cdar2.EIVLTS".equals(dataType)) {
 				dataType = "org.ehealth_connector.common.hl7cdar2.IVLTS";
 			}
 			if (!retVal) {
