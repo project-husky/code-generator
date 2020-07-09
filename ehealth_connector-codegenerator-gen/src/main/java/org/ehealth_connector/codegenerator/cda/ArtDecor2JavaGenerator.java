@@ -145,14 +145,14 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	private static final String FORMATTER_PREFS = System.getProperty("user.dir")
 			+ "/src/main/resources/format/org.eclipse.jdt.core.prefs";
 
+	/** The log. */
+	protected final static Logger log = LoggerFactory.getLogger(ArtDecor2JavaGenerator.class);
+
 	/** Placeholder for pending actions of the Code Generator. */
 	private static String PENDING_ACTIONS = "Pending actions:";
 
 	/** Placeholder for pending actions of the Code Generator. */
 	private static String PENDING_ACTIONS_ADJUST_NAME = "Adjust name: ";
-
-	/** The log. */
-	protected final static Logger log = LoggerFactory.getLogger(ArtDecor2JavaGenerator.class);
 
 	/**
 	 * Adds a comment to the constructor body.
@@ -1658,6 +1658,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	/** The full destination path where to put the generated classes. */
 	private String fullDstFilePath = null;
 
+	/** Flag for the initial run. */
+	boolean initialRun;
+
 	/** The main CDA template (used in the ANTLR4 parser). */
 	private CdaTemplate mainCdaTemplate = null;
 
@@ -1682,9 +1685,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	/** The processing attribute (used in the ANTLR4 parser). */
 	private int processingAttribute = 0;
 
-	/** The processing vocab (used in the ANTLR4 parser). */
-	private int processingVocab = 0;
-
 	/** The processing element (used in the ANTLR4 parser). */
 	private int processingElement = 0;
 
@@ -1700,6 +1700,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	/** The number of processing templates (used in the ANTLR4 parser). */
 	private int processingTemplate = 0;
+
+	/** The processing vocab (used in the ANTLR4 parser). */
+	private int processingVocab = 0;
 
 	/** The running template (used in the ANTLR4 parser). */
 	private CdaTemplate runningTemplate;
@@ -1721,9 +1724,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	/** The value set index (used in the ANTLR4 parser). */
 	private HashMap<String, String> valueSetIndex = null;
-
-	/** Flag for the initial run. */
-	boolean initialRun;
 
 	/**
 	 *
@@ -2262,21 +2262,95 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 								"ArrayList<org.ehealth_connector.common.Code>", fieldName);
 						field.getVariable(0).setInitializer("new " + methodType + "()");
 
+						String dataType = null;
+						try {
+							dataType = getDataType(cdaElement.getParentCdaElement(), templateIndex);
+						} catch (InstantiationException | IllegalAccessException
+								| ClassNotFoundException | NoSuchFieldException | SecurityException
+								| IllegalArgumentException | InvocationTargetException
+								| IOException e) {
+							throw new RuntimeException(
+									"Unhandled exception while getting Datatype for " + attrName
+											+ "(" + cdaElement.getFullXmlName() + ")");
+						}
+
+						@SuppressWarnings("rawtypes")
+						Class fieldDataClass = getDeclaredFieldDatatype(dataType, elementName);
+
+						boolean isList = isClassCollection(fieldDataClass);
+						boolean codeComplete = false;
+						String codeStatement = "";
+
 						for (Code code : cdaAttribute.getCodeList()) {
-							addBodyComment(constructor,
-									"vocab code list entry for attribute " + cdaAttribute.getName()
-											+ " / element " + cdaElement.getXmlName() + ": "
-											+ code);
-							statement = fieldName
-									+ ".add(new Code(CodeBaseType.builder().withCode(\""
-									+ code.getCode() + "\").withCodeSystem(\""
-									+ code.getCodeSystem() + "\")\r\n"
-									+ "				.withCodeSystemName(\""
-									+ code.getCodeSystemName() + "\").withDisplayName(\""
-									+ code.getDisplayName() + "\").build()));";
+							String myCode = code.getCode();
+							String myCodeSystem = code.getCodeSystem();
+							String myCodeSystemName = code.getCodeSystemName();
+							String myDisplayName = code.getDisplayName();
+
+							if ("org.ehealth_connector.common.hl7cdar2.CS"
+									.equals(fieldDataClass.getName()))
+								codeComplete = (myCode != null);
+							else
+								codeComplete = ((myCode != null) && (myCodeSystem != null));
+
+							statement = fieldName + ".add(";
+
+							codeStatement = "new Code(CodeBaseType.builder()";
+
+							if (myCode != null)
+								codeStatement += ".withCode(\"" + myCode + "\")";
+							if (myCodeSystem != null)
+								codeStatement += ".withCodeSystem(\"" + myCodeSystem + "\")";
+							if (myCodeSystemName != null)
+								codeStatement += ".withCodeSystemName(\"" + myCodeSystemName
+										+ "\")";
+							if (myDisplayName != null)
+								codeStatement += ".withDisplayName(\"" + myDisplayName + "\")";
+
+							codeStatement += ".build())";
+
+							statement += codeStatement + ");";
+
 							addBodyStatement(constructor, statement);
 						}
-						addBodyComment(constructor, "---");
+
+						// This an optimization only. Remember that vocab
+						// elements are to define a vocabulary and not a fixed
+						// code.
+						// Though there are ART-DECOR models that define one
+						// only vocab element in order to suggest a fixed code.
+						// Therefore we optimize, here with the following rules:
+						// 1. If the vocabulary contains only one entry, we can
+						// imagine that this serves as a fixed value.
+						// 2. In any case, this entry is only used as a fixed
+						// value if the code is complete (one can for example
+						// just declare the code systems id without given codes
+						// and in this case, the code is not treated as a fixed
+						// value).
+						//
+						// Note: If you change anything here, make sure all
+						// previous CDA documents still validate (e.g.
+						// CDA-CH-EMED Prescription and MedicationList).
+						if ((cdaAttribute.getCodeList().size() == 1) && codeComplete) {
+							String temp;
+							String shortDatatype;
+							if (isList) {
+								shortDatatype = JavaCodeGenerator.toPascalCase(dataType
+										.substring(dataType.length() - 2, dataType.length()));
+								if ("translation".equals(elementName))
+									shortDatatype = "Cd";
+								temp = "(" + codeStatement + ").getHl7CdaR2" + shortDatatype + "()";
+								statement = "super.get" + toUpperFirstChar(elementName) + "().add("
+										+ temp + ");";
+							} else {
+								shortDatatype = JavaCodeGenerator.toPascalCase(fieldDataClass
+										.getName().substring(fieldDataClass.getName().length() - 2,
+												fieldDataClass.getName().length()));
+								temp = "(" + codeStatement + ").getHl7CdaR2" + shortDatatype + "()";
+								statement = elementName + " = " + temp + ";";
+							}
+							addBodyStatement(constructor, statement);
+						}
 
 						MethodDeclaration method = myClass.addMethod(
 								"get" + JavaCodeGenerator.toPascalCase(fieldName),
