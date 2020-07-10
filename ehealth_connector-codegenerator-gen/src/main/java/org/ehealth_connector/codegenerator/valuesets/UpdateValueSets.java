@@ -160,10 +160,7 @@ public class UpdateValueSets {
 	private static void addEnumElements(EnumDeclaration enumType, ValueSet valueSet) {
 
 		ArrayList<ValueSetEntry> list;
-		list = valueSet.getSortedEntryList();
-
-		// TODO: nested lists not supported, yet.
-		// list = valueSet.getSortedEntryListRecursive();
+		list = valueSet.getSortedEntryListRecursive();
 
 		ArrayList<ValueSetEntry> duplicates = ValueSetUtil.getDuplicates(list);
 		if (duplicates.size() > 0) {
@@ -179,12 +176,13 @@ public class UpdateValueSets {
 		}
 
 		for (ValueSetEntry valueSetEntry : list) {
-			String enumConstantName = ValueSet
-					.buildEnumName(valueSetEntry.getCodeBaseType().getDisplayName());
+			String enumConstantName = ValueSet.buildEnumName(
+					valueSetEntry.getCodeBaseType().getDisplayName(), valueSetEntry.getLevel());
 			String preferredDesignation = valueSetEntry.getDesignation(LanguageCode.ENGLISH,
 					DesignationType.PREFERRED);
 			if (preferredDesignation != null)
-				enumConstantName = ValueSet.buildEnumName(preferredDesignation);
+				enumConstantName = ValueSet.buildEnumName(preferredDesignation,
+						valueSetEntry.getLevel());
 			String code = valueSetEntry.getCodeBaseType().getCode();
 			String codeSystem = valueSetEntry.getCodeBaseType().getCodeSystem();
 			String displayName = valueSetEntry.getCodeBaseType().getDisplayName();

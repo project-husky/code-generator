@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.ehealth_connector.common.enums.LanguageCode;
+import org.ehealth_connector.valueset.model.ValueSetEntry;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.TypeDeclaration;
@@ -87,30 +88,35 @@ public final class ValueSetUtil {
 	/**
 	 * Returns all duplicates in the list.
 	 *
-	 * @param <T>
-	 *            the generic type
 	 * @param list
 	 *            the list
-	 * @return the array list
+	 * @return the duplicates
 	 */
-	public static <T> ArrayList<T> getDuplicates(ArrayList<T> list) {
+	public static ArrayList<ValueSetEntry> getDuplicates(ArrayList<ValueSetEntry> list) {
 
-		// Create a new ArrayList
-		ArrayList<T> newList = new ArrayList<T>();
-		ArrayList<T> duplicatesList = new ArrayList<T>();
+		ArrayList<ValueSetEntry> newList = new ArrayList<ValueSetEntry>();
+		ArrayList<ValueSetEntry> duplicatesList = new ArrayList<ValueSetEntry>();
 
 		// Traverse through the first list
-		for (T element : list) {
+		for (ValueSetEntry element : list) {
 
-			// If this element is not present in newList
-			// then add it
-			if (newList.contains(element)) {
-				duplicatesList.add(element);
+			int level = element.getLevel();
+			String code = element.getCodeBaseType().getCode();
+			String displayName = element.getCodeBaseType().getDisplayName();
+
+			// Traverse through the second list
+			for (ValueSetEntry e : newList) {
+				if ((level == e.getLevel()) && ((code.equals(e.getCodeBaseType().getCode())
+						|| (displayName.toUpperCase()
+								.equals(e.getCodeBaseType().getDisplayName().toUpperCase()))))) {
+					duplicatesList.add(element);
+					break;
+				}
 			}
+
 			newList.add(element);
 		}
 
-		// return the new list
 		return duplicatesList;
 	}
 
@@ -150,30 +156,38 @@ public final class ValueSetUtil {
 	}
 
 	/**
-	 * Removes the duplicates from the list.
+	 * Removes all duplicates from the list.
 	 *
-	 * @param <T>
-	 *            the generic type
 	 * @param list
 	 *            the list
-	 * @return the array list
+	 * @return the duplicates
 	 */
-	public static <T> ArrayList<T> removeDuplicates(ArrayList<T> list) {
+	public static ArrayList<ValueSetEntry> removeDuplicates(ArrayList<ValueSetEntry> list) {
 
-		// Create a new ArrayList
-		ArrayList<T> newList = new ArrayList<T>();
+		ArrayList<ValueSetEntry> newList = new ArrayList<ValueSetEntry>();
 
 		// Traverse through the first list
-		for (T element : list) {
+		for (ValueSetEntry element : list) {
 
-			// If this element is not present in newList
-			// then add it
-			if (!newList.contains(element)) {
-				newList.add(element);
+			int level = element.getLevel();
+			String code = element.getCodeBaseType().getCode();
+			String displayName = element.getCodeBaseType().getDisplayName();
+			boolean isDuplicate = false;
+
+			// Traverse through the second list
+			for (ValueSetEntry e : newList) {
+				if ((level == e.getLevel()) && ((code.equals(e.getCodeBaseType().getCode())
+						|| (displayName.toUpperCase()
+								.equals(e.getCodeBaseType().getDisplayName().toUpperCase()))))) {
+					isDuplicate = true;
+					break;
+				}
 			}
+
+			if (!isDuplicate)
+				newList.add(element);
 		}
 
-		// return the new list
 		return newList;
 	}
 }

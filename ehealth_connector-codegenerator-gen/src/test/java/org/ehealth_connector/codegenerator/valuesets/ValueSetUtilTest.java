@@ -32,22 +32,28 @@ public class ValueSetUtilTest {
 	@Test
 	public void testBuildEnumName() {
 
-		assertEquals("HOSPITAL", ValueSet.buildEnumName("Hospital"));
+		assertEquals("HOSPITAL", ValueSet.buildEnumName("Hospital", 0));
 
-		assertEquals("LABORATORY_SERVICE", ValueSet.buildEnumName("Laboratory service"));
+		assertEquals("HOSPITAL_L1", ValueSet.buildEnumName("Hospital", 1));
 
-		assertEquals("ANY_TEXT_AND_ANY_TEXT", ValueSet.buildEnumName("Any text &amp; any text"));
+		assertEquals("HOSPITAL_L2", ValueSet.buildEnumName("Hospital", 2));
 
-		assertEquals("ACCIDENT_AND_EMERGENCY", ValueSet.buildEnumName("Accident &amp; emergency"));
+		assertEquals("LABORATORY_SERVICE", ValueSet.buildEnumName("Laboratory service", 0));
+
+		assertEquals("ANY_TEXT_AND_ANY_TEXT", ValueSet.buildEnumName("Any text &amp; any text", 0));
+
+		assertEquals("ACCIDENT_AND_EMERGENCY",
+				ValueSet.buildEnumName("Accident &amp; emergency", 0));
 
 		assertEquals("CLIENT_OR_PATIENT_HOME",
-				ValueSet.buildEnumName("Client's or patient's home"));
+				ValueSet.buildEnumName("Client's or patient's home", 0));
 
-		assertEquals("IMMUNIZATION_CONTENT", ValueSet.buildEnumName("Immunization Content (IC)"));
+		assertEquals("IMMUNIZATION_CONTENT",
+				ValueSet.buildEnumName("Immunization Content (IC)", 0));
 
-		assertEquals("IMMUNIZATION_CONTENT", ValueSet.buildEnumName("IMMUNIZATION__CONTENT"));
+		assertEquals("IMMUNIZATION_CONTENT", ValueSet.buildEnumName("IMMUNIZATION__CONTENT", 0));
 
-		assertEquals("IMMUNIZATION_CONTENT", ValueSet.buildEnumName("IMMUNIZATION___CONTENT"));
+		assertEquals("IMMUNIZATION_CONTENT", ValueSet.buildEnumName("IMMUNIZATION___CONTENT", 0));
 
 	}
 
