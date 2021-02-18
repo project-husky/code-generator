@@ -30,6 +30,7 @@ import static org.ehealth_connector.common.enums.LanguageCode.ITALIAN;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +73,9 @@ import com.google.common.collect.ImmutableMap;
 
 /**
  * <div class="en">This class generates the CH-EPR value sets from the
- * downloaded JSON files from art-decor.org</div>
+ * downloaded JSON files from art-decor.org.
+ * <a href="https://gitlab.com/ehealth-connector/api/-/wikis/Updating-the-Swiss-EPR-metadata">See
+ * the wiki</a> for additional information on how to use this class.</div>
  */
 public class UpdateValueSets {
 
@@ -102,7 +105,7 @@ public class UpdateValueSets {
 	 * javadoc comments.</div>
 	 */
 	private static final List<LanguageCode> LANGUAGE_CODES = asList(ENGLISH, GERMAN, FRENCH,
-			ITALIAN);;
+			ITALIAN);
 
 	private static Logger log = LoggerFactory.getLogger(UpdateValueSets.class);
 
@@ -129,7 +132,7 @@ public class UpdateValueSets {
 	 * As published on March 3, 2020:
 	 * https://www.e-health-suisse.ch/technik-semantik/semantische-interoperabilitaet/metadaten.html
 	 */
-	private final static String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG = "SwissEprValueSetPackageConfig-20200303.yaml";
+	private static final String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG = "SwissEprValueSetPackageConfig-20200303.yaml";
 
 	/**
 	 * <div class="en">Relative path where to find the Java template text
@@ -154,15 +157,15 @@ public class UpdateValueSets {
 	 *
 	 * @param enumType
 	 *            The enum type representing parsed Java enum class.
-	 * @param concepts
+	 * @param valueSet
 	 *            The concepts from the value set definition file.
 	 */
 	private static void addEnumElements(EnumDeclaration enumType, ValueSet valueSet) {
 
-		ArrayList<ValueSetEntry> list;
+		List<ValueSetEntry> list;
 		list = valueSet.getSortedEntryListRecursive();
 
-		ArrayList<ValueSetEntry> duplicates = ValueSetUtil.getDuplicates(list);
+		List<ValueSetEntry> duplicates = ValueSetUtil.getDuplicates(list);
 		if (duplicates.size() > 0) {
 			String temp = "";
 			for (ValueSetEntry valueSetEntry : duplicates) {
@@ -176,13 +179,7 @@ public class UpdateValueSets {
 		}
 
 		for (ValueSetEntry valueSetEntry : list) {
-			String enumConstantName = ValueSet.buildEnumName(
-					valueSetEntry.getCodeBaseType().getDisplayName(), valueSetEntry.getLevel());
-			String preferredDesignation = valueSetEntry.getDesignation(LanguageCode.ENGLISH,
-					DesignationType.PREFERRED);
-			if (preferredDesignation != null)
-				enumConstantName = ValueSet.buildEnumName(preferredDesignation,
-						valueSetEntry.getLevel());
+			String enumConstantName = valueSetEntry.getEnumConstantName();
 			String code = valueSetEntry.getCodeBaseType().getCode();
 			String codeSystem = valueSetEntry.getCodeBaseType().getCodeSystem();
 			String displayName = valueSetEntry.getCodeBaseType().getDisplayName();
@@ -253,18 +250,18 @@ public class UpdateValueSets {
 	 * @param baseJavaFolder
 	 *            The base Java source folder (relative to the root of the
 	 *            project hierarchy) where the Java package structure begins.
-	 * @param fullyQualifiedclassName
-	 *            the fully qualifiedclass name
+	 * @param fullyQualifiedClassName
+	 *            the fully qualified class name
 	 * @throws IOException
 	 *             When reading or writing the Java source file fails.
 	 */
 	public static void createEnumClassFromTemplate(String baseJavaFolder,
-			String fullyQualifiedclassName) throws IOException {
+			String fullyQualifiedClassName) throws IOException {
 
-		String className = fullyQualifiedclassName
-				.substring(fullyQualifiedclassName.lastIndexOf('.') + 1);
-		String packageName = fullyQualifiedclassName.substring(0,
-				fullyQualifiedclassName.lastIndexOf('.'));
+		String className = fullyQualifiedClassName
+				.substring(fullyQualifiedClassName.lastIndexOf('.') + 1);
+		String packageName = fullyQualifiedClassName.substring(0,
+				fullyQualifiedClassName.lastIndexOf('.'));
 
 		String templateString = FileUtils
 				.readFileToString(new File(TEMPLATE_FILE_LOCATION), Charsets.UTF_8)
@@ -273,7 +270,7 @@ public class UpdateValueSets {
 
 		ParseResult<CompilationUnit> javaSource = new JavaParser().parse(templateString);
 
-		FileUtils.write(getSourceFileName(baseJavaFolder, fullyQualifiedclassName),
+		FileUtils.write(getSourceFileName(baseJavaFolder, fullyQualifiedClassName),
 				javaSource.getResult().get().toString(PRETTY_PRINTER_CONFIGURATION),
 				Charsets.UTF_8);
 
@@ -283,8 +280,10 @@ public class UpdateValueSets {
 	 * <div class="en">The main entry for the value set generator.</div>
 	 *
 	 * @param args
-	 *            command line arguments: 1. Full path and filename to eclipse;
-	 *            2. Full path to the workspace application
+	 *            command line arguments:
+	 *            1. Full path and filename to eclipse;
+	 *            2. Full path to the workspace application;
+	 *            3. Full path to any rscDir directory.
 	 * @throws Exception
 	 *             When any operation fails.
 	 */
@@ -300,7 +299,7 @@ public class UpdateValueSets {
 
 		if (args.clone().length >= 3) {
 			argsOk = true;
-			final String eclipseApplicationPath = args[0].toString();
+			final String eclipseApplicationPath = args[0];
 			if (eclipseApplicationPath != null) {
 				eclipseApp = new File(eclipseApplicationPath);
 				if (!eclipseApp.exists()) {
@@ -316,7 +315,7 @@ public class UpdateValueSets {
 				}
 			}
 
-			final String orgWorkspacePathString = args[1].toString();
+			final String orgWorkspacePathString = args[1];
 			if (orgWorkspacePathString != null) {
 				orgWorkspacePath = new File(orgWorkspacePathString);
 				if (!orgWorkspacePath.exists()) {
@@ -332,7 +331,7 @@ public class UpdateValueSets {
 				}
 			}
 
-			final String rscDirString = args[2].toString();
+			final String rscDirString = args[2];
 			if (rscDirString != null) {
 				rscDir = new File(rscDirString);
 				if (!rscDir.exists()) {
@@ -489,7 +488,7 @@ public class UpdateValueSets {
 	/**
 	 * <div class="en">Replaces the value of a annotation parameter.</div>
 	 *
-	 * @param annotation
+	 * @param annotationExpr
 	 *            The annotation that holds the parameter.
 	 * @param parameterName
 	 *            The name of the parameter to replace the value of.
@@ -582,6 +581,7 @@ public class UpdateValueSets {
 			AnnotationExpr generated = templateType.getAnnotationByClass(Generated.class).get();
 			replaceParameterValue(generated, "value",
 					"org.ehealth_connector.codegenerator.ch.valuesets.UpdateValueSets");
+			replaceParameterValue(generated, "date", LocalDate.now().toString());
 			if (primaryType.getAnnotationByClass(Generated.class).isPresent()) {
 				primaryType.getAnnotationByClass(Generated.class).get().remove();
 			}

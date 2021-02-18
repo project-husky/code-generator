@@ -92,10 +92,10 @@ public final class ValueSetUtil {
 	 *            the list
 	 * @return the duplicates
 	 */
-	public static ArrayList<ValueSetEntry> getDuplicates(ArrayList<ValueSetEntry> list) {
+	public static List<ValueSetEntry> getDuplicates(List<ValueSetEntry> list) {
 
-		ArrayList<ValueSetEntry> newList = new ArrayList<ValueSetEntry>();
-		ArrayList<ValueSetEntry> duplicatesList = new ArrayList<ValueSetEntry>();
+		List<ValueSetEntry> newList = new ArrayList<>();
+		List<ValueSetEntry> duplicatesList = new ArrayList<>();
 
 		// Traverse through the first list
 		for (ValueSetEntry element : list) {
@@ -106,9 +106,8 @@ public final class ValueSetUtil {
 
 			// Traverse through the second list
 			for (ValueSetEntry e : newList) {
-				if ((level == e.getLevel()) && ((code.equals(e.getCodeBaseType().getCode())
-						|| (displayName.toUpperCase()
-								.equals(e.getCodeBaseType().getDisplayName().toUpperCase()))))) {
+				if ((level == e.getLevel()) && (code.equals(e.getCodeBaseType().getCode())
+						|| (displayName.equalsIgnoreCase(e.getCodeBaseType().getDisplayName())))) {
 					duplicatesList.add(element);
 					break;
 				}
@@ -162,9 +161,9 @@ public final class ValueSetUtil {
 	 *            the list
 	 * @return the duplicates
 	 */
-	public static ArrayList<ValueSetEntry> removeDuplicates(ArrayList<ValueSetEntry> list) {
+	public static List<ValueSetEntry> removeDuplicates(List<ValueSetEntry> list) {
 
-		ArrayList<ValueSetEntry> newList = new ArrayList<ValueSetEntry>();
+		List<ValueSetEntry> newList = new ArrayList<>();
 
 		// Traverse through the first list
 		for (ValueSetEntry element : list) {
@@ -176,9 +175,8 @@ public final class ValueSetUtil {
 
 			// Traverse through the second list
 			for (ValueSetEntry e : newList) {
-				if ((level == e.getLevel()) && ((code.equals(e.getCodeBaseType().getCode())
-						|| (displayName.toUpperCase()
-								.equals(e.getCodeBaseType().getDisplayName().toUpperCase()))))) {
+				if ((level == e.getLevel()) && (code.equals(e.getCodeBaseType().getCode())
+						|| (displayName.equalsIgnoreCase(e.getCodeBaseType().getDisplayName())))) {
 					isDuplicate = true;
 					break;
 				}
