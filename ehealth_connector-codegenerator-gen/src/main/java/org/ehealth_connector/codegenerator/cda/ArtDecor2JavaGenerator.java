@@ -32,6 +32,7 @@ import java.lang.reflect.Type;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -39,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.annotation.Generated;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -46,6 +48,7 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
+import com.github.javaparser.ast.expr.StringLiteralExpr;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.Interval;
@@ -122,7 +125,9 @@ import net.sf.saxon.s9api.SaxonApiException;
  * Generator. It orchestrates the individual modules (such as REST Client to
  * ART-DECOR, XSLT, ANTLR and the final Java Class file creation). This class
  * generates Java Classes for all templates used for a HL7 CDA Document Template
- * modeled in ART-DECOR.</div>
+ * modeled in ART-DECOR.
+ * <a href="https://gitlab.com/ehealth-connector/api/-/wikis/ART-DECOR-to-Java-Code-Generator">See
+ * the wiki</a> for additional information on how to use this class.</div>
  *
  * <div class="de">Dies ist die Hauptklasse des ART-DECOR to Java Code
  * Generators. Sie orchestriert die einzelnen Module (z. B. REST-Client to
@@ -1839,9 +1844,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				if (retVal.startsWith("INT.NONNEG"))
 					retVal = "INT";
 
-				if (!templateIndex.containsValue(dataType))
-					if (!retVal.contains("."))
-						retVal = "org.ehealth_connector.common.hl7cdar2." + retVal;
+				if (!templateIndex.containsKey(dataType) && !retVal.contains(".")) {
+					retVal = "org.ehealth_connector.common.hl7cdar2." + retVal;
+				}
 			}
 		}
 		return retVal;
@@ -1934,6 +1939,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	private MethodDeclaration createCreatorForFixedContentsElement(CompilationUnit compilationUnit,
 			ClassOrInterfaceDeclaration myClass, CdaElement cdaElement,
 			String setterForFixedContentsName) {
+		System.out.println("  class name: " + myClass.getNameAsString());
+		System.out.println("  cda java name: " + cdaElement.getJavaName());
+		System.out.println("  setter: " + setterForFixedContentsName);
 
 		MethodDeclaration method = myClass.addMethod(setterForFixedContentsName,
 				privateModifier().getKeyword(), staticModifier().getKeyword());
@@ -1968,7 +1976,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				body.addStatement("En" + enPartU + " retVal = new En" + enPartU + "();");
 			} else
 				throw new RuntimeException(
-						name + " is neither an accesible field nor an accessible getter");
+						name + " is neither an accessible field nor an accessible getter");
 		} else {
 			if (memberType.getName().endsWith("POCDMT000040InfrastructureRootTypeId")) {
 				dataType = memberType.getName();
@@ -1995,16 +2003,22 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
 
 		if (cdaElement.getCdaAttributeList() != null) {
+			final ConstructorDeclaration constructor = myClass
+					.getDefaultConstructor()
+					.orElseGet(() -> createDefaultConstructor(compilationUnit, myClass));
 
-			ConstructorDeclaration constructor = null;
 			MethodDeclaration creatorForFixedContentsMethod = null;
-			ArrayList<String> arguments = new ArrayList<String>();
+			final List<String> arguments = new ArrayList<>();
 			StringBuilder sb = new StringBuilder();
 
 			boolean isAttributeOfTemplateRootElement = false;
 			if (cdaElement.getTemplate().getCdaElementList().size() == 1)
 				isAttributeOfTemplateRootElement = (cdaElement
 						.equals(cdaElement.getTemplate().getCdaElementList().get(0)));
+
+			if (this.isElementAConsumableWithNaMaterial(cdaElement)) {
+				addBodyStatement(constructor, "super.setConsumable(createHl7ConsumableNa());");
+			}
 
 			int i = 0;
 			for (CdaAttribute cdaAttribute : cdaElement.getCdaAttributeList()) {
@@ -2020,14 +2034,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				if ((cdaAttribute.getCode() != null) && (cdaAttribute.getValue() == null)) {
 					cdaAttribute.setValue(cdaAttribute.getCode().getCode());
 				}
-
-				Optional<ConstructorDeclaration> constructorOpt = myClass
-						.getConstructorByParameterTypes(new String[] {});
-				boolean constructorExist = constructorOpt.isPresent();
-				if (!constructorExist) {
-					constructor = createDefaultConstructor(compilationUnit, myClass);
-				} else
-					constructor = constructorOpt.get();
 
 				if ((cdaAttribute.getValue() != null) || (cdaAttribute.getValueSetId() != null)) {
 					if (cdaElement.getJavaName() == null)
@@ -2048,17 +2054,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 							.getMethodsByName(creatorForFixedContentsName);
 
 					if (!isAttributeOfTemplateRootElement) {
-						boolean creatorForFixedContentsExist = (creatorForFixedContentsMethodList
-								.size() > 0);
+						boolean creatorForFixedContentsExist = !creatorForFixedContentsMethodList
+								.isEmpty();
 						if (!creatorForFixedContentsExist) {
-							if (isAttributeOfTemplateRootElement)
-								creatorForFixedContentsMethod = createCreatorForFixedContentsAttribute(
-										compilationUnit, myClass, cdaAttribute,
-										creatorForFixedContentsName);
-							else
-								creatorForFixedContentsMethod = createCreatorForFixedContentsElement(
-										compilationUnit, myClass, cdaElement,
-										creatorForFixedContentsName);
+							creatorForFixedContentsMethod = createCreatorForFixedContentsElement(
+									compilationUnit, myClass, cdaElement,
+									creatorForFixedContentsName);
 						} else
 							creatorForFixedContentsMethod = creatorForFixedContentsMethodList
 									.get(0);
@@ -2074,10 +2075,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 							// end of fix
 
 							if (!ignoreAttr) {
-								if (!isAttributeOfTemplateRootElement)
-									updateCreatorForFixedContentsMethod(compilationUnit,
-											creatorForFixedContentsMethod, cdaElement,
-											cdaAttribute);
+								updateCreatorForFixedContentsMethod(compilationUnit,
+										creatorForFixedContentsMethod, cdaElement, cdaAttribute);
 
 								if (i >= creatorForFixedContentsMethod.getParameters().size()) {
 									arguments.add(sb.toString());
@@ -2193,8 +2192,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 									if (isEnum) {
 										String enumName = memberType.getName();
 										statement = "super.set" + toUpperFirstChar(attrName) + "("
-												+ enumName + ".fromValue(" + "\""
-												+ cdaAttribute.getValue() + "\"" + "));";
+												+ enumName + "." + cdaAttribute.getValue() + ");";
 									} else {
 										if (cdaAttribute.getCode() != null) {
 											if (cdaAttribute.getCode().getCode() != null) {
@@ -2356,7 +2354,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 								"get" + JavaCodeGenerator.toPascalCase(fieldName),
 								publicModifier().getKeyword());
 
-						String comment = "Returns a list of vocab codes as definied in the ART-DECOR model";
+						String comment = "Returns a list of vocab codes as defined in the ART-DECOR model";
 						method.setJavadocComment(comment);
 						method.setType(methodType);
 						BlockStmt body = method.createBody();
@@ -2368,7 +2366,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			arguments.add(sb.toString());
 			sb = null;
 
-			if ((creatorForFixedContentsMethod != null)) {
+			if (creatorForFixedContentsMethod != null) {
 
 				for (String argsForThisCall : arguments) {
 
@@ -2500,6 +2498,80 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	}
 
 	/**
+	 * Creates the assignment for fixed content value.
+	 *
+	 * @param compilationUnit
+	 *            the compilation unit
+	 * @param myClass
+	 *            the my class
+	 * @param cdaElement
+	 *            the cda element
+	 */
+	private void createFixedContentValues(final CompilationUnit compilationUnit,
+										  final ClassOrInterfaceDeclaration myClass,
+										  final CdaElement cdaElement) {
+		// Initializes the content for an null-flavored consumable:
+		// hl7:consumable/hl7:manufacturedProduct/hl7:manufacturedMaterial[nullFlavor="NA"]
+		if (this.isElementAConsumableWithNaMaterial(cdaElement)) {
+			// It's the right structure, add the creator to the generated class
+			compilationUnit.addImport("org.ehealth_connector.common.hl7cdar2.POCDMT000040Consumable");
+			compilationUnit.addImport("org.ehealth_connector.common.hl7cdar2.POCDMT000040ManufacturedProduct");
+			compilationUnit.addImport("org.ehealth_connector.common.hl7cdar2.POCDMT000040Material");
+
+			MethodDeclaration method = myClass.addMethod("createHl7ConsumableNa",
+					privateModifier().getKeyword(), staticModifier().getKeyword());
+			method.setJavadocComment("Creates fixed contents for CDA Element hl7Consumable, "
+					+ "containing an hl7ManufacturedMaterial with a null flavor NA.\n");
+			method.setType("POCDMT000040Consumable");
+
+			BlockStmt body = method.createBody();
+			body.addStatement("final POCDMT000040Material material = new POCDMT000040Material();");
+			body.addStatement("material.getNullFlavor().add(\"NA\");");
+			body.addStatement("final POCDMT000040ManufacturedProduct product = new POCDMT000040ManufacturedProduct();");
+			body.addStatement("product.setManufacturedMaterial(material);");
+			body.addStatement("final POCDMT000040Consumable consumable = new POCDMT000040Consumable();");
+			body.addStatement("consumable.setManufacturedProduct(product);");
+			body.addStatement("return consumable;");
+		}
+	}
+
+	/**
+	 * <div class="en">Checks whether a CDA element is a consumable containing a NA material.</div>
+	 *
+	 * @param cdaElement
+	 * 			The CDA element to check.
+	 * @return whether the CDA element is a consumable containing a NA material or not.
+	 */
+	private boolean isElementAConsumableWithNaMaterial(final CdaElement cdaElement) {
+		if ("hl7:consumable".equals(cdaElement.getXmlName())) {
+			CdaElement manuProduct = null;
+			CdaElement manuMaterial = null;
+			String nullFlavor = null;
+			if (!cdaElement.getChildrenCdaElementList().isEmpty()) {
+				manuProduct = cdaElement.getChildrenCdaElementList().stream()
+						.filter(child -> "hl7:manufacturedProduct".equals(child.getXmlName()))
+						.findAny()
+						.orElse(null);
+			}
+			if (manuProduct != null && !manuProduct.getChildrenCdaElementList().isEmpty()) {
+				manuMaterial = manuProduct.getChildrenCdaElementList().stream()
+						.filter(child -> "hl7:manufacturedMaterial".equals(child.getXmlName()))
+						.findAny()
+						.orElse(null);
+			}
+			if (manuMaterial != null && !manuMaterial.getCdaAttributeList().isEmpty()) {
+				nullFlavor = manuMaterial.getCdaAttributeList().stream()
+						.filter(attr -> "nullFlavor".equals(attr.getName()))
+						.findAny()
+						.map(CdaAttribute::getValue)
+						.orElse(null);
+			}
+			return "NA".equals(nullFlavor);
+		}
+		return false;
+	}
+
+	/**
 	 *
 	 * <div class="en">Creates all Java Classes as files.</div>
 	 *
@@ -2544,8 +2616,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		// Save the current CDA Element as Java Class File
 		CompilationUnit compilationUnit = new CompilationUnit();
 		compilationUnit.setPackageDeclaration(packageName);
+		compilationUnit.addImport(Generated.class);
 
 		String className = JavaCodeGenerator.toPascalCase(cdaTemplate.getName());
+		if ("DosageInstructionsNonStructuredEntryContentModule".equals(className)) {
+			System.out.println("Im in1"); // QQ
+		}
 
 		boolean isSingleElementTemplate = (cdaTemplate.getCdaElementList().size() == 1);
 
@@ -2571,6 +2647,14 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				myClass.addAnnotation(createXmlRootElementAnnotation("ClinicalDocument"));
 			}
 
+			// Add @Generated annotation
+			if (!myClass.getAnnotationByClass(Generated.class).isPresent()) {
+				NormalAnnotationExpr generated = new NormalAnnotationExpr(new Name("Generated"), new NodeList<>());
+				generated.addPair("value", new StringLiteralExpr("org.ehealth_connector.codegenerator.cda.ArtDecor2JavaGenerator"));
+				generated.addPair("date", new StringLiteralExpr(LocalDate.now().toString()));
+				myClass.addAnnotation(generated);
+			}
+
 			String descTemplate = cdaTemplate.getDescription();
 			if (descTemplate == null)
 				descTemplate = "";
@@ -2588,30 +2672,32 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				descElement = "Element description: " + descElement;
 
 			myClass.setJavadocComment(descTemplate + descElement);
-			String inheritenceOf = cdaTemplate.getDataType();
+			String inheritanceOf = cdaTemplate.getDataType();
 
 			// This is for Templates used as contains:
-			if (inheritenceOf == null)
-				inheritenceOf = cdaElement.getParentCdaElement().getDataType();
+			if (inheritanceOf == null)
+				inheritanceOf = cdaElement.getParentCdaElement().getDataType();
 
-			// Inheritence does not work for AD elements.
+			// Inheritance does not work for AD elements.
 			// This is by HL7 CDA Schema design ...
-			if ("org.ehealth_connector.common.hl7cdar2.AD".equals(inheritenceOf))
-				inheritenceOf = null;
+			if ("org.ehealth_connector.common.hl7cdar2.AD".equals(inheritanceOf))
+				inheritanceOf = null;
 
-			if (inheritenceOf != null)
+			if (inheritanceOf != null)
 				myClass.setExtendedTypes(new NodeList<ClassOrInterfaceType>(
-						new ClassOrInterfaceType(null, inheritenceOf)));
+						new ClassOrInterfaceType(null, inheritanceOf)));
 
 			if (isSingleElementTemplate) {
 				createFixedAttributeValues(compilationUnit, myClass, cdaElement);
 				for (CdaElement cdaElement1 : cdaElement.getChildrenCdaElementList()) {
-					createMembers(compilationUnit, myClass, cdaElement1, (inheritenceOf == null));
+					createMembers(compilationUnit, myClass, cdaElement1, (inheritanceOf == null));
 					createFixedAttributeValues(compilationUnit, myClass, cdaElement1);
+					createFixedContentValues(compilationUnit, myClass, cdaElement1);
 				}
 			} else {
-				createMembers(compilationUnit, myClass, cdaElement, (inheritenceOf == null));
+				createMembers(compilationUnit, myClass, cdaElement, (inheritanceOf == null));
 				createFixedAttributeValues(compilationUnit, myClass, cdaElement);
+				createFixedContentValues(compilationUnit, myClass, cdaElement);
 			}
 
 			if ("org.ehealth_connector.common.hl7cdar2.POCDMT000040ClinicalDocument"
