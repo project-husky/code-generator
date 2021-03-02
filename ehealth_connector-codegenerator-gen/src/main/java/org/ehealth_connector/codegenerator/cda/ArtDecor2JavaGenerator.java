@@ -4083,10 +4083,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 								body.addStatement("retVal.setDisplayName(displayName);");
 
 							}
-						} else if ("java.lang.Boolean".contentEquals(memberType.getName()))
-							body.addStatement("retVal.set" + toUpperFirstChar(attrName)
-									+ "(Boolean.parseBoolean(" + attrName + "));");
-						else {
+						} else if ("java.lang.Boolean".contentEquals(memberType.getName())) {
+							body.addStatement(String.format(
+									"if (%s != null) {" +
+									"    retVal.set%s(Boolean.parseBoolean(%s));" +
+									"}", attrName, toUpperFirstChar(attrName), attrName));
+						} else {
 							String enumName = memberType.getName();
 							if (valueSetId != null) {
 								enumName = adjustValueSet(valueSetIndex.get(valueSetId), null);
