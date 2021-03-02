@@ -24,8 +24,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 
-import org.apache.commons.io.Charsets;
 import org.ehealth_connector.codegenerator.cda.config.ConfigurationException;
 import org.ehealth_connector.codegenerator.cda.config.ContentProfileConfig;
 import org.ehealth_connector.codegenerator.cda.config.ContentProfilePackageConfig;
@@ -81,7 +81,7 @@ public class ArtDecor2JavaManager {
 	 */
 	public ContentProfileConfig loadContentProfileConfig(InputStream inputStream)
 			throws ConfigurationException {
-		InputStreamReader reader = new InputStreamReader(inputStream, Charsets.UTF_8);
+		InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
 		ContentProfileConfig contentProfileConfig = new ContentProfileConfig();
 		try {
 			contentProfileConfig = CustomizedYaml.getCustomizedYaml().loadAs(reader,
@@ -155,7 +155,7 @@ public class ArtDecor2JavaManager {
 	 */
 	public ContentProfilePackageConfig loadContentProfilePackageConfig(InputStream inputStream)
 			throws ConfigurationException {
-		InputStreamReader reader = new InputStreamReader(inputStream, Charsets.UTF_8);
+		InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
 		ContentProfilePackageConfig contentProfilePackageConfig = new ContentProfilePackageConfig();
 		try {
 			contentProfilePackageConfig = CustomizedYaml.getCustomizedYaml().loadAs(reader,
@@ -227,7 +227,7 @@ public class ArtDecor2JavaManager {
 	 */
 	public void saveContentProfileConfig(ContentProfileConfig contentProfileConfig,
 			OutputStream outputStream) throws IOException {
-		OutputStreamWriter writer = new OutputStreamWriter(outputStream, Charsets.UTF_8);
+		OutputStreamWriter writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
 		writer.write(CustomizedYaml.getCustomizedYaml().dumpAsMap(contentProfileConfig));
 		writer.flush();
 		writer.close();
@@ -290,7 +290,7 @@ public class ArtDecor2JavaManager {
 	 */
 	public void saveContentProfilePackageConfig(ContentProfilePackageConfig config,
 			OutputStream outputStream) throws IOException {
-		OutputStreamWriter writer = new OutputStreamWriter(outputStream, Charsets.UTF_8);
+		OutputStreamWriter writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
 		writer.write(CustomizedYaml.getCustomizedYaml().dumpAsMap(config));
 		writer.flush();
 		writer.close();
