@@ -70,15 +70,15 @@ public class ArtDecor2JavaGeneratorTest {
 
 		// Initialization
 		ArtDecor2JavaGenerator artDecor2JavaGenerator = null;
-		HashMap<String, CdaTemplate> templateIndex = new HashMap<String, CdaTemplate>();
-		HashMap<String, String> valueSetIndex = new HashMap<String, String>();
-		ArrayList<CdaTemplate> templateList = new ArrayList<CdaTemplate>();
+		HashMap<String, CdaTemplate> templateIndex = new HashMap<>();
+		HashMap<String, String> valueSetIndex = new HashMap<>();
+		ArrayList<CdaTemplate> templateList = new ArrayList<>();
 		String srcFilePath;
 		String templateId;
 
 		// Common properties
 		String prefix = "cdachemed-";
-		String packageName = "org.ehealth_connector.cda.ch.emed.v096";
+		String packageName = "org.ehealth_connector.cda.ch.emed.v097";
 		String dstFilePath = Util.getCurrentDirectory()
 				+ "../../api-java/ehealth_connector-cda/ehealth_connector-cda-ch".replace("/",
 						FileUtil.getPlatformSpecificPathSeparator());
