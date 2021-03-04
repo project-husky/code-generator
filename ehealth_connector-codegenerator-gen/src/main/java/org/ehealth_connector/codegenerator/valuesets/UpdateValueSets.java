@@ -30,6 +30,7 @@ import static org.ehealth_connector.common.enums.LanguageCode.ITALIAN;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -264,7 +265,7 @@ public class UpdateValueSets {
 				fullyQualifiedClassName.lastIndexOf('.'));
 
 		String templateString = FileUtils
-				.readFileToString(new File(TEMPLATE_FILE_LOCATION), Charsets.UTF_8)
+				.readFileToString(new File(TEMPLATE_FILE_LOCATION), StandardCharsets.UTF_8)
 				.replaceAll(TEMPLATE_NAME_TO_REPLACE, className)
 				.replaceAll(TEMPLATE_PACKAGE_NAME_TO_REPLACE, packageName);
 
@@ -272,7 +273,7 @@ public class UpdateValueSets {
 
 		FileUtils.write(getSourceFileName(baseJavaFolder, fullyQualifiedClassName),
 				javaSource.getResult().get().toString(PRETTY_PRINTER_CONFIGURATION),
-				Charsets.UTF_8);
+				StandardCharsets.UTF_8);
 
 	}
 
@@ -561,7 +562,7 @@ public class UpdateValueSets {
 			enumType.setJavadocComment(javadoc.toString());
 
 			// add all members from template file
-			String templateString = FileUtils.readFileToString(new File(TEMPLATE_FILE_LOCATION))
+			String templateString = FileUtils.readFileToString(new File(TEMPLATE_FILE_LOCATION), StandardCharsets.UTF_8)
 					.replaceAll(TEMPLATE_NAME_TO_REPLACE, enumType.getNameAsString());
 			ParseResult<CompilationUnit> templateSource = javaParser.parse(templateString);
 			TypeDeclaration<?> templateType = templateSource.getResult().get().getType(0);
@@ -599,7 +600,7 @@ public class UpdateValueSets {
 				"import java.util.Map;\n");
 		classFileContent = classFileContent.replace("import javax.annotation.Generated;",
 				"import javax.annotation.Generated;\n");
-		FileUtils.write(destFile, classFileContent, Charsets.UTF_8);
+		FileUtils.write(destFile, classFileContent, StandardCharsets.UTF_8);
 
 		return destFile.getAbsoluteFile();
 	}
