@@ -52,6 +52,7 @@ import com.github.javaparser.ast.expr.StringLiteralExpr;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.Interval;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
@@ -2636,23 +2637,24 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				myClass.addAnnotation(generated);
 			}
 
-			String descTemplate = cdaTemplate.getDescription();
-			if (descTemplate == null)
-				descTemplate = "";
-			else
-				descTemplate = "Template description: " + descTemplate;
+			StringBuilder javadoc = new StringBuilder();
+			javadoc.append(String.format("%s\n\n", cdaTemplate.getName()));
+			if (cdaTemplate.getDescription() != null) {
+				javadoc.append(String.format("Template description: %s\n\n", cdaTemplate.getDescription()));
+			}
+			if (cdaElement.getDescription() != null) {
+				javadoc.append(String.format("Element description: %s\n\n", cdaElement.getDescription()));
+			}
+			javadoc.append("<!-- @formatter:off -->\n");
+			javadoc.append(String.format("Identifier: %s\n", cdaTemplate.getId()));
+			javadoc.append(String.format("Effective date: %s\n", cdaTemplate.getEffectiveDate()));
+			if (cdaTemplate.getVersionLabel() != null) {
+				javadoc.append(String.format("Version: %s\n", cdaTemplate.getVersionLabel()));
+			}
+			javadoc.append(String.format("Status: %s\n", cdaTemplate.getStatus()));
+			javadoc.append("<!-- @formatter:on -->\n");
 
-			descTemplate = "Original ART-DECOR template id: " + cdaTemplate.getId()
-					+ Util.getPlatformSpecificLineBreak() + descTemplate
-					+ Util.getPlatformSpecificLineBreak() + Util.getPlatformSpecificLineBreak();
-
-			String descElement = cdaElement.getDescription();
-			if (descElement == null)
-				descElement = "";
-			else
-				descElement = "Element description: " + descElement;
-
-			myClass.setJavadocComment(descTemplate + descElement);
+			myClass.setJavadocComment(javadoc.toString());
 			String inheritanceOf = cdaTemplate.getDataType();
 
 			// This is for Templates used as contains:
@@ -3308,6 +3310,23 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		currentCdaTemplate = new CdaTemplate();
 		currentCdaTemplate.setId(id);
 		currentCdaTemplate.setName(name);
+
+		// Iterate on attributes to find the status, effective date and version label.
+		for (int i = 0; i < ctx.getChildCount(); ++i) {
+			ParseTree child = ctx.getChild(i);
+			if (child instanceof Hl7ItsParser.AttrContext) {
+				Hl7ItsParser.AttrContext attrContext = (Hl7ItsParser.AttrContext) child;
+				String value = attrContext.AttrValue().getText();
+				value = value.substring(1, value.length() - 1);
+				if ("statusCode".equals(attrContext.Name().getText())) {
+					currentCdaTemplate.setStatus(value);
+				} else if ("effectiveDate".equals(attrContext.Name().getText())) {
+					currentCdaTemplate.setEffectiveDate(value.replace("T", " "));
+				} else if ("versionLabel".equals(attrContext.Name().getText())) {
+					currentCdaTemplate.setVersionLabel(value);
+				}
+			}
+		}
 
 		if (mainCdaTemplate == null)
 			mainCdaTemplate = currentCdaTemplate;

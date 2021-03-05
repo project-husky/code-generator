@@ -38,7 +38,6 @@ import java.util.Map;
 
 import javax.annotation.Generated;
 
-import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.ehealth_connector.common.enums.LanguageCode;
 import org.ehealth_connector.common.mdht.enums.ValueSetEnumInterface;
@@ -133,7 +132,7 @@ public class UpdateValueSets {
 	 * As published on March 3, 2020:
 	 * https://www.e-health-suisse.ch/technik-semantik/semantische-interoperabilitaet/metadaten.html
 	 */
-	private static final String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG = "SwissEprValueSetPackageConfig-20200303.yaml";
+	private static final String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG = "SwissEprValueSetPackageConfig-snapshot20210209.yaml";
 
 	/**
 	 * <div class="en">Relative path where to find the Java template text
@@ -552,12 +551,17 @@ public class UpdateValueSets {
 			// add main javadoc
 			StringBuilder javadoc = new StringBuilder();
 			javadoc.append("<!-- @formatter:off -->\n");
+			javadoc.append(String.format("Enumeration of %s values\n\n", valueSet.getName()));
 			for (LanguageCode language : LANGUAGE_CODES) {
 				String desc = valueSet.getDescription(language);
 				if (desc == null)
 					desc = "no designation found for language " + language;
 				javadoc.append(buildJavadocComment(language, desc));
 			}
+			javadoc.append(String.format("\nIdentifier: %s\n", valueSet.getIdentificator().getRoot()));
+			javadoc.append(String.format("Effective date: %1$tF %1$tR\n", valueSet.getVersion().getValidFrom()));
+			javadoc.append(String.format("Version: %s\n", valueSet.getVersion().getLabel()));
+			javadoc.append(String.format("Status: %s\n", valueSet.getStatus()));
 			javadoc.append("<!-- @formatter:on -->\n");
 			enumType.setJavadocComment(javadoc.toString());
 

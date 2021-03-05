@@ -33,13 +33,13 @@ import org.ehealth_connector.codegenerator.cda.enums.ProcessModes;
 public class CdaTemplate {
 
 	/** The list of all attributes attached to this template. */
-	private ArrayList<CdaAttribute> cdaAttributeList = new ArrayList<CdaAttribute>();
+	private ArrayList<CdaAttribute> cdaAttributeList = new ArrayList<>();
 
 	/** The list of all elements declared in this template. */
-	private ArrayList<CdaElement> cdaElementList = new ArrayList<CdaElement>();
+	private ArrayList<CdaElement> cdaElementList = new ArrayList<>();
 
 	/** The list of all templates declared in this template. */
-	private HashMap<CdaTemplate, ProcessModes> cdaTemplateList = new HashMap<CdaTemplate, ProcessModes>();
+	private HashMap<CdaTemplate, ProcessModes> cdaTemplateList = new HashMap<>();
 
 	/** The data type of this template. */
 	private String dataType;
@@ -52,6 +52,15 @@ public class CdaTemplate {
 
 	/** The name of this template. */
 	private String name;
+
+	/** The version label. */
+	private String versionLabel;
+
+	/** The effective date. */
+	private String effectiveDate;
+
+	/** The template status. */
+	private String status;
 
 	/**
 	 * <div class="en">Adds the given attribute.</div>
@@ -172,6 +181,33 @@ public class CdaTemplate {
 	}
 
 	/**
+	 * <div class="en">Gets the version label of this template.</div>
+	 *
+	 * @return the version label
+	 */
+	public String getVersionLabel() {
+		return versionLabel;
+	}
+
+	/**
+	 * <div class="en">Gets the effective date of this template.</div>
+	 *
+	 * @return the effective date
+	 */
+	public String getEffectiveDate() {
+		return effectiveDate;
+	}
+
+	/**
+	 * <div class="en">Gets the status of this template.</div>
+	 *
+	 * @return the status
+	 */
+	public String getStatus() {
+		return status;
+	}
+
+	/**
 	 * <div class="en">Sets the data type of this template.</div>
 	 *
 	 * <div class="de">Legt den Datentyp dieser Vorlage fest.</div>
@@ -217,6 +253,36 @@ public class CdaTemplate {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	/**
+	 * <div class="en">Sets the version label of this template.</div>
+	 *
+	 * @param versionLabel
+	 *            the new version label
+	 */
+	public void setVersionLabel(String versionLabel) {
+		this.versionLabel = versionLabel;
+	}
+
+	/**
+	 * <div class="en">Sets the effective date of this template.</div>
+	 *
+	 * @param effectiveDate
+	 *            the new effective date
+	 */
+	public void setEffectiveDate(String effectiveDate) {
+		this.effectiveDate = effectiveDate;
+	}
+
+	/**
+	 * <div class="en">Sets the status of this template.</div>
+	 *
+	 * @param status
+	 *            the new status
+	 */
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 }
