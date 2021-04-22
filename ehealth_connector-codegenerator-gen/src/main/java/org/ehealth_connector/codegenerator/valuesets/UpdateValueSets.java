@@ -129,10 +129,10 @@ public class UpdateValueSets {
 			.parseClassOrInterfaceType("String");
 
 	/**
-	 * As published on March 3, 2020:
+	 * As published on April 1, 2021:
 	 * https://www.e-health-suisse.ch/technik-semantik/semantische-interoperabilitaet/metadaten.html
 	 */
-	private static final String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG = "SwissEprValueSetPackageConfig-snapshot20210209.yaml";
+	private static final String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG = "SwissEprValueSetPackageConfig-20210401.yaml";
 
 	/**
 	 * <div class="en">Relative path where to find the Java template text
