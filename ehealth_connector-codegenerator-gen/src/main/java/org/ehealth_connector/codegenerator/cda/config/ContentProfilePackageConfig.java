@@ -18,7 +18,7 @@ package org.ehealth_connector.codegenerator.cda.config;
 
 import java.util.ArrayList;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 
 /**
  * <div class="en">The Class ContentProfilePackageConfig contains all relevant

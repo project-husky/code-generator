@@ -39,10 +39,10 @@ import com.github.javaparser.ast.body.TypeDeclaration;
 public final class ValueSetUtil {
 
 	/**
-	 * <div class="en">The JSONPath path to extract a value set from the JSON
-	 * definition file</div>
+	 * The class is not instantiable.
 	 */
-	public static final String VALUE_SET_BASE_PATH = "$.valueSets[0].valueSet[0]";
+	private ValueSetUtil() {
+	}
 
 	/**
 	 * <div class="en">Reads the display name from a concept object parsed from
@@ -149,7 +149,7 @@ public final class ValueSetUtil {
 	 *             When failed to load primary type from compilation unit.
 	 */
 	public static TypeDeclaration<?> loadPrimaryType(CompilationUnit javaSource)
-			throws IOException, InvalidClassException {
+			throws IOException {
 		return javaSource.getPrimaryType().orElseThrow(() -> new InvalidClassException(
 				"Failed to load primary type from compilation unit"));
 	}

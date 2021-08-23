@@ -33,14 +33,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -152,13 +147,13 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			+ "/src/main/resources/format/org.eclipse.jdt.core.prefs";
 
 	/** The log. */
-	protected final static Logger log = LoggerFactory.getLogger(ArtDecor2JavaGenerator.class);
+	protected static final Logger LOG = LoggerFactory.getLogger(ArtDecor2JavaGenerator.class);
 
 	/** Placeholder for pending actions of the Code Generator. */
-	private static String PENDING_ACTIONS = "Pending actions:";
+	private static final String PENDING_ACTIONS = "Pending actions: ";
 
 	/** Placeholder for pending actions of the Code Generator. */
-	private static String PENDING_ACTIONS_ADJUST_NAME = "Adjust name: ";
+	private static final String PENDING_ACTIONS_ADJUST_NAME = "Adjust name: ";
 
 	/**
 	 * Adds a comment to the constructor body.
@@ -168,10 +163,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	 * @param comment
 	 *            the comment
 	 */
-	private static void addBodyComment(ConstructorDeclaration constructor, String comment) {
+	private static void addBodyComment(final ConstructorDeclaration constructor, final String comment) {
 		BlockStmt body = constructor.getBody();
-		LineComment c = new LineComment(comment);
-		body.addOrphanComment(c);
+		body.addOrphanComment(new LineComment(comment));
 	}
 
 	/**
@@ -182,12 +176,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	 * @param comment
 	 *            the comment
 	 */
-	private static void addBodyComment(MethodDeclaration method, String comment) {
-		Optional<BlockStmt> bodyOpt = method.getBody();
-		if (bodyOpt.isPresent()) {
-			LineComment c = new LineComment(comment);
-			bodyOpt.get().addOrphanComment(c);
-		}
+	private static void addBodyComment(final MethodDeclaration method, final String comment) {
+		final Optional<BlockStmt> bodyOpt = method.getBody();
+		bodyOpt.ifPresent(blockStmt -> blockStmt.addOrphanComment(new LineComment(comment)));
 	}
 
 	/**
@@ -198,8 +189,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	 * @param statement
 	 *            the statement
 	 */
-	private static void addBodyStatement(ConstructorDeclaration constructor, String statement) {
-		BlockStmt body = constructor.getBody();
+	private static void addBodyStatement(final ConstructorDeclaration constructor, final String statement) {
+		final BlockStmt body = constructor.getBody();
 		body.addStatement(statement);
 
 	}
@@ -212,9 +203,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	 * @param value
 	 *            the value
 	 */
-	private static void addImport(CompilationUnit compilationUnit, String value) {
+	private static void addImport(final CompilationUnit compilationUnit, final String value) {
 		boolean isAlreadyThere = false;
-		for (ImportDeclaration item : compilationUnit.getImports()) {
+		for (final ImportDeclaration item : compilationUnit.getImports()) {
 			isAlreadyThere = (item.getNameAsString().equals(value));
 			if (isAlreadyThere)
 				break;
@@ -228,26 +219,21 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	 *
 	 * @param creatorForFixedContentsMethod
 	 *            the creator for fixed contents method
-	 * @param cdaElement
-	 *            the cda element
 	 */
-	private static void completeCreatorForFixedContentsMethod(
-			MethodDeclaration creatorForFixedContentsMethod, CdaElement cdaElement) {
-
-		Optional<BlockStmt> bodyOpt = creatorForFixedContentsMethod.getBody();
+	private static void completeCreatorForFixedContentsMethod(final MethodDeclaration creatorForFixedContentsMethod) {
+		Objects.requireNonNull(creatorForFixedContentsMethod);
+		final Optional<BlockStmt> bodyOpt = creatorForFixedContentsMethod.getBody();
 		if (bodyOpt.isPresent()) {
-			BlockStmt body = bodyOpt.get();
-
+			final BlockStmt body = bodyOpt.get();
 			// remove probably earlier added statements
-			ArrayList<Statement> statements = new ArrayList<Statement>();
-			for (Statement stmt : body.getStatements()) {
+			final ArrayList<Statement> statements = new ArrayList<>();
+			for (final Statement stmt : body.getStatements()) {
 				if ("return retVal;".equals(stmt.toString()))
 					statements.add(stmt);
 			}
-			for (Statement statement2 : statements) {
+			for (final Statement statement2 : statements) {
 				body.getStatements().remove(statement2);
 			}
-
 			body.addStatement("return retVal;");
 		}
 	}
@@ -262,40 +248,33 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	 * @param cdaElement
 	 *            the cda element
 	 */
-	private static void createAdder(CompilationUnit compilationUnit,
-			ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
-
-		String logMsg;
-
+	private static void createAdder(final CompilationUnit compilationUnit, final ClassOrInterfaceDeclaration myClass,
+									final CdaElement cdaElement) {
 		if (cdaElement.getDataType() == null)
 			throw new NotImplementedException("Type undefined for " + cdaElement.getJavaName());
 
-		MethodDeclaration method;
-
-		method = myClass.addMethod("add" + JavaCodeGenerator.toPascalCase(cdaElement.getJavaName()),
+		final MethodDeclaration method =
+				myClass.addMethod("add" + JavaCodeGenerator.toPascalCase(cdaElement.getJavaName()),
 				publicModifier().getKeyword());
 
 		String comment = "Adds a " + cdaElement.getJavaName();
-		String desc = cdaElement.getDescription();
+		final String desc = cdaElement.getDescription();
 		if (desc != null)
 			comment += Util.getPlatformSpecificLineBreak() + desc;
 
 		method.setJavadocComment(comment);
-
 		method.addAndGetParameter(cdaElement.getDataType(), "value");
 
-		String name = cdaElement.getXmlName().replace("hl7:", "").replace("pharm:", "")
-				.replace("xsi:", "");
-		@SuppressWarnings("rawtypes")
-		Class memberType = getFieldDatatype(cdaElement.getParentCdaElement().getDataType(), name);
+		String name = cdaElement.getXmlName().replace("hl7:", "").replace("pharm:", "").replace("xsi:", "");
+		Class<?> memberType = getFieldDatatype(cdaElement.getParentCdaElement().getDataType(), name);
 		boolean isField = (memberType != null);
 		if (!isField) {
 			memberType = getMethodDatatype(cdaElement.getParentCdaElement().getDataType(), name);
 		}
 
-		boolean isLocalField = (myClass.getExtendedTypes().size() == 0);
+		boolean isLocalField = myClass.getExtendedTypes().isEmpty();
 
-		BlockStmt body = method.createBody();
+		final BlockStmt body = method.createBody();
 		if (isClassCollection(memberType)) {
 			if (isLocalField) {
 				body.addStatement(name + ".add(value);");
@@ -318,10 +297,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				body.addStatement("getContent().add(new JAXBElement<En" + enPartU
 						+ ">(new QName(\"hl7:" + enPartL + "\"), En" + enPartU + ".class, obj));");
 			} else {
-				logMsg = cdaElement.getFullXmlName()
-						+ " is declared as list, but the XML Schema hosts it as single field. It is strongly recommended to correct the ART-DECOR model!";
-				log.warn(logMsg);
-				System.out.println("\nWARNING: " + logMsg);
+				LOG.warn(cdaElement.getFullXmlName()
+						+ " is declared as list, but the XML Schema hosts it as single field. It is strongly recommended to correct the ART-DECOR model!");
 				body.addStatement(name + "= value;");
 			}
 		}
@@ -335,7 +312,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	 *            the name
 	 * @return the string
 	 */
-	private static String createAdderNamePascalCase(String name) {
+	private static String createAdderNamePascalCase(final String name) {
 		return "add" + JavaCodeGenerator.toPascalCase(name);
 	}
 
@@ -343,29 +320,25 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	 * Creates the method for clearing the list of the given element to the
 	 * resulting class.
 	 *
-	 * @param compilationUnit
-	 *            the compilation unit
 	 * @param myClass
 	 *            the my class
 	 * @param cdaElement
 	 *            the cda element
 	 */
-	private static void createClearer(CompilationUnit compilationUnit,
-			ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
+	private static void createClearer(final ClassOrInterfaceDeclaration myClass, final CdaElement cdaElement) {
 
 		if (cdaElement.getDataType() == null)
 			throw new NotImplementedException("Type undefined for " + cdaElement.getJavaName());
 
 		String name = cdaElement.getXmlName().replace("hl7:", "").replace("pharm:", "")
 				.replace("xsi:", "");
-		@SuppressWarnings("rawtypes")
-		Class memberType = getFieldDatatype(cdaElement.getParentCdaElement().getDataType(), name);
+		Class<?> memberType = getFieldDatatype(cdaElement.getParentCdaElement().getDataType(), name);
 		boolean isField = (memberType != null);
 		if (!isField) {
 			memberType = getMethodDatatype(cdaElement.getParentCdaElement().getDataType(), name);
 		}
 
-		boolean isLocalField = (myClass.getExtendedTypes().size() == 0);
+		boolean isLocalField = myClass.getExtendedTypes().isEmpty();
 
 		if (isClassCollection(memberType)) {
 			MethodDeclaration method;
@@ -397,14 +370,11 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	/**
 	 * Creates the default constructor to the resulting class.
 	 *
-	 * @param compilationUnit
-	 *            the compilation unit
 	 * @param myClass
 	 *            the my class
 	 * @return the constructor declaration
 	 */
-	private static ConstructorDeclaration createDefaultConstructor(CompilationUnit compilationUnit,
-			ClassOrInterfaceDeclaration myClass) {
+	private static ConstructorDeclaration createDefaultConstructor(final ClassOrInterfaceDeclaration myClass) {
 		return myClass.addConstructor(publicModifier().getKeyword());
 	}
 
@@ -418,8 +388,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	 * @param cdaElement
 	 *            the cda element
 	 */
-	private static void createField(CompilationUnit compilationUnit,
-			ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
+	private static void createField(final CompilationUnit compilationUnit, final ClassOrInterfaceDeclaration myClass,
+									final CdaElement cdaElement) {
 
 		if (cdaElement.getDataType() == null)
 			throw new NotImplementedException("Type undefined for " + cdaElement.getJavaName());
@@ -430,8 +400,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		if ("hl7:typeId".contentEquals(cdaElement.getXmlName())) {
 			dataType = "org.ehealth_connector.common.hl7cdar2.POCDMT000040InfrastructureRootTypeId";
 		}
-		@SuppressWarnings("rawtypes")
-		Class memberType = getDeclaredFieldDatatype(cdaElement.getParentCdaElement().getDataType(),
+		Class<?> memberType = getDeclaredFieldDatatype(cdaElement.getParentCdaElement().getDataType(),
 				name);
 
 		Optional<FieldDeclaration> fieldOpt = myClass.getFieldByName(name);
@@ -469,15 +438,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	/**
 	 * Creates the method for getting the given element to the resulting class.
 	 *
-	 * @param compilationUnit
-	 *            the compilation unit
 	 * @param myClass
 	 *            the my class
 	 * @param cdaElement
 	 *            the cda element
 	 */
-	private static void createGetter(CompilationUnit compilationUnit,
-			ClassOrInterfaceDeclaration myClass, CdaElement cdaElement) {
+	private static void createGetter(final ClassOrInterfaceDeclaration myClass, final CdaElement cdaElement) {
 
 		if (cdaElement.getDataType() == null)
 			throw new NotImplementedException("Type undefined for " + cdaElement.getJavaName());
@@ -495,8 +461,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		CdaElement elForType = cdaElement.getParentCdaElement();
 		if (elForType == null)
 			elForType = cdaElement;
-		@SuppressWarnings("rawtypes")
-		Class memberType = getFieldDatatype(elForType.getDataType(), name);
+		Class<?> memberType = getFieldDatatype(elForType.getDataType(), name);
 		boolean isMethod = false;
 		if (memberType == null) {
 			memberType = getMethodDatatype(elForType.getDataType(), name);
@@ -507,7 +472,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		}
 		if (isClassCollection(memberType)) {
 
-			boolean isLocalField = (myClass.getExtendedTypes().size() == 0);
+			boolean isLocalField = myClass.getExtendedTypes().isEmpty();
 
 			if ("effectiveTime".equals(name) && !isLocalField) {
 				dataType = "org.ehealth_connector.common.hl7cdar2.SXCMTS";
@@ -521,7 +486,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		String baseName = cdaElement.getJavaName();
 		List<MethodDeclaration> existingMethods = myClass
 				.getMethodsByName(createGetterNamePascalCase(baseName));
-		if (existingMethods.size() > 0) {
+		if (!existingMethods.isEmpty()) {
 			String methodName = existingMethods.get(0).getNameAsString();
 			String methodDataType = existingMethods.get(0).getType().asString();
 			methodName = methodName
@@ -536,7 +501,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			baseName = baseName + JavaCodeGenerator.toPascalCase(getClassWithoutPackage(dataType));
 		}
 
-		if (existingMethods.size() == 0) {
+		if (existingMethods.isEmpty()) {
 			method = myClass.addMethod(createGetterNamePascalCase(baseName),
 					publicModifier().getKeyword());
 			method.setType(dataType);
@@ -937,7 +902,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 								memberType.getName() + " cannot be cast to " + dataType);
 						logMsg = cdaElement.getFullXmlName() + " :" + memberType.getName()
 								+ " cannot be cast to " + dataType;
-						log.error(logMsg);
+						LOG.error(logMsg);
 						System.out.println("\nERROR: " + logMsg);
 					}
 				} else
@@ -1291,7 +1256,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		String logMsg;
 		logMsg = "ArtDecor2JavaGenerator started";
-		log.info(logMsg);
+		LOG.info(logMsg);
 		System.out.print("===== " + logMsg + " =====\n");
 
 		File eclipseApp = null;
@@ -1308,14 +1273,14 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				eclipseApp = new File(eclipseApplicationPath);
 				if (!eclipseApp.exists()) {
 					logMsg = "Eclipse application does not exist (" + eclipseApplicationPath + ")";
-					log.error(logMsg);
+					LOG.error(logMsg);
 					System.out.println("ERROR: " + logMsg);
 					argsOk = false;
 				} else {
 					if (!eclipseApp.isFile()) {
 						logMsg = "Eclipse application is not a file (" + eclipseApplicationPath
 								+ ")";
-						log.error(logMsg);
+						LOG.error(logMsg);
 						System.out.println("ERROR: " + logMsg);
 						argsOk = false;
 					}
@@ -1327,13 +1292,13 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				orgWorkspacePath = new File(orgWorkspacePathString);
 				if (!orgWorkspacePath.exists()) {
 					logMsg = "Workspace does not exist (" + orgWorkspacePathString + ")";
-					log.error(logMsg);
+					LOG.error(logMsg);
 					System.out.println("ERROR: " + logMsg);
 					argsOk = false;
 				} else {
 					if (!orgWorkspacePath.isDirectory()) {
 						logMsg = "Workspace is not a directory (" + orgWorkspacePathString + ")";
-						log.error(logMsg);
+						LOG.error(logMsg);
 						System.out.println("ERROR: " + logMsg);
 						argsOk = false;
 					}
@@ -1345,13 +1310,13 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				configFile = new File(orgConfigPathString);
 				if (!configFile.exists()) {
 					logMsg = "Config File does not exist (" + orgConfigPathString + ")";
-					log.error(logMsg);
+					LOG.error(logMsg);
 					System.out.println("ERROR: " + logMsg);
 					argsOk = false;
 				} else {
 					if (!configFile.isFile()) {
 						logMsg = "Config is not a file (" + orgConfigPathString + ")";
-						log.error(logMsg);
+						LOG.error(logMsg);
 						System.out.println("ERROR: " + logMsg);
 						argsOk = false;
 					}
@@ -1375,7 +1340,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		} else {
 			logMsg = "ArtDecor2JavaGenerator <eclipse> <workspace> <config> <rscDir>";
-			log.warn("Invalid or no parameter given. Usage: " + logMsg);
+			LOG.warn("Invalid or no parameter given. Usage: " + logMsg);
 			System.out.println("Usage:");
 			System.out.println("");
 			System.out.println(logMsg);
@@ -1423,61 +1388,61 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		FileUtils.copyDirectoryToDirectory(orgWorkspacePath, tempWorkspacePath);
 
 		logMsg = "Settings";
-		log.info(logMsg + ":");
+		LOG.info(logMsg + ":");
 		System.out.println("----------------------------------------");
 		System.out.println(logMsg);
 		System.out.println("----------------------------------------");
 
 		logMsg = "Eclipse runtime: " + eclipseApp.getAbsolutePath();
-		log.info(logMsg);
+		LOG.info(logMsg);
 		System.out.println(logMsg);
 
 		logMsg = "Temp. workspace: " + tempWorkspacePath.getAbsolutePath();
-		log.info(logMsg);
+		LOG.info(logMsg);
 		System.out.println(logMsg);
 
 		logMsg = "Config file: " + configFile.getAbsolutePath();
-		log.info(logMsg);
+		LOG.info(logMsg);
 		System.out.println(logMsg);
 
 		// Load Config
 		logMsg = "Configuration";
-		log.info(logMsg + ":");
+		LOG.info(logMsg + ":");
 		System.out.println("----------------------------------------");
 		System.out.println(logMsg);
 		System.out.println("----------------------------------------");
 		logMsg = "Loading configuration...";
-		log.info(logMsg);
+		LOG.info(logMsg);
 		System.out.println(logMsg);
 		ArtDecor2JavaManager artDecor2JavaManager2 = new ArtDecor2JavaManager();
 		ContentProfilePackageConfig contentProfilePackageConfig = artDecor2JavaManager2
 				.loadContentProfilePackageConfig(configFile.getAbsolutePath());
 		logMsg = "Loading configuration done.";
-		log.info(logMsg);
+		LOG.info(logMsg);
 		System.out.println(logMsg);
 
 		logMsg = "Loaded configuration:";
-		log.debug(logMsg);
+		LOG.debug(logMsg);
 		System.out.println(logMsg);
 		for (ContentProfileConfig contentProfile : contentProfilePackageConfig
 				.getContentProfileConfigList()) {
 			logMsg = "- Target namespace: " + contentProfile.getTargetNamespace();
-			log.debug(logMsg);
+			LOG.debug(logMsg);
 			System.out.println(logMsg);
 			for (String templateId : contentProfile.getArtDecorDocTemplateMap().keySet()) {
 				logMsg = "  - template id: " + templateId;
-				log.debug(logMsg);
+				LOG.debug(logMsg);
 				System.out.println(logMsg);
 			}
 		}
 		logMsg = "Configuration done.";
-		log.info(logMsg);
+		LOG.info(logMsg);
 		System.out.println(logMsg);
 		System.out.println();
 
 		// Perform REST calls
 		logMsg = "Download from ART-DECOR";
-		log.info(logMsg);
+		LOG.info(logMsg);
 		System.out.println("----------------------------------------");
 		System.out.println(logMsg);
 		System.out.println("----------------------------------------");
@@ -1496,13 +1461,13 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			}
 		}
 		logMsg = "Download from ART-DECOR done.";
-		log.info(logMsg);
+		LOG.info(logMsg);
 		System.out.println(logMsg);
 		System.out.println();
 
 		// Perform Java code generation
 		logMsg = "Perform Java code generation";
-		log.info(logMsg);
+		LOG.info(logMsg);
 		System.out.println("----------------------------------------");
 		System.out.println(logMsg);
 		System.out.println("----------------------------------------");
@@ -1546,13 +1511,13 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 						+ FileUtil.getPlatformSpecificPathSeparator());
 		}
 		logMsg = "Java code generation done.";
-		log.info(logMsg);
+		LOG.info(logMsg);
 		System.out.println(logMsg);
 		System.out.println();
 
 		// Apply formatter
 		logMsg = "Applying formatter";
-		log.info(logMsg);
+		LOG.info(logMsg);
 		System.out.println("----------------------------------------");
 		System.out.println(logMsg);
 		System.out.println("----------------------------------------");
@@ -1566,7 +1531,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			}
 		}
 		logMsg = "Formatter applied.";
-		log.info(logMsg);
+		LOG.info(logMsg);
 		System.out.println(logMsg);
 		System.out.println();
 
@@ -1574,17 +1539,17 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		FileUtils.deleteDirectory(tempDownloadPath);
 
 		logMsg = "Generated Java classes and enums in the following folders:";
-		log.info(logMsg);
+		LOG.info(logMsg);
 		System.out.println(logMsg);
 		for (String path : dstPathList) {
 			logMsg = "- " + path;
-			log.info(logMsg);
+			LOG.info(logMsg);
 			System.out.println(logMsg);
 		}
 		System.out.println();
 
 		logMsg = "ArtDecor2JavaGenerator finished.";
-		log.info(logMsg);
+		LOG.info(logMsg);
 		System.out.println(logMsg);
 		System.out.print("===== ART-DECOR to Java Generator finished =====\n");
 
@@ -1674,15 +1639,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 	/** The parent for includes (used in the ANTLR4 parser). */
 	private CdaElement parentForIncludes;
-
-	/** Enable this for debug print of assembled debug information. */
-	private boolean printAssembledDebugInformation = false;
-
-	/** Enable this for debug print of data type debug information. */
-	private boolean printDataTypeDebugInformation = false;
-
-	/** Enable this for debug print of parsing information. */
-	private boolean printParsingDebugInformation = false;
 
 	/** The processing attribute (used in the ANTLR4 parser). */
 	private int processingAttribute = 0;
@@ -1993,7 +1949,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		if (cdaElement.getCdaAttributeList() != null) {
 			final ConstructorDeclaration constructor = myClass
 					.getDefaultConstructor()
-					.orElseGet(() -> createDefaultConstructor(compilationUnit, myClass));
+					.orElseGet(() -> createDefaultConstructor(myClass));
 
 			MethodDeclaration creatorForFixedContentsMethod = null;
 			final List<String> arguments = new ArrayList<>();
@@ -2385,8 +2341,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 					if (!isAttributeOfTemplateRootElement) {
 						if (!isCompleteCreatorForFixedContentsMethod(creatorForFixedContentsMethod))
-							completeCreatorForFixedContentsMethod(creatorForFixedContentsMethod,
-									cdaElement);
+							completeCreatorForFixedContentsMethod(creatorForFixedContentsMethod);
 
 						String creator = creatorForFixedContentsMethod.getNameAsString() + "("
 								+ argsForThisCall + ")";
@@ -2570,16 +2525,16 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		String logMsg;
 
 		logMsg = "Writing Java Class files:";
-		log.debug(logMsg);
+		LOG.debug(logMsg);
 		System.out.println(logMsg);
 		for (CdaTemplate cdaTemplate : templateList) {
 			logMsg = "- " + cdaTemplate.getName();
-			log.debug(logMsg);
+			LOG.debug(logMsg);
 			System.out.println(logMsg);
 			createJavaClassFile(cdaTemplate, packageName, fullDstFilePath);
 		}
 		logMsg = "Writing Java Class files done.";
-		log.debug(logMsg);
+		LOG.debug(logMsg);
 		System.out.println(logMsg);
 	}
 
@@ -2630,7 +2585,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			}
 
 			// Add @Generated annotation
-			if (!myClass.getAnnotationByClass(Generated.class).isPresent()) {
+			if (myClass.getAnnotationByClass(Generated.class).isEmpty()) {
 				NormalAnnotationExpr generated = new NormalAnnotationExpr(new Name("Generated"), new NodeList<>());
 				generated.addPair("value", new StringLiteralExpr("org.ehealth_connector.codegenerator.cda.ArtDecor2JavaGenerator"));
 				generated.addPair("date", new StringLiteralExpr(LocalDate.now().toString()));
@@ -2748,9 +2703,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				createField(compilationUnit, myClass, cdaElement);
 			if (cdaElement.getMaxOccurs() > 1) {
 				createAdder(compilationUnit, myClass, cdaElement);
-				createClearer(compilationUnit, myClass, cdaElement);
+				createClearer(myClass, cdaElement);
 			} else {
-				createGetter(compilationUnit, myClass, cdaElement);
+				createGetter(myClass, cdaElement);
 				createSetter(compilationUnit, myClass, cdaElement);
 			}
 		}
@@ -2798,17 +2753,14 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		if (templateIndex.containsKey(templateId)) {
 			logMsg = templateId + " is already known as " + templateIndex.get(templateId);
-			log.debug(logMsg);
-			if (printParsingDebugInformation)
-				System.out.println(logMsg);
+			LOG.debug(logMsg);
 			retVal = templateIndex.get(templateId);
 		}
 
 		if (retVal == null) {
 			if (initialRun) {
 				logMsg = "Processing document template: " + templateId;
-				log.debug(logMsg);
-				System.out.println(logMsg);
+				LOG.debug(logMsg);
 			}
 
 			templateIndex.put(templateId, runningTemplate);
@@ -2844,9 +2796,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 			// Parse the template
 			logMsg = "Parsing started";
-			log.debug(logMsg);
-			if (printParsingDebugInformation)
-				System.out.println(logMsg);
+			LOG.debug(logMsg);
 
 			walker.walk(this, parser.template());
 			templateIndex.remove(templateId, runningTemplate);
@@ -2854,12 +2804,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			retVal = currentCdaTemplate;
 
 			logMsg = "Parsing completed";
-			log.debug(logMsg);
-			if (printParsingDebugInformation) {
-				System.out.println(logMsg);
-				System.out.println("-----------------------------------------------------------");
-				System.out.println("");
-			}
+			LOG.debug(logMsg);
 
 			// filling missing data types
 			for (CdaElement item : mainCdaTemplate.getCdaElementList()) {
@@ -2870,9 +2815,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			if (initialRun) {
 				logMsg = "Assembled content for template " + mainCdaTemplate.getName() + " (id: "
 						+ mainCdaTemplate.getId() + ")";
-				log.debug(logMsg);
-				if (printAssembledDebugInformation)
-					System.out.println(logMsg);
+				LOG.debug(logMsg);
 
 				printCdaAttributes(" ", mainCdaTemplate.getCdaAttributeList());
 
@@ -2884,7 +2827,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		if (initialRun) {
 			logMsg = "Processing: " + templateId + " done.";
-			log.info(logMsg);
+			LOG.info(logMsg);
 			System.out.println(logMsg);
 		}
 
@@ -2935,9 +2878,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		logMsg = "Attribute: " + currentCdaAttribute.getName() + "="
 				+ currentCdaAttribute.getValue() + " (dataType: "
 				+ currentCdaAttribute.getDataType() + ")";
-		log.debug(logMsg);
-		if (printParsingDebugInformation)
-			System.out.println(logMsg);
+		LOG.debug(logMsg);
 	}
 
 	/**
@@ -3165,9 +3106,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		if (containsAttrCtx != null) {
 			ref = containsAttrCtx.AttrValue().getText().replace("\"", "");
 			logMsg = cdaElement.getJavaName() + " contains " + ref;
-			log.debug(logMsg);
-			if (printParsingDebugInformation)
-				System.out.println(logMsg);
+			LOG.debug(logMsg);
 			try {
 				if (parentForContains == null)
 					throw new RuntimeException("parent is null for contains " + ref);
@@ -3191,10 +3130,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		logMsg = "Element: " + cdaElement.getJavaName() + " (dataType: " + cdaElement.getDataType()
 				+ ")";
-		log.debug(logMsg);
-		if (printParsingDebugInformation)
-			System.out.println(logMsg);
-
+		LOG.debug(logMsg);
 	}
 
 	/**
@@ -3235,9 +3171,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			}
 
 			logMsg = "Include: " + ref;
-			log.debug(logMsg);
-			if (printParsingDebugInformation)
-				System.out.println(logMsg);
+			LOG.debug(logMsg);
 			try {
 				// Process includes
 				ArtDecor2JavaGenerator artDecor2JavaGenerator = new ArtDecor2JavaGenerator(
@@ -3255,7 +3189,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 							.addCdaTemplate(template, ProcessModes.INCLUDE);
 				else {
 					logMsg = "Uups, no child, no sibling, no parent - what else?";
-					log.error(logMsg);
+					LOG.error(logMsg);
 					System.out.println("ERROR:" + logMsg);
 				}
 
@@ -3335,9 +3269,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		logMsg = "Template: " + currentCdaTemplate.getName() + " (id: " + currentCdaTemplate.getId()
 				+ ")";
-		log.debug(logMsg);
-		if (printParsingDebugInformation)
-			System.out.println(logMsg);
+		LOG.debug(logMsg);
 	}
 
 	/**
@@ -3427,7 +3359,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 				if (!skipValueSetGeneration && !valueSetIndex.containsKey(valueSetId)) {
 					logMsg = "- downloading ValueSet " + valueSetId + " ...";
-					log.debug(logMsg);
+					LOG.debug(logMsg);
 					System.out.println(logMsg);
 
 					String sourceUrl = artDecorBaseUrl.toString() + "RetrieveValueSet?prefix="
@@ -3453,13 +3385,13 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 							| InitializationException e) {
 						String msg = "valueSet (" + valueSetId + ") cannot be downloaded: "
 								+ e.getMessage();
-						log.error(msg);
+						LOG.error(msg);
 						System.out.println("ERROR: " + msg);
 						throw new RuntimeException(msg);
 					}
 					if (valueSet != null) {
 						logMsg = "  creating enum class file ...";
-						log.debug(logMsg);
+						LOG.debug(logMsg);
 						System.out.println(logMsg);
 						String fullValueSetClassName = packageName + ".enums."
 								+ JavaCodeGenerator.toPascalCase(valueSet.getName());
@@ -3483,12 +3415,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 									+ ") cannot be created as Java enum file: " + e.getMessage());
 						}
 						logMsg = "  creating enum class file done";
-						log.debug(logMsg);
+						LOG.debug(logMsg);
 						System.out.println(logMsg);
 
 					}
 					logMsg = "- downloading ValueSet " + valueSetId + " done.";
-					log.debug(logMsg);
+					LOG.debug(logMsg);
 					System.out.println(logMsg);
 				}
 			}
@@ -3513,9 +3445,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 				logMsg = "Attribute from vocab Element: " + tempName + "="
 						+ currentCdaAttribute.getValueSetId() + " (dataType: "
 						+ currentCdaAttribute.getDataType() + ")";
-			log.debug(logMsg);
-			if (printParsingDebugInformation)
-				System.out.println(logMsg);
+			LOG.debug(logMsg);
 		}
 	}
 
@@ -3684,9 +3614,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 			}
 			logMsg = "Datatype for " + cdaElement.getFullXmlName().replace("hl7:", "")
 					.replace("pharm:", "").replace("xsi:", "") + " --> " + dataType;
-			log.debug(logMsg);
-			if (printDataTypeDebugInformation)
-				System.out.println(logMsg);
+			LOG.debug(logMsg);
 			for (CdaElement item : cdaElement.getChildrenCdaElementList()) {
 				fillDatatypesRecursive(item);
 			}
@@ -3987,22 +3915,18 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 			String logMsg;
 			logMsg = "Processing " + cdaTemplate.getName();
-			log.debug(logMsg);
-			// System.out.println(logMsg);
+			LOG.debug(logMsg);
 			for (CdaElement cdaElement : cdaTemplate.getCdaElementList()) {
 				logMsg = " " + cdaElement.getXmlName();
-				log.debug(logMsg);
-				// System.out.println(logMsg);
+				LOG.debug(logMsg);
 				for (CdaTemplate cdaTemplate2 : cdaElement.getCdaTemplateList().keySet()) {
 					ProcessModes mode = cdaElement.getCdaTemplateList().get(cdaTemplate2);
 					logMsg = " " + mode + " " + cdaTemplate2.getName();
-					log.debug(logMsg);
-					// System.out.println(logMsg);
+					LOG.debug(logMsg);
 					if (mode != ProcessModes.CONTAINS) {
 						for (CdaElement cdaElement2 : cdaTemplate2.getCdaElementList()) {
 							logMsg = "Adding " + cdaElement2.getXmlName();
-							log.debug(logMsg);
-							// System.out.println(logMsg);
+							LOG.debug(logMsg);
 							cdaElement.addChild(cdaElement2);
 						}
 					}
@@ -4033,7 +3957,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
 		Optional<Parameter> params = setterForFixedContentsMethod.getParameterByName(attrName);
 
-		if (!params.isPresent()) {
+		if (params.isEmpty()) {
 			setterForFixedContentsMethod.addAndGetParameter("String", attrName);
 			Optional<Javadoc> javaDocOpt = setterForFixedContentsMethod.getJavadoc();
 			Javadoc javadoc = javaDocOpt.get();
@@ -4066,7 +3990,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 						body.addStatement("retVal.get" + enPartU + "().add(" + attrName + ");");
 					} else
 						throw new RuntimeException(
-								name + " is neither an accesible field nor an accessible getter");
+								name + " is neither an accessible field nor an accessible getter");
 				} else {
 					if ("nullFlavor".equals(attrName)) {
 						addImport(compilationUnit, "java.util.ArrayList");

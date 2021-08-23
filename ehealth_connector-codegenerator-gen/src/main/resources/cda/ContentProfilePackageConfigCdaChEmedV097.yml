@@ -18,6 +18,6 @@ contentProfileConfigList:
     ch-pcc-: https://art-decor.org/decor/services/
     ch-pharm-: https://art-decor.org/decor/services/
     hl7chcda-: https://art-decor.org/decor/services/
-  targetDir: api-java/ehealth_connector-cda/ehealth_connector-cda-ch
-  targetNamespace: org.ehealth_connector.cda.ch.emed.v097
+  targetDir: ehealthconnector-suisse/ehealth_connector-emed/ehealth_connector-emed-cda
+  targetNamespace: org.ehealth_connector.emed.cda.models.artdecor
 description: CDA-CH-EMED - Swiss eMedication, draft version 0.97 of February 22, 2021

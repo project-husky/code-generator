@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 
 import org.apache.commons.io.FileUtils;
 import org.ehealth_connector.common.enums.LanguageCode;
@@ -69,7 +69,6 @@ import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.printer.PrettyPrinterConfiguration;
 import com.github.javaparser.printer.PrettyPrinterConfiguration.IndentType;
-import com.google.common.collect.ImmutableMap;
 
 /**
  * <div class="en">This class generates the CH-EPR value sets from the
@@ -82,7 +81,7 @@ public class UpdateValueSets {
 	/**
 	 * <div class="en">Javadoc comment prefix for the code fields.</div>
 	 */
-	private static final Map<LanguageCode, String> CODE_JAVADOC_PREFIX = ImmutableMap.of(ENGLISH,
+	private static final Map<LanguageCode, String> CODE_JAVADOC_PREFIX = Map.of(ENGLISH,
 			"Code for ", GERMAN, "Code für ", FRENCH, "Code de ", ITALIAN, "Code per ");
 
 	/**
@@ -107,7 +106,7 @@ public class UpdateValueSets {
 	private static final List<LanguageCode> LANGUAGE_CODES = asList(ENGLISH, GERMAN, FRENCH,
 			ITALIAN);
 
-	private static Logger log = LoggerFactory.getLogger(UpdateValueSets.class);
+	private static final Logger LOG = LoggerFactory.getLogger(UpdateValueSets.class);
 
 	/**
 	 * <div class="en">Java code formatter/pretty printer configuration used to
@@ -289,7 +288,7 @@ public class UpdateValueSets {
 	 */
 	public static void main(String[] args) throws Exception {
 
-		log.debug("Update value sets");
+		LOG.debug("Update value sets");
 		System.out.print("===== Update value sets =====\n");
 
 		File eclipseApp = null;
@@ -495,16 +494,11 @@ public class UpdateValueSets {
 	 * @param value
 	 *            The value to set.
 	 */
-	private static void replaceParameterValue(AnnotationExpr annotationExpr, String parameterName,
-			String value) {
+	private static void replaceParameterValue(AnnotationExpr annotationExpr, String parameterName, String value) {
 		List<Node> parameters = annotationExpr.getChildNodes();
 		for (Node parameter : parameters) {
-			if (parameter instanceof MemberValuePair) {
-				MemberValuePair memberValuePair = (MemberValuePair) parameter;
-				if (parameterName.equals(memberValuePair.getNameAsString())) {
-					memberValuePair.setValue(new StringLiteralExpr(value));
-				}
-
+			if (parameter instanceof MemberValuePair memberValuePair && parameterName.equals(memberValuePair.getNameAsString())) {
+				memberValuePair.setValue(new StringLiteralExpr(value));
 			}
 		}
 	}
@@ -583,14 +577,18 @@ public class UpdateValueSets {
 					.forEach(javaSource.getResult().get()::addImport);
 
 			// @generated
-			AnnotationExpr generated = templateType.getAnnotationByClass(Generated.class).get();
+			final AnnotationExpr generated;
+			if (primaryType.getAnnotationByClass(Generated.class).isPresent()) {
+				generated = primaryType.getAnnotationByClass(Generated.class).get();
+			} else {
+				generated = templateType.getAnnotationByClass(Generated.class).get();
+				primaryType.addAnnotation(generated);
+			}
+
 			replaceParameterValue(generated, "value",
 					"org.ehealth_connector.codegenerator.ch.valuesets.UpdateValueSets");
 			replaceParameterValue(generated, "date", LocalDate.now().toString());
-			if (primaryType.getAnnotationByClass(Generated.class).isPresent()) {
-				primaryType.getAnnotationByClass(Generated.class).get().remove();
-			}
-			primaryType.addAnnotation(generated);
+
 
 		} else {
 			throw new IllegalStateException(
@@ -602,8 +600,8 @@ public class UpdateValueSets {
 				.toString(PRETTY_PRINTER_CONFIGURATION);
 		classFileContent = classFileContent.replace("import java.util.Map;",
 				"import java.util.Map;\n");
-		classFileContent = classFileContent.replace("import javax.annotation.Generated;",
-				"import javax.annotation.Generated;\n");
+		classFileContent = classFileContent.replace("import javax.annotation.processing.Generated;",
+				"import javax.annotation.processing.Generated;\n");
 		FileUtils.write(destFile, classFileContent, StandardCharsets.UTF_8);
 
 		return destFile.getAbsoluteFile();
