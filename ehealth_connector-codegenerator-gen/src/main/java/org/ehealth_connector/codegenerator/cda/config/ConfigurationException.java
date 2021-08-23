@@ -16,6 +16,8 @@
  */
 package org.ehealth_connector.codegenerator.cda.config;
 
+import java.io.Serial;
+
 /**
  * <div class="en">Exception in case the content profile configuration is
  * invalid.</div>
@@ -26,6 +28,7 @@ package org.ehealth_connector.codegenerator.cda.config;
 public class ConfigurationException extends Exception {
 
 	/** The generated constant serialVersionUID. */
+	@Serial
 	private static final long serialVersionUID = -836975789021093767L;
 
 	/**

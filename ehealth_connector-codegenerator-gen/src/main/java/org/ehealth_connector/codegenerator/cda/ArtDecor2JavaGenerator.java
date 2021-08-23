@@ -1516,6 +1516,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		System.out.println();
 
 		// Apply formatter
+		// TODO: use https://github.com/google/google-java-format
 		logMsg = "Applying formatter";
 		LOG.info(logMsg);
 		System.out.println("----------------------------------------");
@@ -1563,7 +1564,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 	 * @param attrList
 	 *            the attr list
 	 */
-	private static void printCdaAttributes(String intend, ArrayList<CdaAttribute> attrList) {
+	private static void printCdaAttributes(String intend, List<CdaAttribute> attrList) {
 		for (CdaAttribute attr : attrList) {
 			System.out.println(intend + "  " + attr.getName() + " = " + attr.getValue()
 					+ " (dataType: " + attr.getDataType() + ")");
@@ -2320,7 +2321,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 							.contentEquals(creatorForFixedContentsMethod.getNameAsString())) {
 						if (argCountMethod == 1) {
 							CdaAttribute attr = new CdaAttribute();
-							attr.setCdaElement(cdaElement);
 							attr.setName("inversionInd");
 							updateCreatorForFixedContentsMethod(compilationUnit,
 									creatorForFixedContentsMethod, cdaElement, attr);
@@ -2854,7 +2854,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		processingVocab = 0;
 
 		currentCdaAttribute = new CdaAttribute();
-		currentCdaAttribute.setCdaElement(currentCdaElement);
 		currentCdaAttribute.setCdaTemplate(currentCdaTemplate);
 
 		NameAttrContext nameAttrCtx = ctx.nameAttr();
@@ -3116,11 +3115,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 						dstFilePath, packageName, fileHeader, artDecorPrefix, artDecorBaseUrl);
 				CdaTemplate template = artDecor2JavaGenerator.doOneTemplate(ref);
 				currentCdaElement.addCdaTemplate(template, ProcessModes.CONTAINS);
-
-				// not sure, if this is really needed. if not, remove also the
-				// template hash map property in CDATemplate
-				currentCdaTemplate.addCdaTemplate(template, ProcessModes.CONTAINS);
-
 			} catch (SaxonApiException | IOException | JAXBException | ClassNotFoundException
 					| IllegalAccessException | IllegalArgumentException | InvocationTargetException
 					| InstantiationException | NoSuchFieldException | SecurityException e) {
@@ -3192,11 +3186,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 					LOG.error(logMsg);
 					System.out.println("ERROR:" + logMsg);
 				}
-
-				// not sure, if this is really needed. if not, remove also the
-				// template hash map property in CDATemplate
-				currentCdaTemplate.addCdaTemplate(template, ProcessModes.INCLUDE);
-
 			} catch (SaxonApiException | IOException | JAXBException | ClassNotFoundException
 					| IllegalAccessException | IllegalArgumentException | InvocationTargetException
 					| InstantiationException | NoSuchFieldException | SecurityException e) {
@@ -3322,7 +3311,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 		if ((code != null) || (codeSystem != null) || (valueSetId != null)) {
 			if (currentCdaAttribute == null) {
 				currentCdaAttribute = new CdaAttribute();
-				currentCdaAttribute.setCdaElement(currentCdaElement);
 				currentCdaAttribute.setDataType("cs");
 				if (currentCdaElement == null)
 					// an attribute on top level of a template without root

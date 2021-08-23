@@ -19,6 +19,7 @@ package org.ehealth_connector.codegenerator.cda.config;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.processing.Generated;
 
@@ -43,8 +44,8 @@ public class ContentProfileConfig {
 	@Generated("SparkTools")
 	public static final class Builder {
 		private String artDecorBaseUrl;
-		private HashMap<String, String> artDecorDocTemplateMap;
-		private HashMap<String, String> artDecorProjectMap;
+		private Map<String, String> artDecorDocTemplateMap;
+		private Map<String, String> artDecorProjectMap;
 		private String targetDir;
 		private String targetNamespace;
 
@@ -95,10 +96,10 @@ public class ContentProfileConfig {
 	private String artDecorBaseUrl;
 
 	/** The art decor doc template id list. */
-	private HashMap<String, String> artDecorDocTemplateMap;
+	private Map<String, String> artDecorDocTemplateMap;
 
 	/** The art decor project references. */
-	private HashMap<String, String> artDecorProjectMap;
+	private Map<String, String> artDecorProjectMap;
 
 	/** The art decor main prefix. */
 	private String artDecorMainPrefix;
@@ -117,11 +118,8 @@ public class ContentProfileConfig {
 	 * Instantiates a new content profile config. Default constructor.
 	 */
 	public ContentProfileConfig() {
-		if (this.artDecorDocTemplateMap == null)
-			this.artDecorDocTemplateMap = new HashMap<String, String>();
-		if (this.artDecorProjectMap == null)
-			this.artDecorProjectMap = new HashMap<String, String>();
-
+		this.artDecorDocTemplateMap = new HashMap<>();
+		this.artDecorProjectMap = new HashMap<>();
 	}
 
 	@Generated("SparkTools")
@@ -144,11 +142,8 @@ public class ContentProfileConfig {
 	 *            the target dir
 	 */
 	public ContentProfileConfig(URL artDecorBaseUrl, String targetNamespace, String targetDir) {
-		if (this.artDecorDocTemplateMap == null)
-			this.artDecorDocTemplateMap = new HashMap<String, String>();
-		if (this.artDecorProjectMap == null)
-			this.artDecorProjectMap = new HashMap<String, String>();
-
+		this.artDecorDocTemplateMap = new HashMap<>();
+		this.artDecorProjectMap = new HashMap<>();
 		this.artDecorBaseUrl = artDecorBaseUrl.toString();
 		this.targetNamespace = targetNamespace;
 		this.targetDir = targetDir;
@@ -166,7 +161,7 @@ public class ContentProfileConfig {
 	 */
 	public void addProject(String prefix, String url) throws MalformedURLException {
 		if (this.artDecorProjectMap == null)
-			this.artDecorProjectMap = new HashMap<String, String>();
+			this.artDecorProjectMap = new HashMap<>();
 		addProject(prefix, new URL(url));
 	}
 
@@ -182,12 +177,12 @@ public class ContentProfileConfig {
 	 */
 	public void addProject(String prefix, URL url) {
 		if (this.artDecorProjectMap == null)
-			this.artDecorProjectMap = new HashMap<String, String>();
-		artDecorProjectMap.put(prefix, url.toString());
-		if (artDecorMainPrefix == null)
-			artDecorMainPrefix = prefix;
-		if (artDecorMainBaseUrl == null)
-			artDecorMainBaseUrl = url.toString();
+			this.artDecorProjectMap = new HashMap<>();
+		this.artDecorProjectMap.put(prefix, url.toString());
+		if (this.artDecorMainPrefix == null)
+			this.artDecorMainPrefix = prefix;
+		if (this.artDecorMainBaseUrl == null)
+			this.artDecorMainBaseUrl = url.toString();
 	}
 
 	/**
@@ -200,8 +195,8 @@ public class ContentProfileConfig {
 	 */
 	public void addTemplateId(String templateId, String effectiveTime) {
 		if (this.artDecorDocTemplateMap == null)
-			this.artDecorDocTemplateMap = new HashMap<String, String>();
-		artDecorDocTemplateMap.put(templateId, effectiveTime);
+			this.artDecorDocTemplateMap = new HashMap<>();
+		this.artDecorDocTemplateMap.put(templateId, effectiveTime);
 	}
 
 	/**
@@ -217,7 +212,7 @@ public class ContentProfileConfig {
 	 * @return the art decor base url as string
 	 */
 	public String getArtDecorBaseUrl() {
-		return artDecorBaseUrl.toString();
+		return this.artDecorBaseUrl;
 	}
 
 	/**
@@ -235,7 +230,7 @@ public class ContentProfileConfig {
 	public URL getArtDecorBaseUrlAsUrl() {
 		URL retVal = null;
 		try {
-			retVal = new URL(artDecorBaseUrl);
+			retVal = new URL(this.artDecorBaseUrl);
 		} catch (Exception e) {
 		}
 		return retVal;
@@ -250,10 +245,10 @@ public class ContentProfileConfig {
 	 *
 	 * @return the art decor doc template id
 	 */
-	public HashMap<String, String> getArtDecorDocTemplateMap() {
+	public Map<String, String> getArtDecorDocTemplateMap() {
 		if (this.artDecorDocTemplateMap == null)
-			this.artDecorDocTemplateMap = new HashMap<String, String>();
-		return artDecorDocTemplateMap;
+			this.artDecorDocTemplateMap = new HashMap<>();
+		return this.artDecorDocTemplateMap;
 	}
 
 	/**
@@ -262,7 +257,7 @@ public class ContentProfileConfig {
 	 * @return the art decor main base url
 	 */
 	public String getArtDecorMainBaseUrl() {
-		return artDecorMainBaseUrl;
+		return this.artDecorMainBaseUrl;
 	}
 
 	/**
@@ -271,7 +266,7 @@ public class ContentProfileConfig {
 	 * @return the art decor main prefix
 	 */
 	public String getArtDecorMainPrefix() {
-		return artDecorMainPrefix;
+		return this.artDecorMainPrefix;
 	}
 
 	/**
@@ -281,10 +276,10 @@ public class ContentProfileConfig {
 	 *
 	 * @return the art decor project list
 	 */
-	public HashMap<String, String> getArtDecorProjectMap() {
+	public Map<String, String> getArtDecorProjectMap() {
 		if (this.artDecorProjectMap == null)
-			this.artDecorProjectMap = new HashMap<String, String>();
-		return artDecorProjectMap;
+			this.artDecorProjectMap = new HashMap<>();
+		return this.artDecorProjectMap;
 	}
 
 	/**
@@ -297,7 +292,7 @@ public class ContentProfileConfig {
 	 * @return the target dir
 	 */
 	public String getTargetDir() {
-		return targetDir;
+		return this.targetDir;
 	}
 
 	/**
@@ -310,7 +305,7 @@ public class ContentProfileConfig {
 	 * @return the target namespace
 	 */
 	public String getTargetNamespace() {
-		return targetNamespace;
+		return this.targetNamespace;
 	}
 
 	/**
@@ -356,9 +351,9 @@ public class ContentProfileConfig {
 	 * @param artDecorDocTemplateMap
 	 *            the art decor doc template map
 	 */
-	public void setArtDecorDocTemplateMap(HashMap<String, String> artDecorDocTemplateMap) {
+	public void setArtDecorDocTemplateMap(Map<String, String> artDecorDocTemplateMap) {
 		if (this.artDecorDocTemplateMap == null)
-			this.artDecorDocTemplateMap = new HashMap<String, String>();
+			this.artDecorDocTemplateMap = new HashMap<>();
 		this.artDecorDocTemplateMap = artDecorDocTemplateMap;
 	}
 
@@ -378,9 +373,9 @@ public class ContentProfileConfig {
 	 * @param artDecorProjectMap
 	 *            the art decor project map
 	 */
-	public void setArtDecorProjectMap(HashMap<String, String> artDecorProjectMap) {
+	public void setArtDecorProjectMap(Map<String, String> artDecorProjectMap) {
 		if (this.artDecorProjectMap == null)
-			this.artDecorProjectMap = new HashMap<String, String>();
+			this.artDecorProjectMap = new HashMap<>();
 		this.artDecorProjectMap = artDecorProjectMap;
 	}
 

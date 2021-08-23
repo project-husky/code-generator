@@ -53,12 +53,11 @@
 			<artifactId>javaparser-symbol-solver-core</artifactId>
 			<version>3.14.5</version>
 		</dependency>
-
-		<!-- stuff for code formatting tests (backup for later use, only) <dependency> <groupId>org.eclipse.platform</groupId> <artifactId>org.eclipse.equinox.common</artifactId> 
-			<version>3.10.400</version> </dependency> <dependency> <groupId>org.eclipse.jdt</groupId> <artifactId>org.eclipse.jdt.core</artifactId> <version>3.18.0</version> 
-			</dependency> <dependency> <groupId>org.eclipse.platform</groupId> <artifactId>org.eclipse.core.runtime</artifactId> <version>3.15.300</version> </dependency> 
-			<dependency> <groupId>org.eclipse.platform</groupId> <artifactId>org.eclipse.core.resources</artifactId> <version>3.13.400</version> </dependency> <dependency> 
-			<groupId>org.eclipse.platform</groupId> <artifactId>org.eclipse.text</artifactId> <version>3.8.200</version> </dependency> -->
+		<dependency>
+			<groupId>com.google.googlejavaformat</groupId>
+			<artifactId>google-java-format</artifactId>
+			<version>1.11.0</version>
+		</dependency>
 
 		<!-- test stuff -->
 		<dependency>

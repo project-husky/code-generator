@@ -18,6 +18,8 @@ package org.ehealth_connector.codegenerator.cda.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.ehealth_connector.codegenerator.cda.enums.ProcessModes;
 
@@ -33,13 +35,13 @@ import org.ehealth_connector.codegenerator.cda.enums.ProcessModes;
 public class CdaElement {
 
 	/** The list of all attributes attached to this element. */
-	private ArrayList<CdaAttribute> cdaAttributeList = new ArrayList<CdaAttribute>();
+	private final List<CdaAttribute> cdaAttributeList = new ArrayList<>();
 
 	/** The list of all elements declared in this element. */
-	private ArrayList<CdaElement> childrenCdaElementList = new ArrayList<CdaElement>();
+	private final List<CdaElement> childrenCdaElementList = new ArrayList<>();
 
 	/** The list of all templates declared in this element. */
-	private HashMap<CdaTemplate, ProcessModes> cdaTemplateList = new HashMap<CdaTemplate, ProcessModes>();
+	private final Map<CdaTemplate, ProcessModes> cdaTemplateList = new HashMap<>();
 
 	/** The data type of this element. */
 	private String dataType;
@@ -127,7 +129,7 @@ public class CdaElement {
 	 *
 	 * @return the cda attribute list
 	 */
-	public ArrayList<CdaAttribute> getCdaAttributeList() {
+	public List<CdaAttribute> getCdaAttributeList() {
 		return cdaAttributeList;
 	}
 
@@ -138,7 +140,7 @@ public class CdaElement {
 	 *
 	 * @return the cda template list
 	 */
-	public HashMap<CdaTemplate, ProcessModes> getCdaTemplateList() {
+	public Map<CdaTemplate, ProcessModes> getCdaTemplateList() {
 		return cdaTemplateList;
 	}
 
@@ -149,7 +151,7 @@ public class CdaElement {
 	 *
 	 * @return the children cda element list
 	 */
-	public ArrayList<CdaElement> getChildrenCdaElementList() {
+	public List<CdaElement> getChildrenCdaElementList() {
 		return childrenCdaElementList;
 	}
 
@@ -176,27 +178,6 @@ public class CdaElement {
 	}
 
 	/**
-	 * <div class="en">Gets the full Java name of this element. This ios for
-	 * debugging purposes, only. It concatenates all eleement names in the
-	 * element tree.</div>
-	 *
-	 * <div class="de">Ruft den vollständigen Java-Namen dieses Elements ab.
-	 * Dies ist nur zu Debug-Zwecken. Es verkettet alle Elementnamen im
-	 * Elementbaum.</div>
-	 *
-	 * @return the full java name
-	 */
-	public String getFullJavaName() {
-		String retVal = getJavaName();
-		CdaElement parent = getParentCdaElement();
-		while (parent != null) {
-			retVal = parent.getJavaName() + "." + retVal;
-			parent = parent.getParentCdaElement();
-		}
-		return retVal;
-	}
-
-	/**
 	 * <div class="en">Gets the full XML name of this element. This ios for
 	 * debugging purposes, only. It concatenates all eleement names in the
 	 * element tree.</div>
@@ -208,13 +189,13 @@ public class CdaElement {
 	 * @return the full xml name
 	 */
 	public String getFullXmlName() {
-		String retVal = getXmlName();
+		final StringBuilder retVal = new StringBuilder(getXmlName());
 		CdaElement parent = getParentCdaElement();
 		while (parent != null) {
-			retVal = parent.getXmlName() + "." + retVal;
+			retVal.insert(0, parent.getXmlName() + ".");
 			parent = parent.getParentCdaElement();
 		}
-		return retVal;
+		return retVal.toString();
 	}
 
 	/**
@@ -287,30 +268,6 @@ public class CdaElement {
 	 */
 	public String getXmlName() {
 		return xmlName;
-	}
-
-	/**
-	 * <div class="en">Sets the attribute list.</div>
-	 *
-	 * <div class="de">Legt die Attributliste fest.</div>
-	 *
-	 * @param cdaAttributeList
-	 *            the new cda attribute list
-	 */
-	public void setCdaAttributeList(ArrayList<CdaAttribute> cdaAttributeList) {
-		this.cdaAttributeList = cdaAttributeList;
-	}
-
-	/**
-	 * <div class="en">Sets the element list.</div>
-	 *
-	 * <div class="de">Legt die Elementliste fest.</div>
-	 *
-	 * @param childrenCdaElementList
-	 *            the new children cda element list
-	 */
-	public void setChildrenCdaElementList(ArrayList<CdaElement> childrenCdaElementList) {
-		this.childrenCdaElementList = childrenCdaElementList;
 	}
 
 	/**

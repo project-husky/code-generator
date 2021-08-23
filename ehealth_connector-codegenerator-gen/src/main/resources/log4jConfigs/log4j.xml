@@ -40,8 +40,8 @@
 
 	<root>
 		<!-- change the behavior here, if you want to have DEBUG information in the Logs -->
-		<priority value="INFO" />
-		<appender-ref ref="LogFileAppender" />
+		<priority value="DEBUG" />
+		<appender-ref ref="STDOUT" />
 		<!-- ignore STDOUT appender in order to switch off console logging 
 		<appender-ref ref="STDOUT"/>
 		-->

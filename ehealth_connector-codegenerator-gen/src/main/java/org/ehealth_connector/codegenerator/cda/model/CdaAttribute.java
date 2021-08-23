@@ -17,6 +17,7 @@
 package org.ehealth_connector.codegenerator.cda.model;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.ehealth_connector.common.Code;
 
@@ -50,26 +51,13 @@ public class CdaAttribute {
 	private Code code = null;
 
 	/** The list code of codes of this attribute. */
-	private ArrayList<Code> codes = null;
-
-	/** The element, in which this attribute is declared. */
-	private CdaElement cdaElement;
+	private List<Code> codes = null;
 
 	/** The template, in which this attribute is declared. */
 	private CdaTemplate cdaTemplate;
 
 	/** True, if it is a vocabulary attribute. False otherwise. */
 	private boolean isVocab;
-
-	/**
-	 * <div class="en">Instantiates a new attribute. Default constructor.</div>
-	 *
-	 * <div class="de">Instanziiert ein neues Attribut.
-	 * Standardkonstruktor.</div>
-	 *
-	 */
-	public CdaAttribute() {
-	}
 
 	/**
 	 * <div class="en">Adds the code of this attribute.</div>
@@ -81,21 +69,8 @@ public class CdaAttribute {
 	 */
 	public void addCode(Code code) {
 		if (this.codes == null)
-			this.codes = new ArrayList<Code>();
+			this.codes = new ArrayList<>();
 		this.codes.add(code);
-	}
-
-	/**
-	 * <div class="en">Gets the element, in which this attribute is
-	 * declared.</div>
-	 *
-	 * <div class="de">Ruft das Element ab, in dem dieses Attribut deklariert
-	 * ist.</div>
-	 *
-	 * @return the cda element
-	 */
-	public CdaElement getCdaElement() {
-		return cdaElement;
 	}
 
 	/**
@@ -129,7 +104,7 @@ public class CdaAttribute {
 	 *
 	 * @return the code
 	 */
-	public ArrayList<Code> getCodeList() {
+	public List<Code> getCodeList() {
 		return codes;
 	}
 
@@ -199,20 +174,6 @@ public class CdaAttribute {
 	 */
 	public boolean isVocab() {
 		return isVocab;
-	}
-
-	/**
-	 * <div class="en">Sets the element, in which this attribute is
-	 * declared.</div>
-	 *
-	 * <div class="de">Legt das Element fest, in dem dieses Attribut deklariert
-	 * ist.</div>
-	 *
-	 * @param cdaElement
-	 *            the new cda element
-	 */
-	public void setCdaElement(CdaElement cdaElement) {
-		this.cdaElement = cdaElement;
 	}
 
 	/**

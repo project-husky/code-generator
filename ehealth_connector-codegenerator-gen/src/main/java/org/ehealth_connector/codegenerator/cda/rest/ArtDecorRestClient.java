@@ -23,6 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
@@ -137,7 +138,7 @@ public class ArtDecorRestClient {
 	private ArrayList<String> templates;
 
 	/** The art decor project map. */
-	private HashMap<String, String> artDecorProjectMap;
+	private Map<String, String> artDecorProjectMap;
 
 	/**
 	 * <div class="en">Constructor for an ART-DECOR REST client instance. The
@@ -152,7 +153,7 @@ public class ArtDecorRestClient {
 	 * @param baseDir
 	 *            the base dir
 	 */
-	public ArtDecorRestClient(HashMap<String, String> artDecorProjectMap, String baseDir) {
+	public ArtDecorRestClient(Map<String, String> artDecorProjectMap, String baseDir) {
 
 		if (baseDir == null)
 			throw new RuntimeException(

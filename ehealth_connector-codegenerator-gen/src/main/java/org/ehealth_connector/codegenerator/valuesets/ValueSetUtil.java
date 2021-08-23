@@ -17,16 +17,12 @@
 
 package org.ehealth_connector.codegenerator.valuesets;
 
-import static org.ehealth_connector.common.enums.LanguageCode.ENGLISH;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InvalidClassException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import org.ehealth_connector.common.enums.LanguageCode;
 import org.ehealth_connector.valueset.model.ValueSetEntry;
 
 import com.github.javaparser.ast.CompilationUnit;
@@ -45,67 +41,25 @@ public final class ValueSetUtil {
 	}
 
 	/**
-	 * <div class="en">Reads the display name from a concept object parsed from
-	 * JSON.</div>
-	 *
-	 * @param language
-	 *            The language to find the display name in.
-	 * @param concept
-	 *            The concept object parsed from JSON.
-	 * @return The display name or null if not found.
-	 * @throws IllegalStateException
-	 *             When no designation found for the provided language
-	 */
-	@SuppressWarnings("unchecked")
-	public static String getDisplayName(LanguageCode language, Map<String, Object> concept)
-			throws IllegalStateException {
-		if (language == null) {
-			return concept.get("displayName").toString();
-		}
-
-		List<Map<String, String>> designations = (List<Map<String, String>>) concept
-				.get("designation");
-
-		if (designations != null) {
-			for (Map<String, String> designation : designations) {
-				String designationLanguage = designation.get("language");
-				if (designationLanguage != null
-						&& designationLanguage.startsWith(language.getCodeValue())) {
-					return designation.get("displayName");
-				}
-			}
-
-			// nothing found for desired language, return the default for
-			// english
-			if (language == ENGLISH) {
-				return getDisplayName(null, concept);
-			}
-			throw new IllegalStateException("no designation found for language " + language);
-		} else
-			return concept.get("displayName").toString();
-	}
-
-	/**
 	 * Returns all duplicates in the list.
 	 *
 	 * @param list
 	 *            the list
 	 * @return the duplicates
 	 */
-	public static List<ValueSetEntry> getDuplicates(List<ValueSetEntry> list) {
-
-		List<ValueSetEntry> newList = new ArrayList<>();
-		List<ValueSetEntry> duplicatesList = new ArrayList<>();
+	public static List<ValueSetEntry> getDuplicates(final List<ValueSetEntry> list) {
+		final List<ValueSetEntry> newList = new ArrayList<>();
+		final List<ValueSetEntry> duplicatesList = new ArrayList<>();
 
 		// Traverse through the first list
-		for (ValueSetEntry element : list) {
+		for (final ValueSetEntry element : list) {
 
-			int level = element.getLevel();
-			String code = element.getCodeBaseType().getCode();
-			String displayName = element.getCodeBaseType().getDisplayName();
+			final int level = element.getLevel();
+			final String code = element.getCodeBaseType().getCode();
+			final String displayName = element.getCodeBaseType().getDisplayName();
 
 			// Traverse through the second list
-			for (ValueSetEntry e : newList) {
+			for (final ValueSetEntry e : newList) {
 				if ((level == e.getLevel()) && (code.equals(e.getCodeBaseType().getCode())
 						|| (displayName.equalsIgnoreCase(e.getCodeBaseType().getDisplayName())))) {
 					duplicatesList.add(element);
@@ -129,7 +83,7 @@ public final class ValueSetUtil {
 	 *            The class name including the package name.
 	 * @return A file instance of the Java file.
 	 */
-	public static File getSourceFileName(String baseJavaFolder, String fullyQualifiedClassName) {
+	public static File getSourceFileName(final String baseJavaFolder, final String fullyQualifiedClassName) {
 		return new File(new File(baseJavaFolder, "src/main/java"),
 				fullyQualifiedClassName.replaceAll("\\.", "/") + ".java").getAbsoluteFile();
 	}
@@ -161,20 +115,19 @@ public final class ValueSetUtil {
 	 *            the list
 	 * @return the duplicates
 	 */
-	public static List<ValueSetEntry> removeDuplicates(List<ValueSetEntry> list) {
-
-		List<ValueSetEntry> newList = new ArrayList<>();
+	public static List<ValueSetEntry> removeDuplicates(final List<ValueSetEntry> list) {
+		final List<ValueSetEntry> newList = new ArrayList<>();
 
 		// Traverse through the first list
-		for (ValueSetEntry element : list) {
+		for (final ValueSetEntry element : list) {
 
-			int level = element.getLevel();
-			String code = element.getCodeBaseType().getCode();
-			String displayName = element.getCodeBaseType().getDisplayName();
+			final int level = element.getLevel();
+			final String code = element.getCodeBaseType().getCode();
+			final String displayName = element.getCodeBaseType().getDisplayName();
 			boolean isDuplicate = false;
 
 			// Traverse through the second list
-			for (ValueSetEntry e : newList) {
+			for (final ValueSetEntry e : newList) {
 				if ((level == e.getLevel()) && (code.equals(e.getCodeBaseType().getCode())
 						|| (displayName.equalsIgnoreCase(e.getCodeBaseType().getDisplayName())))) {
 					isDuplicate = true;

@@ -50,12 +50,18 @@ public class JavaCodeGenerator {
 	 * The Constant DELIMITERS to be used for Pascal, camel, kebab and snake
 	 * casing.
 	 */
-	private final static char[] DELIMITERS = new char[] { '-', '_', ' ' };
+	private static final char[] DELIMITERS = new char[] { '-', '_', ' ' };
 
 	/**
 	 * The Constant REGEX to be used for Pascal, camel, kebab and snake casing.
 	 */
-	private final static String REGEX = "(?<=[a-z0-9])[A-Z0-9]";
+	private static final Pattern REGEX = Pattern.compile("(?<=[a-z0-9])[A-Z0-9]");
+
+	/**
+	 * The class is not instantiable.
+	 */
+	private JavaCodeGenerator() {
+	}
 
 	/**
 	 * <div class="en">Sorts the class content alphabetically and saves it to
@@ -71,54 +77,29 @@ public class JavaCodeGenerator {
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
-	public static void completeAndSave(CompilationUnit compilationUnit, File outFile)
-			throws IOException {
-
+	public static void completeAndSave(final CompilationUnit compilationUnit, final File outFile) throws IOException {
 		// Sort all
-		NodeList<ImportDeclaration> imports = compilationUnit.getImports();
+		final NodeList<ImportDeclaration> imports = compilationUnit.getImports();
 		imports.sort(new ImportComparator());
 
-		for (ClassOrInterfaceDeclaration cl : compilationUnit
-				.findAll(ClassOrInterfaceDeclaration.class)) {
+		for (final ClassOrInterfaceDeclaration cl : compilationUnit.findAll(ClassOrInterfaceDeclaration.class)) {
 			cl.getMembers().sort(new BodyDeclarationsComparator());
 		}
-		PrettyPrinterConfiguration ppc = new PrettyPrinterConfiguration()
-				.setIndentType(IndentType.TABS).setIndentSize(1);
-		ParseResult<CompilationUnit> javaSource = new JavaParser()
-				.parse(compilationUnit.toString());
-
-		String fileHeader = JavaCodeGenerator.getFileHeader();
-
+		final PrettyPrinterConfiguration ppc = new PrettyPrinterConfiguration().setIndentType(IndentType.TABS)
+				.setIndentSize(1);
+		final ParseResult<CompilationUnit> javaSource = new JavaParser().parse(compilationUnit.toString());
+		final String fileHeader = JavaCodeGenerator.getFileHeader();
 		String generatedClassFileContent = javaSource.getResult().get().toString(ppc);
 
-		if (!generatedClassFileContent.startsWith(fileHeader))
-			generatedClassFileContent = JavaCodeGenerator.getFileHeader() + "\r\n"
-					+ generatedClassFileContent;
+		if (!generatedClassFileContent.startsWith(fileHeader)) {
+			generatedClassFileContent = JavaCodeGenerator.getFileHeader() + "\r\n" + generatedClassFileContent;
+		}
 
 		// This is for debugging purposes, only:
 		// System.out.println(generatedClassFileContent);
 
 		FileUtils.writeStringToFile(outFile, generatedClassFileContent, Charsets.UTF_8);
 
-	}
-
-	/**
-	 * <div class="en">Sorts the class content alphabetically and saves it to
-	 * the given file.</div>
-	 *
-	 * <div class="de">Sortiert den Klasseninhalt alphabetisch und speichert ihn
-	 * in der angegebenen Datei.</div>
-	 *
-	 * @param compilationUnit
-	 *            the compilation unit
-	 * @param fileName
-	 *            the file name
-	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
-	 */
-	public static void completeAndSave(CompilationUnit compilationUnit, String fileName)
-			throws IOException {
-		completeAndSave(compilationUnit, new File(fileName));
 	}
 
 	/**
@@ -131,7 +112,7 @@ public class JavaCodeGenerator {
 	 * @return the file header
 	 */
 	public static String getFileHeader() {
-		File fileHeaderFile = new File(
+		final File fileHeaderFile = new File(
 				System.getProperty("user.dir") + "/src/main/resources/format/JavaFileHeader.txt");
 		String fileHeaderContent = "";
 
@@ -153,7 +134,7 @@ public class JavaCodeGenerator {
 	 *            the value
 	 * @return the string
 	 */
-	public static String toCamelCase(String value) {
+	public static String toCamelCase(final String value) {
 		return CaseUtils.toCamelCase(toEssentials(value), false, DELIMITERS);
 	}
 
@@ -168,10 +149,10 @@ public class JavaCodeGenerator {
 	 *            the value
 	 * @return the string
 	 */
-	private static String toEssentials(String value) {
-		String temp = value.replaceAll("[^A-Za-z0-9]", " ");
-		Matcher m = Pattern.compile(REGEX).matcher(temp);
-		StringBuffer sb = new StringBuffer();
+	private static String toEssentials(final String value) {
+		final String temp = value.replaceAll("[^A-Za-z0-9]", " ");
+		final Matcher m = REGEX.matcher(temp);
+		final StringBuilder sb = new StringBuilder();
 		while (m.find()) {
 			m.appendReplacement(sb, " " + m.group().toLowerCase());
 		}
@@ -190,9 +171,9 @@ public class JavaCodeGenerator {
 	 *            the value
 	 * @return the string
 	 */
-	public static String toKebabCase(String value) {
-		Matcher m = Pattern.compile(REGEX).matcher(toPascalCase(value));
-		StringBuffer sb = new StringBuffer();
+	public static String toKebabCase(final String value) {
+		final Matcher m = REGEX.matcher(toPascalCase(value));
+		final StringBuilder sb = new StringBuilder();
 		while (m.find()) {
 			m.appendReplacement(sb, "-" + m.group().toLowerCase());
 		}
@@ -211,7 +192,7 @@ public class JavaCodeGenerator {
 	 *            the value
 	 * @return the string
 	 */
-	public static String toKebabCaseCaps(String value) {
+	public static String toKebabCaseCaps(final String value) {
 		return toKebabCase(value).toUpperCase();
 	}
 
@@ -225,7 +206,7 @@ public class JavaCodeGenerator {
 	 *            the value
 	 * @return the string
 	 */
-	public static String toPascalCase(String value) {
+	public static String toPascalCase(final String value) {
 		return CaseUtils.toCamelCase(toEssentials(value), true, DELIMITERS);
 	}
 
@@ -240,9 +221,9 @@ public class JavaCodeGenerator {
 	 *            the value
 	 * @return the string
 	 */
-	public static String toSnakeCase(String value) {
-		Matcher m = Pattern.compile(REGEX).matcher(toPascalCase(value));
-		StringBuffer sb = new StringBuffer();
+	public static String toSnakeCase(final String value) {
+		Matcher m = REGEX.matcher(toPascalCase(value));
+		final StringBuilder sb = new StringBuilder();
 		while (m.find()) {
 			m.appendReplacement(sb, "_" + m.group().toLowerCase());
 		}
@@ -261,8 +242,7 @@ public class JavaCodeGenerator {
 	 *            the value
 	 * @return the string
 	 */
-	public static String toSnakeCaseCaps(String value) {
+	public static String toSnakeCaseCaps(final String value) {
 		return toSnakeCase(value).toUpperCase();
 	}
-
 }

@@ -45,12 +45,12 @@ public class ImportComparator implements Comparator<ImportDeclaration> {
 	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public int compare(ImportDeclaration a, ImportDeclaration b) {
-		if ((a == null) && (b == null))
+	public int compare(final ImportDeclaration a, final ImportDeclaration b) {
+		if (a == null && b == null)
 			return 0;
-		else if ((a == null) && (b != null))
+		else if (a == null)
 			return -1;
-		else if ((a != null) && (b == null))
+		else if (b == null)
 			return 1;
 		else {
 			return a.getNameAsString().compareTo(b.getNameAsString());

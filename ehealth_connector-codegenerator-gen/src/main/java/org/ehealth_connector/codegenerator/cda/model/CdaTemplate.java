@@ -17,9 +17,7 @@
 package org.ehealth_connector.codegenerator.cda.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.ehealth_connector.codegenerator.cda.enums.ProcessModes;
+import java.util.List;
 
 /**
  * <div class="en">This class contains all necessary template information to
@@ -33,13 +31,10 @@ import org.ehealth_connector.codegenerator.cda.enums.ProcessModes;
 public class CdaTemplate {
 
 	/** The list of all attributes attached to this template. */
-	private ArrayList<CdaAttribute> cdaAttributeList = new ArrayList<>();
+	private final List<CdaAttribute> cdaAttributeList = new ArrayList<>();
 
 	/** The list of all elements declared in this template. */
-	private ArrayList<CdaElement> cdaElementList = new ArrayList<>();
-
-	/** The list of all templates declared in this template. */
-	private HashMap<CdaTemplate, ProcessModes> cdaTemplateList = new HashMap<>();
+	private List<CdaElement> cdaElementList = new ArrayList<>();
 
 	/** The data type of this template. */
 	private String dataType;
@@ -84,23 +79,9 @@ public class CdaTemplate {
 	 */
 	public void addCdaElement(CdaElement cdaElement) {
 		if (cdaElementList == null) {
-			cdaElementList = new ArrayList<CdaElement>();
+			cdaElementList = new ArrayList<>();
 		}
 		cdaElementList.add(cdaElement);
-	}
-
-	/**
-	 * <div class="en">Adds the given template.</div>
-	 *
-	 * <div class="de">Fügt das angegebene Template hinzu.</div>
-	 *
-	 * @param cdaTemplate
-	 *            the cda template
-	 * @param processMode
-	 *            the process mode
-	 */
-	public void addCdaTemplate(CdaTemplate cdaTemplate, ProcessModes processMode) {
-		cdaTemplateList.put(cdaTemplate, processMode);
 	}
 
 	/**
@@ -110,7 +91,7 @@ public class CdaTemplate {
 	 *
 	 * @return the cda attribute list
 	 */
-	public ArrayList<CdaAttribute> getCdaAttributeList() {
+	public List<CdaAttribute> getCdaAttributeList() {
 		return cdaAttributeList;
 	}
 
@@ -121,19 +102,8 @@ public class CdaTemplate {
 	 *
 	 * @return the cda element list
 	 */
-	public ArrayList<CdaElement> getCdaElementList() {
+	public List<CdaElement> getCdaElementList() {
 		return cdaElementList;
-	}
-
-	/**
-	 * <div class="en">Gets the template list.</div>
-	 *
-	 * <div class="de">Ruft die Templateliste ab.</div>
-	 *
-	 * @return the cda template list
-	 */
-	public HashMap<CdaTemplate, ProcessModes> getCdaTemplateList() {
-		return cdaTemplateList;
 	}
 
 	/**
