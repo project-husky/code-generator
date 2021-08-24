@@ -17,32 +17,21 @@
 
 package org.ehealth_connector.codegenerator.valuesets;
 
-import static com.github.javaparser.ast.Modifier.finalModifier;
-import static com.github.javaparser.ast.Modifier.publicModifier;
-import static com.github.javaparser.ast.Modifier.staticModifier;
-import static java.util.Arrays.asList;
-import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.getSourceFileName;
-import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.loadPrimaryType;
-import static org.ehealth_connector.common.enums.LanguageCode.ENGLISH;
-import static org.ehealth_connector.common.enums.LanguageCode.FRENCH;
-import static org.ehealth_connector.common.enums.LanguageCode.GERMAN;
-import static org.ehealth_connector.common.enums.LanguageCode.ITALIAN;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.processing.Generated;
-
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.ParseResult;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.EnumConstantDeclaration;
+import com.github.javaparser.ast.body.EnumDeclaration;
+import com.github.javaparser.ast.body.TypeDeclaration;
+import com.github.javaparser.ast.expr.*;
+import com.github.javaparser.ast.type.Type;
+import com.github.javaparser.printer.PrettyPrinterConfiguration;
+import com.github.javaparser.printer.PrettyPrinterConfiguration.IndentType;
 import org.apache.commons.io.FileUtils;
-import org.ehealth_connector.codegenerator.java.JavaCodeFormatter;
 import org.ehealth_connector.common.enums.LanguageCode;
 import org.ehealth_connector.common.mdht.enums.ValueSetEnumInterface;
-import org.ehealth_connector.common.utils.Util;
 import org.ehealth_connector.valueset.api.ValueSetManager;
 import org.ehealth_connector.valueset.api.ValueSetPackageManager;
 import org.ehealth_connector.valueset.config.ValueSetConfig;
@@ -53,22 +42,22 @@ import org.ehealth_connector.valueset.model.ValueSetEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.javaparser.JavaParser;
-import com.github.javaparser.ParseResult;
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.EnumConstantDeclaration;
-import com.github.javaparser.ast.body.EnumDeclaration;
-import com.github.javaparser.ast.body.TypeDeclaration;
-import com.github.javaparser.ast.expr.AnnotationExpr;
-import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.MemberValuePair;
-import com.github.javaparser.ast.expr.SimpleName;
-import com.github.javaparser.ast.expr.StringLiteralExpr;
-import com.github.javaparser.ast.type.Type;
-import com.github.javaparser.printer.PrettyPrinterConfiguration;
-import com.github.javaparser.printer.PrettyPrinterConfiguration.IndentType;
+import javax.annotation.processing.Generated;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import static com.github.javaparser.ast.Modifier.*;
+import static java.util.Arrays.asList;
+import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.getSourceFileName;
+import static org.ehealth_connector.codegenerator.valuesets.ValueSetUtil.loadPrimaryType;
+import static org.ehealth_connector.common.enums.LanguageCode.*;
 
 /**
  * <div class="en">This class generates the CH-EPR value sets from the
@@ -89,7 +78,7 @@ public class UpdateValueSets {
      * generator (YAML and JSON files).</div>
      */
     private static final String CONFIG_FILE_BASE_PATH = System.getProperty("user.dir")
-            + "/src/main/resources/valuesets/";
+            + "/ehealth_connector-codegenerator-gen/src/main/resources/valuesets/";
 
     /**
      * <div class="en">List of all languages that should be used to generate
@@ -104,13 +93,7 @@ public class UpdateValueSets {
      * write Java code.</div>
      */
     private static final PrettyPrinterConfiguration PRETTY_PRINTER_CONFIGURATION = new PrettyPrinterConfiguration()
-            .setIndentType(IndentType.TABS).setIndentSize(1);
-
-    /**
-     * <div class="en">Relative path to the root of the maven project
-     * structure.</div>
-     */
-    private static final String PROJECT_ROOT_RELATIVE_PATH = "../../";
+            .setIndentType(IndentType.TABS).setIndentSize(1).setOrderImports(true);
 
     /**
      * <div class="en">Shortcut for the internal type of a string.</div>
@@ -127,7 +110,8 @@ public class UpdateValueSets {
      * <div class="en">Relative path where to find the Java template text
      * file.</div>
      */
-    private static final String TEMPLATE_FILE_LOCATION = "src/main/resources/valuesets/template.java.txt";
+    private static final String TEMPLATE_FILE_LOCATION = "ehealth_connector-codegenerator-gen/src/main/resources" +
+            "/format/template.java.txt";
 
     /**
      * <div class="en">Class name in the template that will be replaced with the
@@ -148,46 +132,40 @@ public class UpdateValueSets {
      * @param valueSet The concepts from the value set definition file.
      */
     private static void addEnumElements(EnumDeclaration enumType, ValueSet valueSet) {
-
-        List<ValueSetEntry> list;
-        list = valueSet.getSortedEntryListRecursive();
-
-        List<ValueSetEntry> duplicates = ValueSetUtil.getDuplicates(list);
-        if (duplicates.size() > 0) {
-            String temp = "";
-            for (ValueSetEntry valueSetEntry : duplicates) {
-                if (!"".equals(temp))
-                    temp = temp + ", ";
-                temp = temp + valueSetEntry.getCodeBaseType().getDisplayName();
+        List<ValueSetEntry> list = valueSet.getSortedEntryListRecursive();
+        final List<ValueSetEntry> duplicates = ValueSetUtil.getDuplicates(list);
+        if (!duplicates.isEmpty()) {
+            final StringBuilder temp = new StringBuilder();
+            for (final ValueSetEntry valueSetEntry : duplicates) {
+                if (!temp.isEmpty()) {
+                    temp.append(", ");
+                }
+                temp.append(valueSetEntry.getCodeBaseType().getDisplayName());
             }
-            System.out.println("WARNING: ValueSet '" + valueSet.getDisplayName()
-                    + "' contains duplicate(s): " + temp);
+            LOG.warn("WARNING: ValueSet '{}' contains duplicate(s): {}", valueSet.getDisplayName(), temp);
             list = ValueSetUtil.removeDuplicates(list);
         }
 
-        for (ValueSetEntry valueSetEntry : list) {
-            String enumConstantName = valueSetEntry.getEnumConstantName();
-            String code = valueSetEntry.getCodeBaseType().getCode();
-            String codeSystem = valueSetEntry.getCodeBaseType().getCodeSystem();
-            String displayName = valueSetEntry.getCodeBaseType().getDisplayName();
+        for (final ValueSetEntry valueSetEntry : list) {
+            final String enumConstantName = valueSetEntry.getEnumConstantName();
+            final String code = valueSetEntry.getCodeBaseType().getCode();
+            final String codeSystem = valueSetEntry.getCodeBaseType().getCodeSystem();
+            final String displayName = valueSetEntry.getCodeBaseType().getDisplayName();
 
-            NodeList<Expression> values = new NodeList<>();
-            StringBuilder javadocEnum = new StringBuilder();
-            StringBuilder javadocConstant = new StringBuilder();
+            final NodeList<Expression> values = new NodeList<>();
+            final StringBuilder javadocEnum = new StringBuilder();
+            final StringBuilder javadocConstant = new StringBuilder();
 
             values.add(new StringLiteralExpr(code));
             values.add(new StringLiteralExpr(codeSystem));
             values.add(new StringLiteralExpr(displayName));
 
             // build comments per language
-            javadocEnum.append("<!-- @formatter:off -->\n");
-            javadocConstant.append("<!-- @formatter:off -->\n");
-            for (LanguageCode language : LANGUAGE_CODES) {
-                String designation = valueSetEntry.getDesignation(language,
-                        DesignationType.PREFERRED);
+            for (final LanguageCode language : LANGUAGE_CODES) {
+                String designation = valueSetEntry.getDesignation(language, DesignationType.PREFERRED);
                 if (designation == null)
                     designation = valueSetEntry.getDesignation(language, DesignationType.PREFERRED);
-                if ((designation == null) && (ENGLISH.equals(language)))
+                if (designation == null && ENGLISH == language)
                     designation = valueSetEntry.getCodeBaseType().getDisplayName();
                 if (designation != null) {
                     values.add(new StringLiteralExpr(designation));
@@ -198,11 +176,9 @@ public class UpdateValueSets {
                     values.add(new StringLiteralExpr("TOTRANSLATE"));
 
             }
-            javadocEnum.append("<!-- @formatter:on -->\n");
-            javadocConstant.append("<!-- @formatter:on -->\n");
 
             // the enum constant with all values
-            EnumConstantDeclaration enumConstant = new EnumConstantDeclaration(new NodeList<>(),
+            final EnumConstantDeclaration enumConstant = new EnumConstantDeclaration(new NodeList<>(),
                     new SimpleName(enumConstantName), new NodeList<>(values), new NodeList<>());
             enumConstant.setJavadocComment(javadocEnum.toString());
             enumType.addEntry(enumConstant);
@@ -212,7 +188,6 @@ public class UpdateValueSets {
                             new StringLiteralExpr(code), publicModifier().getKeyword(),
                             staticModifier().getKeyword(), finalModifier().getKeyword())
                     .setJavadocComment(javadocConstant.toString());
-
         }
     }
 
@@ -225,8 +200,8 @@ public class UpdateValueSets {
      * @return The HTML snippet of the comment.
      */
     private static String buildJavadocComment(LanguageCode language, String comment) {
-        return "<div class=\"" + language.getCodeValue().substring(0, 2) + "\">" + comment
-                + "</div>\n";
+        return language.getCodeValue().substring(0, 2).toUpperCase(Locale.ROOT) + ": " + comment
+                + "<br>\n";
     }
 
     /**
@@ -259,22 +234,21 @@ public class UpdateValueSets {
     }
 
     /**
-     * <div class="en">The main entry for the value set generator.</div>
+     * The main entry for the value set generator.
      *
-     * @param args command line arguments: 1. Full path and filename to eclipse; 2. Full path to the workspace
-     *             application; 3. Full path to any rscDir directory.
-     * @throws Exception When any operation fails.
+     * @param args command line arguments. A single value is expected.
      */
-    public static void main(String[] args) throws Exception {
-        LOG.debug("Update value sets");
+    public static void main(String[] args) {
+        LOG.info("Update value sets");
 
         if (args.length != 1) {
-            System.out.println("Usage:");
-            System.out.println("");
-            System.out.println("UpdateValueSets <javaSourceDir>");
-            System.out.println("");
-            System.out.println(
-                    "  javaSourceDir: This parameter must be the full path to any javaSourceDir (e.g. .../demo-java/rsc)");
+            LOG.info("Usage:");
+            LOG.info("UpdateValueSets <javaSourceDir>");
+            LOG.info("  javaSourceDir: This parameter must be the full path to the eHealthConnector-Suisse project " +
+                    "directory (e.g. D:/Java/ehealtconnector-suisse)");
+            LOG.info("");
+            LOG.info("Example:");
+            LOG.info("UpdateValueSets D:/Java/ehealtconnector-suisse");
             return;
         }
         final String javaSourceDirString = args[0];
@@ -283,12 +257,12 @@ public class UpdateValueSets {
         if (javaSourceDirString != null) {
             javaSourceDir = new File(javaSourceDirString);
             if (!javaSourceDir.exists()) {
-                LOG.error("ERROR: Java source directory does not exist (" + javaSourceDirString + ")");
+                LOG.error("ERROR: Java source directory does not exist ({})", javaSourceDirString);
                 return;
             } else {
                 if (!javaSourceDir.isDirectory()) {
                     LOG.error(
-                            "ERROR: Java source is not a directory (" + javaSourceDirString + ")");
+                            "ERROR: Java source is not a directory ({})", javaSourceDirString);
                     return;
                 }
             }
@@ -296,61 +270,40 @@ public class UpdateValueSets {
             LOG.error("ERROR: Java source directory is null");
             return;
         }
-        Util.initLogger(javaSourceDir.getAbsolutePath(), UpdateValueSets.class);
 
-        System.out.println("Config base dir: " + new File(CONFIG_FILE_BASE_PATH).getAbsolutePath());
-        System.out.println("javaSourceDir: " + javaSourceDir.getAbsolutePath());
+        LOG.info("Config base dir: {}", new File(CONFIG_FILE_BASE_PATH).getAbsolutePath());
+        LOG.info("Java source dir: {}", javaSourceDir.getAbsolutePath());
 
-        String fnPackageConfig = CONFIG_FILE_BASE_PATH + SWISS_EPR_VALUE_SET_PACKAGE_CONFIG;
-        // String fnPackageConfig = CONFIG_FILE_BASE_PATH +
-        // ART_DECOR_VALUE_SET_PACKAGE_CONFIG;
+        final String fnPackageConfig = CONFIG_FILE_BASE_PATH + SWISS_EPR_VALUE_SET_PACKAGE_CONFIG;
 
-        ValueSetPackageManager valueSetPackageManager;
-        valueSetPackageManager = new ValueSetPackageManager();
-        ValueSetPackageConfig valueSetPackageConfig = valueSetPackageManager
-                .loadValueSetPackageConfig(fnPackageConfig);
+        try {
+            final ValueSetPackageManager valueSetPackageManager = new ValueSetPackageManager();
+            final ValueSetPackageConfig valueSetPackageConfig =
+                    valueSetPackageManager.loadValueSetPackageConfig(fnPackageConfig);
 
-        ValueSetManager valueSetManager = new ValueSetManager();
-        for (ValueSetConfig valueSetConfig : valueSetPackageConfig.getValueSetConfigList()) {
-            System.out.print("Processing enum: " + valueSetConfig.getClassName() + "\n");
+            final ValueSetManager valueSetManager = new ValueSetManager();
+            for (ValueSetConfig valueSetConfig : valueSetPackageConfig.getValueSetConfigList()) {
+                LOG.debug("Processing enum: {}", valueSetConfig.getClassName());
 
-            // This is for debug purposes, only:
-            // if ("org.ehealth_connector.security.ch.epr.enums.PurposeOfUse"
-            // .equals(valueSetConfig.getClassName()))
-            // System.out.print("---> Let me break, here\n");
+                LOG.debug("Downloading value set from {}", valueSetConfig.getSourceUrl());
+                final ValueSet valueSet = valueSetManager.downloadValueSet(valueSetConfig);
 
-            System.out.print("- downloading ValueSet...");
-            ValueSet valueSet = valueSetManager.downloadValueSet(valueSetConfig);
-            System.out.print("done.\n");
+                LOG.debug("Creating Java class file");
+                final String baseJavaFolder = javaSourceDir.getAbsolutePath() + "/" + valueSetConfig.getProjectFolder();
+                final String fullyQualifiedClassName = valueSetConfig.getClassName();
 
-            System.out.print("- creating Java Class...");
-            String baseJavaFolder = PROJECT_ROOT_RELATIVE_PATH + "/"
-                    + valueSetConfig.getProjectFolder();
-            String fullyQualifiedclassName = valueSetConfig.getClassName();
+                // delete existing class file
+                Files.delete(getSourceFileName(baseJavaFolder, fullyQualifiedClassName).toPath());
 
-            // This is for debug purposes, only:
-            // valueSetManager.saveValueSet(valueSet, "/temp/" +
-            // valueSet.getName() + ".yaml");
-
-            // delete existing class file
-            getSourceFileName(baseJavaFolder, fullyQualifiedclassName).delete();
-
-            // create the class file
-            createEnumClassFromTemplate(baseJavaFolder, fullyQualifiedclassName);
-
-            File classFile = updateEnumClass(valueSet.getIdentificator().getRoot(),
-                    valueSet.getName(), baseJavaFolder, valueSetConfig.getClassName(), valueSet);
-
-            // Apply formatter
-            try {
-                JavaCodeFormatter.formatFile(classFile);
-            } catch (final Exception e) {
-                LOG.error("Error while formatting file {}", classFile.getAbsolutePath());
-                LOG.error("Exception thrown: ", e);
+                // create the class file
+                createEnumClassFromTemplate(baseJavaFolder, fullyQualifiedClassName);
+                updateEnumClass(valueSet.getIdentificator().getRoot(), valueSet.getName(), baseJavaFolder,
+                        valueSetConfig.getClassName(), valueSet);
             }
+            LOG.info("Processed {} enums.", valueSetPackageConfig.getValueSetConfigList().size());
+        } catch (final Exception e) {
+            LOG.error("Uncaught exception: ", e);
         }
-
-        LOG.info("Processed " + valueSetPackageConfig.getValueSetConfigList().size() + " enums.");
     }
 
     /**
@@ -417,13 +370,13 @@ public class UpdateValueSets {
     public static File updateEnumClass(String id, String valueSetName, String baseJavaFolder,
                                        String className, ValueSet valueSet) throws IOException, IllegalStateException {
 
-        JavaParser javaParser = new JavaParser();
-        ParseResult<CompilationUnit> javaSource = javaParser
+        final JavaParser javaParser = new JavaParser();
+        final ParseResult<CompilationUnit> javaSource = javaParser
                 .parse(getSourceFileName(baseJavaFolder, className));
-        TypeDeclaration<?> primaryType = loadPrimaryType(javaSource.getResult().get());
+        final TypeDeclaration<?> primaryType = loadPrimaryType(javaSource.getResult().get());
 
         if (primaryType.isTopLevelType() && primaryType.isEnumDeclaration()) {
-            EnumDeclaration enumType = ((EnumDeclaration) primaryType);
+            final EnumDeclaration enumType = ((EnumDeclaration) primaryType);
 
             // clear content and add all enum elements
             removeEverything(enumType);
@@ -432,27 +385,29 @@ public class UpdateValueSets {
             addEnumElements(enumType, valueSet);
 
             // add main javadoc
-            StringBuilder javadoc = new StringBuilder();
-            javadoc.append("<!-- @formatter:off -->\n");
-            javadoc.append(String.format("Enumeration of %s values\n\n", valueSet.getName()));
-            for (LanguageCode language : LANGUAGE_CODES) {
+            final StringBuilder javadoc = new StringBuilder();
+            javadoc.append(String.format("Enumeration of %s values\n", valueSet.getName()));
+            javadoc.append("<p>\n");
+            for (final LanguageCode language : LANGUAGE_CODES) {
                 String desc = valueSet.getDescription(language);
-                if (desc == null)
-                    desc = "no designation found for language " + language;
+                if (desc == null) {
+                    desc = "No designation found.";
+                }
                 javadoc.append(buildJavadocComment(language, desc));
             }
-            javadoc.append(String.format("\nIdentifier: %s\n", valueSet.getIdentificator().getRoot()));
-            javadoc.append(String.format("Effective date: %1$tF %1$tR\n", valueSet.getVersion().getValidFrom()));
-            javadoc.append(String.format("Version: %s\n", valueSet.getVersion().getLabel()));
+            javadoc.append("<p>\n");
+            javadoc.append(String.format("Identifier: %s<br>\n", valueSet.getIdentificator().getRoot()));
+            javadoc.append(String.format("Effective date: %1$tF %1$tR<br>\n", valueSet.getVersion().getValidFrom()));
+            javadoc.append(String.format("Version: %s<br>\n", valueSet.getVersion().getLabel()));
             javadoc.append(String.format("Status: %s\n", valueSet.getStatus()));
-            javadoc.append("<!-- @formatter:on -->\n");
             enumType.setJavadocComment(javadoc.toString());
 
             // add all members from template file
-            String templateString = FileUtils.readFileToString(new File(TEMPLATE_FILE_LOCATION), StandardCharsets.UTF_8)
+            final String templateString = FileUtils.readFileToString(new File(TEMPLATE_FILE_LOCATION),
+                            StandardCharsets.UTF_8)
                     .replaceAll(TEMPLATE_NAME_TO_REPLACE, enumType.getNameAsString());
-            ParseResult<CompilationUnit> templateSource = javaParser.parse(templateString);
-            TypeDeclaration<?> templateType = templateSource.getResult().get().getType(0);
+            final ParseResult<CompilationUnit> templateSource = javaParser.parse(templateString);
+            final TypeDeclaration<?> templateType = templateSource.getResult().get().getType(0);
             templateType.getMembers().forEach(enumType::addMember);
 
             // replace constant values and imports
@@ -460,12 +415,10 @@ public class UpdateValueSets {
             replaceConstantValue(enumType, "VALUE_SET_NAME", valueSetName);
 
             // replace imports with those found in the template
-            new ArrayList<>(javaSource.getResult().get().getImports())
-                    .forEach(javaSource.getResult().get()::remove);
-            templateSource.getResult().get().getImports()
-                    .forEach(javaSource.getResult().get()::addImport);
+            new ArrayList<>(javaSource.getResult().get().getImports()).forEach(javaSource.getResult().get()::remove);
+            templateSource.getResult().get().getImports().forEach(javaSource.getResult().get()::addImport);
 
-            // @generated
+            // @generated annotation
             final AnnotationExpr generated;
             if (primaryType.getAnnotationByClass(Generated.class).isPresent()) {
                 generated = primaryType.getAnnotationByClass(Generated.class).get();
@@ -477,18 +430,13 @@ public class UpdateValueSets {
             replaceParameterValue(generated, "value",
                     "org.ehealth_connector.codegenerator.ch.valuesets.UpdateValueSets");
             replaceParameterValue(generated, "date", LocalDate.now().toString());
-
-
         } else {
-            throw new IllegalStateException(
-                    "Class with name " + className + " does not declare an Enum type.");
+            throw new IllegalStateException("Class with name " + className + " does not declare an Enum type.");
         }
 
-        File destFile = getSourceFileName(baseJavaFolder, className);
-        String classFileContent = javaSource.getResult().get()
-                .toString(PRETTY_PRINTER_CONFIGURATION);
-        classFileContent = classFileContent.replace("import java.util.Map;",
-                "import java.util.Map;\n");
+        final File destFile = getSourceFileName(baseJavaFolder, className);
+        String classFileContent = javaSource.getResult().get().toString(PRETTY_PRINTER_CONFIGURATION);
+        classFileContent = classFileContent.replace("import java.util.Map;", "import java.util.Map;\n");
         classFileContent = classFileContent.replace("import javax.annotation.processing.Generated;",
                 "import javax.annotation.processing.Generated;\n");
         FileUtils.write(destFile, classFileContent, StandardCharsets.UTF_8);

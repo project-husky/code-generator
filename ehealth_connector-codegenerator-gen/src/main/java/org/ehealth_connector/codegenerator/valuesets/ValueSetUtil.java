@@ -34,111 +34,111 @@ import com.github.javaparser.ast.body.TypeDeclaration;
  */
 public final class ValueSetUtil {
 
-	/**
-	 * The class is not instantiable.
-	 */
-	private ValueSetUtil() {
-	}
+    /**
+     * The class is not instantiable.
+     */
+    private ValueSetUtil() {
+    }
 
-	/**
-	 * Returns all duplicates in the list.
-	 *
-	 * @param list
-	 *            the list
-	 * @return the duplicates
-	 */
-	public static List<ValueSetEntry> getDuplicates(final List<ValueSetEntry> list) {
-		final List<ValueSetEntry> newList = new ArrayList<>();
-		final List<ValueSetEntry> duplicatesList = new ArrayList<>();
+    /**
+     * Returns all duplicates in the list.
+     *
+     * @param list
+     *            the list
+     * @return the duplicates
+     */
+    public static List<ValueSetEntry> getDuplicates(final List<ValueSetEntry> list) {
+        final List<ValueSetEntry> newList = new ArrayList<>();
+        final List<ValueSetEntry> duplicatesList = new ArrayList<>();
 
-		// Traverse through the first list
-		for (final ValueSetEntry element : list) {
+        // Traverse through the first list
+        for (final ValueSetEntry element : list) {
 
-			final int level = element.getLevel();
-			final String code = element.getCodeBaseType().getCode();
-			final String displayName = element.getCodeBaseType().getDisplayName();
+            final int level = element.getLevel();
+            final String code = element.getCodeBaseType().getCode();
+            final String displayName = element.getCodeBaseType().getDisplayName();
 
-			// Traverse through the second list
-			for (final ValueSetEntry e : newList) {
-				if ((level == e.getLevel()) && (code.equals(e.getCodeBaseType().getCode())
-						|| (displayName.equalsIgnoreCase(e.getCodeBaseType().getDisplayName())))) {
-					duplicatesList.add(element);
-					break;
-				}
-			}
+            // Traverse through the second list
+            for (final ValueSetEntry e : newList) {
+                if ((level == e.getLevel()) && (code.equals(e.getCodeBaseType().getCode())
+                        || (displayName.equalsIgnoreCase(e.getCodeBaseType().getDisplayName())))) {
+                    duplicatesList.add(element);
+                    break;
+                }
+            }
 
-			newList.add(element);
-		}
+            newList.add(element);
+        }
 
-		return duplicatesList;
-	}
+        return duplicatesList;
+    }
 
-	/**
-	 * <div class="en">Create a file instance to a Java source file by its fully
-	 * qualified class name and a base folder.</div>
-	 *
-	 * @param baseJavaFolder
-	 *            The base source folder the Java code resides in.
-	 * @param fullyQualifiedClassName
-	 *            The class name including the package name.
-	 * @return A file instance of the Java file.
-	 */
-	public static File getSourceFileName(final String baseJavaFolder, final String fullyQualifiedClassName) {
-		return new File(new File(baseJavaFolder, "src/main/java"),
-				fullyQualifiedClassName.replaceAll("\\.", "/") + ".java").getAbsoluteFile();
-	}
+    /**
+     * <div class="en">Create a file instance to a Java source file by its fully
+     * qualified class name and a base folder.</div>
+     *
+     * @param baseJavaFolder
+     *            The base source folder the Java code resides in.
+     * @param fullyQualifiedClassName
+     *            The class name including the package name.
+     * @return A file instance of the Java file.
+     */
+    public static File getSourceFileName(final String baseJavaFolder, final String fullyQualifiedClassName) {
+        return new File(new File(baseJavaFolder, "src/main/java"),
+                fullyQualifiedClassName.replaceAll("\\.", "/") + ".java").getAbsoluteFile();
+    }
 
-	/**
-	 * <div class="en">Retrieves the primary type from a compilation unit.</div>
-	 *
-	 * @param javaSource
-	 *            Parsed AST representation of a Java file.
-	 * @return Parsed AST representation of the primary type found in the source
-	 *         file.
-	 * @throws IOException
-	 *             If there is no primary type found or the Compilation unit was
-	 *             not loaded from a file and the primary type could therefore
-	 *             not be established.
-	 * @throws InvalidClassException
-	 *             When failed to load primary type from compilation unit.
-	 */
-	public static TypeDeclaration<?> loadPrimaryType(CompilationUnit javaSource)
-			throws IOException {
-		return javaSource.getPrimaryType().orElseThrow(() -> new InvalidClassException(
-				"Failed to load primary type from compilation unit"));
-	}
+    /**
+     * <div class="en">Retrieves the primary type from a compilation unit.</div>
+     *
+     * @param javaSource
+     *            Parsed AST representation of a Java file.
+     * @return Parsed AST representation of the primary type found in the source
+     *         file.
+     * @throws IOException
+     *             If there is no primary type found or the Compilation unit was
+     *             not loaded from a file and the primary type could therefore
+     *             not be established.
+     * @throws InvalidClassException
+     *             When failed to load primary type from compilation unit.
+     */
+    public static TypeDeclaration<?> loadPrimaryType(CompilationUnit javaSource)
+            throws IOException {
+        return javaSource.getPrimaryType().orElseThrow(() -> new InvalidClassException(
+                "Failed to load primary type from compilation unit"));
+    }
 
-	/**
-	 * Removes all duplicates from the list.
-	 *
-	 * @param list
-	 *            the list
-	 * @return the duplicates
-	 */
-	public static List<ValueSetEntry> removeDuplicates(final List<ValueSetEntry> list) {
-		final List<ValueSetEntry> newList = new ArrayList<>();
+    /**
+     * Removes all duplicates from the list.
+     *
+     * @param list
+     *            the list
+     * @return the duplicates
+     */
+    public static List<ValueSetEntry> removeDuplicates(final List<ValueSetEntry> list) {
+        final List<ValueSetEntry> newList = new ArrayList<>();
 
-		// Traverse through the first list
-		for (final ValueSetEntry element : list) {
+        // Traverse through the first list
+        for (final ValueSetEntry element : list) {
 
-			final int level = element.getLevel();
-			final String code = element.getCodeBaseType().getCode();
-			final String displayName = element.getCodeBaseType().getDisplayName();
-			boolean isDuplicate = false;
+            final int level = element.getLevel();
+            final String code = element.getCodeBaseType().getCode();
+            final String displayName = element.getCodeBaseType().getDisplayName();
+            boolean isDuplicate = false;
 
-			// Traverse through the second list
-			for (final ValueSetEntry e : newList) {
-				if ((level == e.getLevel()) && (code.equals(e.getCodeBaseType().getCode())
-						|| (displayName.equalsIgnoreCase(e.getCodeBaseType().getDisplayName())))) {
-					isDuplicate = true;
-					break;
-				}
-			}
+            // Traverse through the second list
+            for (final ValueSetEntry e : newList) {
+                if ((level == e.getLevel()) && (code.equals(e.getCodeBaseType().getCode())
+                        || (displayName.equalsIgnoreCase(e.getCodeBaseType().getDisplayName())))) {
+                    isDuplicate = true;
+                    break;
+                }
+            }
 
-			if (!isDuplicate)
-				newList.add(element);
-		}
+            if (!isDuplicate)
+                newList.add(element);
+        }
 
-		return newList;
-	}
+        return newList;
+    }
 }
