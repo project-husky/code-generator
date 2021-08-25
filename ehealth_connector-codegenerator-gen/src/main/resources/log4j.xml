@@ -9,6 +9,9 @@
 	<category name="org.apache.log4j.xml">
 		<priority value="info" />
 	</category>
+	<category name="httpclient">
+		<level value="info" />
+	</category>
 	<root>
 		<priority value ="debug" />
 		<appender-ref ref="STDOUT" />

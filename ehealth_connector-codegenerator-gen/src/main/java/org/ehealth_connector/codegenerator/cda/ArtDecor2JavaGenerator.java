@@ -58,7 +58,6 @@ import org.ehealth_connector.codegenerator.valuesets.ValueSetUtil;
 import org.ehealth_connector.common.Code;
 import org.ehealth_connector.common.basetypes.CodeBaseType;
 import org.ehealth_connector.common.hl7cdar2.ObjectFactory;
-import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.Util;
 import org.ehealth_connector.valueset.api.ValueSetManager;
 import org.ehealth_connector.valueset.config.ValueSetConfig;
@@ -110,13 +109,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
      */
     protected static final Logger LOG = LoggerFactory.getLogger(ArtDecor2JavaGenerator.class);
     /**
-     * Settings for the Java Code Formatter application. It contains the same settings as the formatter XML, just in
-     * another file format. Best way is to export the formatter from eclipse preferences, remove the XML stuff and put
-     * it in the prefs file.
-     */
-    private static final String FORMATTER_PREFS =
-            System.getProperty("user.dir") + "/src/main/resources/format/org.eclipse.jdt.core.prefs";
-    /**
      * Placeholder for pending actions of the Code Generator.
      */
     private static final String PENDING_ACTIONS = "Pending actions: ";
@@ -127,7 +119,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
     /**
      * The data type index.
      */
-    private static HashMap<String, String> dataTypeIndex = null;
+    private static Map<String, String> dataTypeIndex = null;
     /**
      * The base url to ART-DECOR services.
      */
@@ -148,10 +140,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
      * The running template (used in the ANTLR4 parser).
      */
     private final CdaTemplate runningTemplate;
-    /**
-     * This is for debugging purposes, only and allows to skip the value set generation.
-     */
-    private final boolean skipValueSetGeneration = false;
     /**
      * Flag for the initial run.
      */
@@ -175,11 +163,11 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
     /**
      * The destination path where to put the generated classes.
      */
-    private String dstFilePath = null;
+    private String dstFilePath;
     /**
      * The full destination path where to put the generated classes.
      */
-    private String fullDstFilePath = null;
+    private String fullDstFilePath;
     /**
      * The main CDA template (used in the ANTLR4 parser).
      */
@@ -219,19 +207,19 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
     /**
      * The source file path is where to look for template XMLs.
      */
-    private String srcFilePath = null;
+    private String srcFilePath;
     /**
      * The template index (used in the ANTLR4 parser).
      */
-    private HashMap<String, CdaTemplate> templateIndex = null;
+    private final Map<String, CdaTemplate> templateIndex;
     /**
      * The template list (used in the ANTLR4 parser).
      */
-    private ArrayList<CdaTemplate> templateList = null;
+    private final List<CdaTemplate> templateList;
     /**
      * The value set index (used in the ANTLR4 parser).
      */
-    private HashMap<String, String> valueSetIndex = null;
+    private final Map<String, String> valueSetIndex;
 
     /**
      * <div class="en">Constructor for the ART-DECOR to Java Generator.</div>
@@ -251,49 +239,44 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public ArtDecor2JavaGenerator(
-            CdaElement callingCdaElement,
-            HashMap<String, CdaTemplate> templateIndex,
-            HashMap<String, String> valueSetIndex,
-            ArrayList<CdaTemplate> templateList,
-            String srcFilePath,
-            String dstFilePath,
-            String packageName,
-            String fileHeader,
-            String artDecorPrefix,
-            URL artDecorBaseUrl)
+            final CdaElement callingCdaElement,
+            final Map<String, CdaTemplate> templateIndex,
+            final Map<String, String> valueSetIndex,
+            final List<CdaTemplate> templateList,
+            final String srcFilePath,
+            final String dstFilePath,
+            final String packageName,
+            final String fileHeader,
+            final String artDecorPrefix,
+            final URL artDecorBaseUrl)
             throws IOException {
         this.callingCdaElement = callingCdaElement;
         this.artDecorPrefix = artDecorPrefix;
         this.artDecorBaseUrl = artDecorBaseUrl;
-
-        if (templateIndex == null) this.templateIndex = new HashMap<>();
-        else this.templateIndex = templateIndex;
-
-        if (valueSetIndex == null) this.valueSetIndex = new HashMap<>();
-        else this.valueSetIndex = valueSetIndex;
-
-        if (templateList == null) this.templateList = new ArrayList<>();
-        else this.templateList = templateList;
-
+        this.templateIndex = Objects.requireNonNullElseGet(templateIndex, HashMap::new);
+        this.valueSetIndex = Objects.requireNonNullElseGet(valueSetIndex, HashMap::new);
+        this.templateList = Objects.requireNonNullElseGet(templateList, ArrayList::new);
         this.srcFilePath = srcFilePath;
         this.dstFilePath = dstFilePath;
         this.packageName = packageName;
         this.fileHeader = fileHeader;
 
-        if (!this.dstFilePath.endsWith(FileUtil.getPlatformSpecificPathSeparator()))
-            this.dstFilePath += FileUtil.getPlatformSpecificPathSeparator();
+        if (!this.dstFilePath.endsWith("/"))
+            this.dstFilePath += "/";
         fullDstFilePath =
                 new File(new File(dstFilePath, "src/main/java"), packageName.replaceAll("\\.", "/"))
                         .getAbsolutePath();
 
-        if (!this.fullDstFilePath.endsWith(FileUtil.getPlatformSpecificPathSeparator()))
-            this.fullDstFilePath += FileUtil.getPlatformSpecificPathSeparator();
+        if (!this.fullDstFilePath.endsWith("/"))
+            this.fullDstFilePath += "/";
 
         initialRun = (callingCdaElement == null);
-        if (initialRun) FileUtils.deleteDirectory(new File(fullDstFilePath));
+        if (initialRun) {
+            FileUtils.deleteDirectory(new File(fullDstFilePath));
+        }
 
-        if (!this.srcFilePath.endsWith(FileUtil.getPlatformSpecificPathSeparator()))
-            this.srcFilePath += FileUtil.getPlatformSpecificPathSeparator();
+        if (!this.srcFilePath.endsWith("/"))
+            this.srcFilePath += "/";
 
         runningTemplate = new CdaTemplate();
         runningTemplate.setName("***Running***");
@@ -802,37 +785,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
     }
 
     /**
-     * Creates the member and getter for the given element to the resulting class.
-     *
-     * @param compilationUnit the compilation unit
-     * @param myClass         the my class
-     * @param dataType        the data type
-     * @param memberName      the member name
-     * @param methodName      the method name
-     */
-    private static void createMemberAndGetter(final CompilationUnit compilationUnit,
-                                              final ClassOrInterfaceDeclaration myClass,
-                                              final String dataType,
-                                              final String memberName,
-                                              final String methodName) {
-        Optional<FieldDeclaration> memberOpt = myClass.getFieldByName(memberName);
-        if (memberOpt.isEmpty()) {
-            final FieldDeclaration field = myClass.addField(dataType, memberName, privateModifier().getKeyword());
-
-            // We do not want to have this member serialized!
-            addImport(compilationUnit, "javax.xml.bind.annotation.XmlTransient");
-            field.addAnnotation(createXmlTransientAnnotation());
-
-            final MethodDeclaration method = myClass.addMethod(methodName, publicModifier().getKeyword());
-            method.setType(dataType);
-            method.setJavadocComment("Gets the member " + memberName);
-
-            final BlockStmt body = method.createBody();
-            body.addStatement("return " + memberName + ";");
-        }
-    }
-
-    /**
      * Creates the saveToFile methods to the resulting class.
      *
      * @param compilationUnit the compilation unit
@@ -918,9 +870,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
     private static void createSetter(final CompilationUnit compilationUnit,
                                      final ClassOrInterfaceDeclaration myClass,
                                      final CdaElement cdaElement) {
-
-        String logMsg;
-
         if (cdaElement.getDataType() == null)
             throw new NotImplementedException("Type undefined for " + cdaElement.getJavaName());
 
@@ -938,9 +887,11 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                 cdaElement.getXmlName().replace("hl7:", "").replace("pharm:", "").replace("xsi:", "");
 
         CdaElement elForType = cdaElement.getParentCdaElement();
-        if (elForType == null) elForType = cdaElement;
-        @SuppressWarnings("rawtypes")
-        Class memberType = getFieldDatatype(elForType.getDataType(), name);
+        if (elForType == null) {
+            elForType = cdaElement;
+        }
+
+        Class<?> memberType = getFieldDatatype(elForType.getDataType(), name);
         boolean isMethod = false;
         if (memberType == null) {
             memberType = getMethodDatatype(elForType.getDataType(), name);
@@ -961,7 +912,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
         String comment = "Sets the " + cdaElement.getJavaName();
         String desc = cdaElement.getDescription();
-        if (desc != null) comment += Util.getPlatformSpecificLineBreak() + desc;
+        if (desc != null) {
+            comment += Util.getPlatformSpecificLineBreak() + desc;
+        }
 
         method.setJavadocComment(comment);
 
@@ -969,18 +922,24 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
         BlockStmt body = method.createBody();
 
-        if (myClass.getExtendedTypes().size() == 0) isMethod = false;
+        if (myClass.getExtendedTypes().size() == 0) {
+            isMethod = false;
+        }
         if (memberType != null) {
             String temp = name;
             if (isClassCollection(memberType)) {
-                if (isMethod) temp = createGetterNameUpperFirstChar(name) + "()";
+                if (isMethod) {
+                    temp = createGetterNameUpperFirstChar(name) + "()";
+                }
                 body.addStatement(temp + ".clear();");
                 body.addStatement(temp + ".add(value);");
             } else {
                 String cast = "";
                 boolean doCast = false;
 
-                if (doCast) cast = "(" + memberType.getName() + ")";
+                if (doCast) {
+                    cast = "(" + memberType.getName() + ")";
+                }
 
                 if (memberType.getName().endsWith(".IVLTS") && !(dataType.endsWith(".IVLTS"))) {
                     if (memberType.getName().endsWith(".IVLTS") && (dataType.endsWith(".TS"))) {
@@ -994,18 +953,16 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                         body.addStatement("this." + temp + " = ivlts;");
                     } else {
                         addBodyComment(method, memberType.getName() + " cannot be cast to " + dataType);
-                        logMsg =
-                                cdaElement.getFullXmlName()
-                                        + " :"
-                                        + memberType.getName()
-                                        + " cannot be cast to "
-                                        + dataType;
-                        LOG.error(logMsg);
-                        System.out.println("\nERROR: " + logMsg);
+                        LOG.error("{}: {} cannot be cast to {}", cdaElement.getFullXmlName(), memberType.getName(),
+                                dataType);
                     }
-                } else body.addStatement("this." + temp + " = " + cast + "value;");
+                } else {
+                    body.addStatement("this." + temp + " = " + cast + "value;");
+                }
             }
-        } else addBodyComment(method, "TODO: NYI");
+        } else {
+            addBodyComment(method, "TODO: NYI");
+        }
     }
 
     /**
@@ -1089,7 +1046,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
     private static String getClassWithoutPackage(final String className) {
         String retVal = className;
         while (retVal.contains(".")) {
-            return retVal.substring(retVal.indexOf(".") + 1);
+            retVal = retVal.substring(retVal.indexOf(".") + 1);
         }
         return retVal;
     }
@@ -1101,8 +1058,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
      * @param memberName the member name
      * @return the declared field datatype
      */
-    private static Class getDeclaredFieldDatatype(final Class myClass, final String memberName) {
-        Class retVal = null;
+    private static Class<?> getDeclaredFieldDatatype(final Class<?> myClass, final String memberName) {
+        Class<?> retVal = null;
 
         if (myClass != null) {
             Field f;
@@ -1125,19 +1082,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
      * @param memberName the member name
      * @return the declared field datatype
      */
-    private static Class getDeclaredFieldDatatype(final String className, final String memberName) {
-        Class retVal = null;
-
+    private static Class<?> getDeclaredFieldDatatype(final String className, final String memberName) {
         try {
-            Class c = Class.forName(className);
-            if (c != null) {
-                retVal = getDeclaredFieldDatatype(c, memberName);
-            }
+           return getDeclaredFieldDatatype(Class.forName(className), memberName);
         } catch (ClassNotFoundException e) {
-            // Do nothing
+            return null;
         }
-
-        return retVal;
     }
 
     /**
@@ -1168,34 +1118,29 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
         try {
             Class<?> c = Class.forName(className);
-            if (c != null) {
-
-                Field f = null;
-                try {
-                    f = c.getDeclaredField(memberName);
-                } catch (NoSuchFieldException | SecurityException e) {
-                    // Do nothing
-                }
-
-                Method m = null;
-                try {
-                    m =
-                            c.getDeclaredMethod(
-                                    createGetterNamePascalCase(JavaCodeGenerator.toPascalCase(memberName)));
-                } catch (NoSuchMethodException | SecurityException e) {
-                    // Do nothing
-                }
-
-                if ((f != null) && (m != null)) {
-                    f.setAccessible(true);
-                    try {
-                        retVal = f.getGenericType().toString();
-                    } catch (IllegalArgumentException e) {
-                        // Do nothing
-                    }
-                }
+            Field f = null;
+            try {
+                f = c.getDeclaredField(memberName);
+            } catch (NoSuchFieldException | SecurityException e) {
+                // Do nothing
             }
 
+            Method m = null;
+            try {
+                m = c.getDeclaredMethod(
+                                createGetterNamePascalCase(JavaCodeGenerator.toPascalCase(memberName)));
+            } catch (NoSuchMethodException | SecurityException e) {
+                // Do nothing
+            }
+
+            if (f != null && m != null) {
+                f.setAccessible(true);
+                try {
+                    retVal = f.getGenericType().toString();
+                } catch (IllegalArgumentException e) {
+                    // Do nothing
+                }
+            }
         } catch (ClassNotFoundException e) {
             // Do nothing
         }
@@ -1258,300 +1203,153 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
      *
      * <p><div class="de">Hauptzugang zum ART-DECOR to Java Code Generator.</div>
      *
-     * @param args <pre>
-     *                        command line arguments:
-     *                        1. Full path and filename to eclipse
-     *                        2. Full path to the workspace application
-     *                        </pre>
+     * @param args Command line arguments. Two values are expected.
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         LOG.info("ArtDecor2JavaGenerator started");
 
-        File configFile = null;
-
-        boolean argsOk = false;
-
-        if (args.clone().length >= 4) {
-            argsOk = true;
-            final String eclipseApplicationPath = args[0];
-            if (eclipseApplicationPath != null) {
-                eclipseApp = new File(eclipseApplicationPath);
-                if (!eclipseApp.exists()) {
-                    logMsg = "Eclipse application does not exist (" + eclipseApplicationPath + ")";
-                    LOG.error(logMsg);
-                    System.out.println("ERROR: " + logMsg);
-                    argsOk = false;
-                } else {
-                    if (!eclipseApp.isFile()) {
-                        logMsg = "Eclipse application is not a file (" + eclipseApplicationPath + ")";
-                        LOG.error(logMsg);
-                        System.out.println("ERROR: " + logMsg);
-                        argsOk = false;
-                    }
-                }
-            }
-
-            final String orgWorkspacePathString = args[1];
-            if (orgWorkspacePathString != null) {
-                orgWorkspacePath = new File(orgWorkspacePathString);
-                if (!orgWorkspacePath.exists()) {
-                    logMsg = "Workspace does not exist (" + orgWorkspacePathString + ")";
-                    LOG.error(logMsg);
-                    System.out.println("ERROR: " + logMsg);
-                    argsOk = false;
-                } else {
-                    if (!orgWorkspacePath.isDirectory()) {
-                        logMsg = "Workspace is not a directory (" + orgWorkspacePathString + ")";
-                        LOG.error(logMsg);
-                        System.out.println("ERROR: " + logMsg);
-                        argsOk = false;
-                    }
-                }
-            }
-
-            final String orgConfigPathString = args[2];
-            if (orgConfigPathString != null) {
-                configFile = new File(orgConfigPathString);
-                if (!configFile.exists()) {
-                    logMsg = "Config File does not exist (" + orgConfigPathString + ")";
-                    LOG.error(logMsg);
-                    System.out.println("ERROR: " + logMsg);
-                    argsOk = false;
-                } else {
-                    if (!configFile.isFile()) {
-                        logMsg = "Config is not a file (" + orgConfigPathString + ")";
-                        LOG.error(logMsg);
-                        System.out.println("ERROR: " + logMsg);
-                        argsOk = false;
-                    }
-                }
-            }
-
-            final String rscDirString = args[3];
-            if (rscDirString != null) {
-                rscDir = new File(rscDirString);
-                if (!rscDir.exists()) {
-                    System.out.println("ERROR: Workspace does not exist (" + rscDirString + ")");
-                    argsOk = false;
-                } else {
-                    if (!rscDir.isDirectory()) {
-                        System.out.println("ERROR: Workspace is not a directory (" + rscDirString + ")");
-                        argsOk = false;
-                    }
-                }
-            }
-
-        } else {
-            logMsg = "ArtDecor2JavaGenerator <eclipse> <workspace> <config> <rscDir>";
-            LOG.warn("Invalid or no parameter given. Usage: " + logMsg);
-            System.out.println("Usage:");
-            System.out.println();
-            System.out.println(logMsg);
-            System.out.println();
-            System.out.println(
-                    "  eclipse:   First parameter must be the full path and filename of your eclipse application");
-            System.out.println(
-                    "             (e.g. C:\\JavaProgramme\\eclipse\\rcp-2019-06\\eclipse\\eclipse.exe");
-            System.out.println();
-            System.out.println(
-                    "  workspace: Second parameter must be the full path to your current workspace directory");
-            System.out.println(
-                    "             Note: It will be copied into a temp folder, as the current one is in use by Eclipse IDE");
-            System.out.println();
-            System.out.println(
-                    "  config: Third parameter must be the full path to your configuration file");
-            System.out.println();
-            System.out.println(
-                    "  rscDir: Fourth parameter must be the full path to any rscDir (e.g. .../demo-java/rsc)");
-
-            argsOk = false;
-        }
-
-        if (!argsOk) {
-            System.out.println();
-            System.out.println("***");
-            System.out.println("Try again :-)");
+        if (args.length != 2) {
+            LOG.info("Usage:");
+            LOG.info("ArtDecor2JavaGenerator <configFile> <javaSourceDir>");
+            LOG.info("  configFile: This parameter is the path to the YAML configuration file to use (e.g. " +
+                    "D:/Java/ehealthconnector-codegenerator/ehealth_connector-codegenerator-gen/src/main" +
+                    "/resources/cda/ContentProfilePackageConfigCdaChEmedV097.yml)");
+            LOG.info("  javaSourceDir: This parameter must be the path to the eHealthConnector-Suisse project " +
+                    "directory (e.g. D:/Java/ehealtconnector-suisse)");
+            LOG.info("");
+            LOG.info("Example:");
+            LOG.info("ArtDecor2JavaGenerator D:/Java/ehealthconnector-codegenerator/ehealth_connector-codegenerator-gen/" +
+                    "src/main/resources/cda/ContentProfilePackageConfigCdaChEmedV097.yml D:/Java/ehealtconnector-suisse");
             return;
         }
 
-        final String tempWorkspacePathString =
-                Util.getTempDirectory()
-                        + FileUtil.getPlatformSpecificPathSeparator()
-                        + "tmpWS_"
-                        + orgWorkspacePath.getName();
-        final File tempWorkspacePath = new File(tempWorkspacePathString);
+        final String configFileString = args[0];
+        final File configFile;
+        if (configFileString != null) {
+            configFile = new File(configFileString);
+            if (!configFile.exists()) {
+                LOG.error("ERROR: Config file does not exist ({})", configFileString);
+                return;
+            } else {
+                if (!configFile.isFile()) {
+                    LOG.error(
+                            "ERROR: Config file is not a file ({})", configFileString);
+                    return;
+                }
+            }
+        } else {
+            LOG.error("ERROR: Config file is null");
+            return;
+        }
 
-        final String tempDownloadPathString =
-                Util.getTempDirectory()
-                        + FileUtil.getPlatformSpecificPathSeparator()
-                        + "eHC_Arde_Download"
-                        + FileUtil.getPlatformSpecificPathSeparator();
+        final String javaSourceDirString = args[1];
+        final File javaSourceDir;
+        if (javaSourceDirString != null) {
+            javaSourceDir = new File(javaSourceDirString);
+            if (!javaSourceDir.exists()) {
+                LOG.error("ERROR: Java source directory does not exist ({})", javaSourceDirString);
+                return;
+            } else {
+                if (!javaSourceDir.isDirectory()) {
+                    LOG.error(
+                            "ERROR: Java source is not a directory ({})", javaSourceDirString);
+                    return;
+                }
+            }
+        } else {
+            LOG.error("ERROR: Java source directory is null");
+            return;
+        }
+
+        final String tempDownloadPathString = Util.getTempDirectory() + "/eHC_Arde_Download/";
         final File tempDownloadPath = new File(tempDownloadPathString);
-
-        FileUtils.deleteDirectory(tempWorkspacePath);
         FileUtils.deleteDirectory(tempDownloadPath);
-        FileUtils.copyDirectoryToDirectory(orgWorkspacePath, tempWorkspacePath);
 
-        logMsg = "Settings";
-        LOG.info(logMsg + ":");
-        System.out.println("----------------------------------------");
-        System.out.println(logMsg);
-        System.out.println("----------------------------------------");
-
-        logMsg = "Eclipse runtime: " + eclipseApp.getAbsolutePath();
-        LOG.info(logMsg);
-        System.out.println(logMsg);
-
-        logMsg = "Temp. workspace: " + tempWorkspacePath.getAbsolutePath();
-        LOG.info(logMsg);
-        System.out.println(logMsg);
-
-        logMsg = "Config file: " + configFile.getAbsolutePath();
-        LOG.info(logMsg);
-        System.out.println(logMsg);
+        LOG.info("Settings:");
+        LOG.info("Config file: {}", configFile.getAbsolutePath());
 
         // Load Config
-        logMsg = "Configuration";
-        LOG.info(logMsg + ":");
-        System.out.println("----------------------------------------");
-        System.out.println(logMsg);
-        System.out.println("----------------------------------------");
-        logMsg = "Loading configuration...";
-        LOG.info(logMsg);
-        System.out.println(logMsg);
-        ArtDecor2JavaManager artDecor2JavaManager2 = new ArtDecor2JavaManager();
-        ContentProfilePackageConfig contentProfilePackageConfig =
+        LOG.info("Configuration:");
+        LOG.info("Loading configuration...");
+        final ArtDecor2JavaManager artDecor2JavaManager2 = new ArtDecor2JavaManager();
+        final ContentProfilePackageConfig contentProfilePackageConfig =
                 artDecor2JavaManager2.loadContentProfilePackageConfig(configFile.getAbsolutePath());
-        logMsg = "Loading configuration done.";
-        LOG.info(logMsg);
-        System.out.println(logMsg);
+        LOG.info("Loading configuration done.");
 
-        logMsg = "Loaded configuration:";
-        LOG.debug(logMsg);
-        System.out.println(logMsg);
-        for (ContentProfileConfig contentProfile :
-                contentProfilePackageConfig.getContentProfileConfigList()) {
-            logMsg = "- Target namespace: " + contentProfile.getTargetNamespace();
-            LOG.debug(logMsg);
-            System.out.println(logMsg);
-            for (String templateId : contentProfile.getArtDecorDocTemplateMap().keySet()) {
-                logMsg = "  - template id: " + templateId;
-                LOG.debug(logMsg);
-                System.out.println(logMsg);
+        LOG.debug("Loaded configuration:");
+        for (final ContentProfileConfig contentProfile : contentProfilePackageConfig.getContentProfileConfigList()) {
+            LOG.debug("- Target namespace: {}", contentProfile.getTargetNamespace());
+            for (final String templateId : contentProfile.getArtDecorDocTemplateMap().keySet()) {
+                LOG.debug("  - template id: {}", templateId);
             }
         }
-        logMsg = "Configuration done.";
-        LOG.info(logMsg);
-        System.out.println(logMsg);
-        System.out.println();
+        LOG.info("Configuration done.");
 
         // Perform REST calls
         LOG.info("Download from ART-DECOR");
-        for (ContentProfileConfig contentProfile :
-                contentProfilePackageConfig.getContentProfileConfigList()) {
-            String dir =
-                    tempDownloadPath.getAbsolutePath()
-                            + FileUtil.getPlatformSpecificPathSeparator()
-                            + contentProfile.getTargetNamespace()
-                            + FileUtil.getPlatformSpecificPathSeparator();
-            ArtDecorRestClient artDecorRestClient =
-                    new ArtDecorRestClient(contentProfile.getArtDecorProjectMap(), dir);
+        for (final ContentProfileConfig contentProfile : contentProfilePackageConfig.getContentProfileConfigList()) {
+            String dir = tempDownloadPath.getAbsolutePath() + "/" + contentProfile.getTargetNamespace() + "/";
+            ArtDecorRestClient artDecorRestClient = new ArtDecorRestClient(contentProfile.getArtDecorProjectMap(), dir);
 
-            for (String templateId : contentProfile.getArtDecorDocTemplateMap().keySet()) {
-                String effectiveTime = contentProfile.getArtDecorDocTemplateMap().get(templateId);
+            for (final String templateId : contentProfile.getArtDecorDocTemplateMap().keySet()) {
+                final String effectiveTime = contentProfile.getArtDecorDocTemplateMap().get(templateId);
                 artDecorRestClient.downloadTemplateRecursive(templateId, effectiveTime);
             }
         }
-        logMsg = "Download from ART-DECOR done.";
-        LOG.info(logMsg);
-        System.out.println(logMsg);
-        System.out.println();
+        LOG.info("Download from ART-DECOR done.");
 
         // Perform Java code generation
-        logMsg = "Perform Java code generation";
-        LOG.info(logMsg);
-        System.out.println("----------------------------------------");
-        System.out.println(logMsg);
-        System.out.println("----------------------------------------");
-        System.out.println();
-        ArrayList<String> dstPathList = new ArrayList<>();
-        for (ContentProfileConfig contentProfile :
-                contentProfilePackageConfig.getContentProfileConfigList()) {
-            String srcFilePath =
-                    tempDownloadPath.getAbsolutePath()
-                            + FileUtil.getPlatformSpecificPathSeparator()
-                            + contentProfile.getTargetNamespace()
-                            + FileUtil.getPlatformSpecificPathSeparator();
-            HashMap<String, CdaTemplate> templateIndex = new HashMap<>();
-            HashMap<String, String> valueSetIndex = new HashMap<>();
-            ArrayList<CdaTemplate> templateList = new ArrayList<>();
-            String dstFilePath = contentProfile.getTargetDir();
+        LOG.info("Perform Java code generation");
+        final List<String> dstPathList = new ArrayList<>();
+        for (final ContentProfileConfig contentProfile : contentProfilePackageConfig.getContentProfileConfigList()) {
+            String srcFilePath = tempDownloadPath.getAbsolutePath() + "/" + contentProfile.getTargetNamespace() + "/";
+            final Map<String, CdaTemplate> templateIndex = new HashMap<>();
+            final Map<String, String> valueSetIndex = new HashMap<>();
+            final List<CdaTemplate> templateList = new ArrayList<>();
+
+
+            String dstFilePath = contentProfile.getTargetDir(); //TODO REMOVE
             if (!(dstFilePath.startsWith("/")
                     || dstFilePath.startsWith("\\")
                     || ":".equals(dstFilePath.subSequence(2, 3)))) {
                 // is not an absolute path, so we adjust the relative path
-                dstFilePath =
-                        ".."
-                                + FileUtil.getPlatformSpecificPathSeparator()
-                                + ".."
-                                + FileUtil.getPlatformSpecificPathSeparator()
-                                + dstFilePath;
+                dstFilePath = "../../" + dstFilePath;
             }
-            if (!dstFilePath.endsWith(FileUtil.getPlatformSpecificPathSeparator()))
-                dstFilePath += FileUtil.getPlatformSpecificPathSeparator();
+            if (!dstFilePath.endsWith("/")) {
+                dstFilePath += "/";
+            }
 
-            String prefix = contentProfile.getArtDecorMainPrefix();
-            URL url = new URL(contentProfile.getArtDecorMainBaseUrl());
-            ArtDecor2JavaGenerator artDecor2JavaGenerator =
-                    new ArtDecor2JavaGenerator(
-                            null,
-                            templateIndex,
-                            valueSetIndex,
-                            templateList,
-                            srcFilePath,
-                            dstFilePath,
-                            contentProfile.getTargetNamespace(),
-                            JavaCodeGenerator.getFileHeader(),
-                            prefix,
-                            url);
-            for (String templateId : contentProfile.getArtDecorDocTemplateMap().keySet()) {
+            final ArtDecor2JavaGenerator artDecor2JavaGenerator = new ArtDecor2JavaGenerator(
+                null,
+                templateIndex,
+                valueSetIndex,
+                templateList,
+                srcFilePath,
+                javaSourceDir.getAbsolutePath(),
+                contentProfile.getTargetNamespace(),
+                JavaCodeGenerator.getFileHeader(),
+                contentProfile.getArtDecorMainPrefix(),
+                new URL(contentProfile.getArtDecorMainBaseUrl())
+            );
+            for (final String templateId : contentProfile.getArtDecorDocTemplateMap().keySet()) {
                 artDecor2JavaGenerator.prepareForAnotherTemplate();
                 artDecor2JavaGenerator.doOneTemplate(templateId);
             }
             artDecor2JavaGenerator.createJavaClasses();
-            if (!dstPathList.contains(artDecor2JavaGenerator.getFullDstFilePath()))
+            if (!dstPathList.contains(artDecor2JavaGenerator.getFullDstFilePath())) {
                 dstPathList.add(artDecor2JavaGenerator.getFullDstFilePath());
-            if (!dstPathList.contains(
-                    artDecor2JavaGenerator.getFullDstFilePath()
-                            + FileUtil.getPlatformSpecificPathSeparator()
-                            + "enums"))
-                dstPathList.add(
-                        artDecor2JavaGenerator.getFullDstFilePath()
-                                + "enums"
-                                + FileUtil.getPlatformSpecificPathSeparator());
+            }
+            if (!dstPathList.contains(artDecor2JavaGenerator.getFullDstFilePath() + "/enums")) {
+                dstPathList.add(artDecor2JavaGenerator.getFullDstFilePath() + "enums/");
+            }
         }
-        logMsg = "Java code generation done.";
-        LOG.info(logMsg);
-        System.out.println(logMsg);
-        System.out.println();
-
-        FileUtils.deleteDirectory(tempWorkspacePath);
+        LOG.info("Java code generation done.");
         FileUtils.deleteDirectory(tempDownloadPath);
-
-        logMsg = "Generated Java classes and enums in the following folders:";
-        LOG.info(logMsg);
-        System.out.println(logMsg);
-        for (String path : dstPathList) {
-            logMsg = "- " + path;
-            LOG.info(logMsg);
-            System.out.println(logMsg);
+        LOG.info("Generated Java classes and enums in the following folders:");
+        for (final String path : dstPathList) {
+            LOG.info("- {}", path);
         }
-        System.out.println();
-
-        logMsg = "ArtDecor2JavaGenerator finished.";
-        LOG.info(logMsg);
-        System.out.println(logMsg);
-        System.out.print("===== ART-DECOR to Java Generator finished =====\n");
+        LOG.info("ArtDecor2JavaGenerator finished.");
     }
 
     /**
@@ -1603,19 +1401,35 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
         String retVal = dataType;
         if (retVal != null) {
 
-            if (retVal.endsWith("running")) retVal = null;
+            if (retVal.endsWith("running")) {
+                retVal = null;
+            }
             else {
-                if (retVal.startsWith("IVL_PQ")) retVal = "IVLPQ";
-                if (retVal.startsWith("EIVL_TS")) retVal = "EIVLTS";
-                if (retVal.startsWith("IVL_TS")) retVal = "IVLTS";
-                if (retVal.startsWith("TS.")) retVal = "TS";
-                if (retVal.startsWith("SXPR_TS")) retVal = "SXPRTS";
+                if (retVal.startsWith("IVL_PQ")) {
+                    retVal = "IVLPQ";
+                }
+                if (retVal.startsWith("EIVL_TS")) {
+                    retVal = "EIVLTS";
+                }
+                if (retVal.startsWith("IVL_TS")) {
+                    retVal = "IVLTS";
+                }
+                if (retVal.startsWith("TS.")) {
+                    retVal = "TS";
+                }
+                if (retVal.startsWith("SXPR_TS")) {
+                    retVal = "SXPRTS";
+                }
                 if (retVal.startsWith("SD.TEXT")) {
                     retVal = "ED";
                     if (containingClassName != null)
-                        if (containingClassName.endsWith("Section")) retVal = "StrucDocText";
+                        if (containingClassName.endsWith("Section")) {
+                            retVal = "StrucDocText";
+                        }
                 }
-                if (retVal.startsWith("INT.NONNEG")) retVal = "INT";
+                if (retVal.startsWith("INT.NONNEG")) {
+                    retVal = "INT";
+                }
 
                 if (!templateIndex.containsKey(dataType) && !retVal.contains(".")) {
                     retVal = "org.ehealth_connector.common.hl7cdar2." + retVal;
@@ -1638,55 +1452,18 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                 value.replace(packageName + ".enums", "org.ehealth_connector.common.hl7cdar2");
         try {
             String className = null;
-            if (myClass != null) className = myClass.getNameAsString();
+            if (myClass != null) {
+                className = myClass.getNameAsString();
+            }
             Class<?> cl = Class.forName(adjustDataType(testEnum, className));
-            if (cl != null) retVal = cl.getName();
+            if (cl != null) {
+                retVal = cl.getName();
+            }
         } catch (ClassNotFoundException e) {
             // Do nothing
         }
 
         return retVal;
-    }
-
-    /**
-     * Creates the creator method for fixed attribute contents.
-     *
-     * @param compilationUnit            the compilation unit
-     * @param myClass                    the my class
-     * @param cdaAttribute               the cda attribute
-     * @param setterForFixedContentsName the setter for fixed contents name
-     * @return the method declaration
-     */
-    private MethodDeclaration createCreatorForFixedContentsAttribute(
-            CompilationUnit compilationUnit,
-            ClassOrInterfaceDeclaration myClass,
-            CdaAttribute cdaAttribute,
-            String setterForFixedContentsName) {
-        MethodDeclaration method =
-                myClass.addMethod(setterForFixedContentsName, privateModifier().getKeyword());
-        BlockStmt body = method.createBody();
-
-        String dataType = null;
-        if (cdaAttribute.getValueSetId() != null) {
-            dataType = adjustValueSet(valueSetIndex.get(cdaAttribute.getValueSetId()), myClass);
-        } else {
-            dataType = "String";
-        }
-
-        String attrName =
-                cdaAttribute.getName().replace("hl7:", "").replace("pharm:", "").replace("xsi:", "");
-        String memberName = "my" + JavaCodeGenerator.toPascalCase(attrName);
-
-        String methodName = "getPredefined" + JavaCodeGenerator.toPascalCase(attrName);
-        createMemberAndGetter(compilationUnit, myClass, dataType, memberName, methodName);
-
-        method.addAndGetParameter(dataType, "value");
-        method.setJavadocComment(
-                "Creates fixed contents for CDA Attribute " + cdaAttribute.getName() + "\n\n");
-
-        body.addStatement("this." + memberName + " = value;");
-
-        return method;
     }
 
     /**
@@ -2438,8 +2215,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
             ClassOrInterfaceDeclaration myClass = null;
             Optional<ClassOrInterfaceDeclaration> classOpt = compilationUnit.getClassByName(className);
-            if (classOpt.isPresent()) myClass = classOpt.get();
-            if (myClass == null) myClass = compilationUnit.addClass(className).setPublic(true);
+            if (classOpt.isPresent()) {
+                myClass = classOpt.get();
+            }
+            if (myClass == null) {
+                myClass = compilationUnit.addClass(className).setPublic(true);
+            }
 
             String dataType = adjustDataType(cdaElement.getDataType(), myClass.getNameAsString());
 
@@ -2467,31 +2248,35 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
             }
 
             StringBuilder javadoc = new StringBuilder();
-            javadoc.append(String.format("%s\n\n", cdaTemplate.getName()));
+            javadoc.append(String.format("%s\n", cdaTemplate.getName()));
+            javadoc.append("<p>\n");
             if (cdaTemplate.getDescription() != null) {
-                javadoc.append(String.format("Template description: %s\n\n", cdaTemplate.getDescription()));
+                javadoc.append(String.format("Template description: %s<br>\n", cdaTemplate.getDescription()));
             }
             if (cdaElement.getDescription() != null) {
-                javadoc.append(String.format("Element description: %s\n\n", cdaElement.getDescription()));
+                javadoc.append(String.format("Element description: %s<br>\n", cdaElement.getDescription()));
             }
-            javadoc.append("<!-- @formatter:off -->\n");
-            javadoc.append(String.format("Identifier: %s\n", cdaTemplate.getId()));
-            javadoc.append(String.format("Effective date: %s\n", cdaTemplate.getEffectiveDate()));
+            javadoc.append("<p>\n");
+            javadoc.append(String.format("Identifier: %s<br>\n", cdaTemplate.getId()));
+            javadoc.append(String.format("Effective date: %s<br>\n", cdaTemplate.getEffectiveDate()));
             if (cdaTemplate.getVersionLabel() != null) {
-                javadoc.append(String.format("Version: %s\n", cdaTemplate.getVersionLabel()));
+                javadoc.append(String.format("Version: %s<br>\n", cdaTemplate.getVersionLabel()));
             }
             javadoc.append(String.format("Status: %s\n", cdaTemplate.getStatus()));
-            javadoc.append("<!-- @formatter:on -->\n");
 
             myClass.setJavadocComment(javadoc.toString());
             String inheritanceOf = cdaTemplate.getDataType();
 
             // This is for Templates used as contains:
-            if (inheritanceOf == null) inheritanceOf = cdaElement.getParentCdaElement().getDataType();
+            if (inheritanceOf == null) {
+                inheritanceOf = cdaElement.getParentCdaElement().getDataType();
+            }
 
             // Inheritance does not work for AD elements.
             // This is by HL7 CDA Schema design ...
-            if ("org.ehealth_connector.common.hl7cdar2.AD".equals(inheritanceOf)) inheritanceOf = null;
+            if ("org.ehealth_connector.common.hl7cdar2.AD".equals(inheritanceOf)) {
+                inheritanceOf = null;
+            }
 
             if (inheritanceOf != null)
                 myClass.setExtendedTypes(new NodeList<>(new ClassOrInterfaceType(null, inheritanceOf)));
@@ -2619,8 +2404,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
             templateIndex.put(templateId, runningTemplate);
 
             String kitSrcFilePath = srcFilePath;
-            if (!kitSrcFilePath.endsWith("kit" + FileUtil.getPlatformSpecificPathSeparator()))
-                kitSrcFilePath += "kit" + FileUtil.getPlatformSpecificPathSeparator();
+            if (!kitSrcFilePath.endsWith("kit/"))
+                kitSrcFilePath += "kit/";
 
             String orgFn = srcFilePath + templateId + ".xml";
             String trnFn = srcFilePath + templateId + "_transformed.xml";
@@ -2634,7 +2419,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                 trnFile = new File(trnFn);
             }
 
-            if (!trnFile.exists()) Hl7Its2EhcTransformer.transform(orgFn, trnFn);
+            if (!trnFile.exists()) {
+                Hl7Its2EhcTransformer.transform(orgFn, trnFn);
+            }
 
             String content;
 
@@ -3053,18 +2840,13 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                                 artDecorBaseUrl);
                 CdaTemplate template = artDecor2JavaGenerator.doOneTemplate(ref);
 
-                if (isChildElement) currentCdaElement.addCdaTemplate(template, ProcessModes.INCLUDE);
-                else if (isSiblingElement)
+                if (isChildElement) {
+                    currentCdaElement.addCdaTemplate(template, ProcessModes.INCLUDE);
+                } else if (isSiblingElement) {
                     currentCdaElement.getParentCdaElement().addCdaTemplate(template, ProcessModes.INCLUDE);
-                else if (isParentElement)
-                    currentCdaElement
-                            .getParentCdaElement()
-                            .getParentCdaElement()
+                } else {
+                    currentCdaElement.getParentCdaElement().getParentCdaElement()
                             .addCdaTemplate(template, ProcessModes.INCLUDE);
-                else {
-                    logMsg = "Uups, no child, no sibling, no parent - what else?";
-                    LOG.error(logMsg);
-                    System.out.println("ERROR:" + logMsg);
                 }
             } catch (SaxonApiException
                     | IOException
@@ -3076,8 +2858,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                     | InstantiationException
                     | NoSuchFieldException
                     | SecurityException e) {
-                throw new RuntimeException(
-                        "Code generation of include (" + ref + " failed:" + e.getMessage());
+                throw new RuntimeException("Code generation of include (" + ref + " failed:" + e.getMessage());
             }
         }
     }
@@ -3093,22 +2874,28 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
      */
     @Override
     public void enterTemplate(Hl7ItsParser.TemplateContext ctx) {
-
-        String logMsg;
         String name = null;
         String id = null;
 
         IdAttrContext idAttrCtx = ctx.idAttr();
-        if (idAttrCtx != null) id = idAttrCtx.AttrValue().getText().replace("\"", "");
+        if (idAttrCtx != null) {
+            id = idAttrCtx.AttrValue().getText().replace("\"", "");
+        }
 
         NameAttrContext nameAttrCtx = ctx.nameAttr();
-        if (nameAttrCtx != null) name = nameAttrCtx.AttrValue().getText().replace("\"", "");
+        if (nameAttrCtx != null) {
+            name = nameAttrCtx.AttrValue().getText().replace("\"", "");
+        }
 
-        if ((id == null) && (name == null))
-            throw new RuntimeException(
-                    "id and name are null for template " + ctx.getText().substring(0, 500) + "...");
-        if (id == null) throw new RuntimeException("id is null for template " + name);
-        if (name == null) throw new RuntimeException("name is null for template " + id);
+        if (id == null && name == null) {
+            throw new RuntimeException("id and name are null for template " + ctx.getText().substring(0, 500) + "...");
+        }
+        if (id == null) {
+            throw new RuntimeException("id is null for template " + name);
+        }
+        if (name == null) {
+            throw new RuntimeException("name is null for template " + id);
+        }
 
         processingTemplate++;
         currentCdaTemplate = new CdaTemplate();
@@ -3118,8 +2905,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
         // Iterate on attributes to find the status, effective date and version label.
         for (int i = 0; i < ctx.getChildCount(); ++i) {
             ParseTree child = ctx.getChild(i);
-            if (child instanceof Hl7ItsParser.AttrContext) {
-                Hl7ItsParser.AttrContext attrContext = (Hl7ItsParser.AttrContext) child;
+            if (child instanceof final Hl7ItsParser.AttrContext attrContext) {
                 String value = attrContext.AttrValue().getText();
                 value = value.substring(1, value.length() - 1);
                 if ("statusCode".equals(attrContext.Name().getText())) {
@@ -3132,13 +2918,11 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
             }
         }
 
-        if (mainCdaTemplate == null) mainCdaTemplate = currentCdaTemplate;
-
+        if (mainCdaTemplate == null) {
+            mainCdaTemplate = currentCdaTemplate;
+        }
         templateList.add(currentCdaTemplate);
-
-        logMsg =
-                "Template: " + currentCdaTemplate.getName() + " (id: " + currentCdaTemplate.getId() + ")";
-        LOG.debug(logMsg);
+        LOG.debug("Template: {} (id: {})", currentCdaTemplate.getName(), currentCdaTemplate.getId());
     }
 
     /**
@@ -3152,14 +2936,13 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
      */
     @Override
     public void enterVocab(Hl7ItsParser.VocabContext ctx) {
-
-        String logMsg;
-
         processingVocab++;
 
         String code = null;
         CodeAttrContext codeAttrCtx = ctx.codeAttr();
-        if (codeAttrCtx != null) code = codeAttrCtx.AttrValue().getText().replace("\"", "");
+        if (codeAttrCtx != null) {
+            code = codeAttrCtx.AttrValue().getText().replace("\"", "");
+        }
 
         String codeSystem = null;
         CodeSystemAttrContext codeSystemAttrCtx = ctx.codeSystemAttr();
@@ -3202,25 +2985,35 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                 CodeBaseType codeBt = new CodeBaseType();
                 codeBt.setCode(code);
                 codeBt.setCodeSystem(codeSystem);
-                if (codeSystemName != null) codeBt.setCodeSystemName(codeSystemName);
-                if (displayName != null) codeBt.setDisplayName(displayName);
-                if (processingVocab == 1) currentCdaAttribute.setCode(new Code(codeBt));
-                if (processingVocab == 2) {
+                if (codeSystemName != null) {
+                    codeBt.setCodeSystemName(codeSystemName);
+                }
+                if (displayName != null) {
+                    codeBt.setDisplayName(displayName);
+                }
+                if (processingVocab == 1) {
+                    currentCdaAttribute.setCode(new Code(codeBt));
+                } else if (processingVocab == 2) {
                     if (currentCdaAttribute.getCode() != null)
                         currentCdaAttribute.addCode(currentCdaAttribute.getCode());
                     currentCdaAttribute.setCode(null);
                     currentCdaAttribute.addCode(new Code(codeBt));
+                } else if (processingVocab > 2) {
+                    currentCdaAttribute.addCode(new Code(codeBt));
                 }
-                if (processingVocab > 2) currentCdaAttribute.addCode(new Code(codeBt));
             }
             if (valueSetId != null) {
-                if (currentCdaAttribute.getName() == null) currentCdaAttribute.setName("valueSet");
+                if (currentCdaAttribute.getName() == null) {
+                    currentCdaAttribute.setName("valueSet");
+                }
                 currentCdaAttribute.setValueSetId(valueSetId);
 
+                /*
+                 * This is for debugging purposes only and allows to skip the value set generation.
+                 */
+                boolean skipValueSetGeneration = false;
                 if (!skipValueSetGeneration && !valueSetIndex.containsKey(valueSetId)) {
-                    logMsg = "- downloading ValueSet " + valueSetId + " ...";
-                    LOG.debug(logMsg);
-                    System.out.println(logMsg);
+                    LOG.debug("- downloading ValueSet {}...", valueSetId);
 
                     String sourceUrl =
                             artDecorBaseUrl.toString()
@@ -3253,15 +3046,11 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                             | ParserConfigurationException
                             | SAXException
                             | InitializationException e) {
-                        String msg = "valueSet (" + valueSetId + ") cannot be downloaded: " + e.getMessage();
-                        LOG.error(msg);
-                        System.out.println("ERROR: " + msg);
-                        throw new RuntimeException(msg);
+                        LOG.error("valueSet ({}) cannot be downloaded: {}", valueSetId, e.getMessage());
+                        throw new RuntimeException("valueSet (" + valueSetId + ") cannot be downloaded: " + e.getMessage());
                     }
                     if (valueSet != null) {
-                        logMsg = "  creating enum class file ...";
-                        LOG.debug(logMsg);
-                        System.out.println(logMsg);
+                        LOG.debug("  creating enum class file ...");
                         String fullValueSetClassName =
                                 packageName + ".enums." + JavaCodeGenerator.toPascalCase(valueSet.getName());
                         valueSetIndex.put(valueSetId, fullValueSetClassName);
@@ -3287,56 +3076,31 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                                             + ") cannot be created as Java enum file: "
                                             + e.getMessage());
                         }
-                        logMsg = "  creating enum class file done";
-                        LOG.debug(logMsg);
-                        System.out.println(logMsg);
+                        LOG.debug("  creating enum class file done");
                     }
-                    logMsg = "- downloading ValueSet " + valueSetId + " done.";
-                    LOG.debug(logMsg);
-                    System.out.println(logMsg);
+                    LOG.debug("- downloading ValueSet {} done.", valueSetId);
                 }
             }
 
             String tempName = "unnamedAttribute";
-            logMsg = "Uups some wrong with logMsg in enterVocab()...";
-            if (currentCdaAttribute.getName() != null) tempName = currentCdaAttribute.getName();
-            if (currentCdaAttribute.getValue() != null)
-                logMsg =
-                        "Attribute from vocab Element: "
-                                + tempName
-                                + "="
-                                + currentCdaAttribute.getValue()
-                                + " (dataType: "
-                                + currentCdaAttribute.getDataType()
-                                + ")";
-            else if (currentCdaAttribute.getCode() != null)
-                logMsg =
-                        "Attribute from vocab Element: "
-                                + tempName
-                                + "="
-                                + currentCdaAttribute.getCode()
-                                + " (dataType: "
-                                + currentCdaAttribute.getDataType()
-                                + ")";
-            else if (currentCdaAttribute.getCodeList() != null)
-                logMsg =
-                        "Attribute from vocab Element: "
-                                + tempName
-                                + "="
-                                + currentCdaAttribute.getCodeList()
-                                + " (dataType: "
-                                + currentCdaAttribute.getDataType()
-                                + ")";
-            else if (currentCdaAttribute.getValueSetId() != null)
-                logMsg =
-                        "Attribute from vocab Element: "
-                                + tempName
-                                + "="
-                                + currentCdaAttribute.getValueSetId()
-                                + " (dataType: "
-                                + currentCdaAttribute.getDataType()
-                                + ")";
-            LOG.debug(logMsg);
+            if (currentCdaAttribute.getName() != null) {
+                tempName = currentCdaAttribute.getName();
+            }
+            if (currentCdaAttribute.getValue() != null) {
+                LOG.error("Attribute from vocab Element: {}={} (dataType: {})", tempName,
+                        currentCdaAttribute.getValue(), currentCdaAttribute.getDataType());
+            } else if (currentCdaAttribute.getCode() != null) {
+                LOG.error("Attribute from vocab Element: {}={} (dataType: {})", tempName,
+                        currentCdaAttribute.getCode(), currentCdaAttribute.getDataType());
+            } else if (currentCdaAttribute.getCodeList() != null) {
+                LOG.error("Attribute from vocab Element: {}={} (dataType: {})", tempName,
+                        currentCdaAttribute.getCodeList(), currentCdaAttribute.getDataType());
+            } else if (currentCdaAttribute.getValueSetId() != null) {
+                LOG.error("Attribute from vocab Element: {}={} (dataType: {})", tempName,
+                        currentCdaAttribute.getValueSetId(), currentCdaAttribute.getDataType());
+            } else {
+                LOG.error("Uups some wrong with logMsg in enterVocab()...");
+            }
         }
     }
 
@@ -3460,7 +3224,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
      * Fill all data types recursively for all CDA elements.
      *
      * @param cdaElement the cda element
-     * @throws JAXBException             the JAXB exception
      * @throws ClassNotFoundException    the class not found exception
      * @throws IOException               Signals that an I/O exception has occurred.
      * @throws IllegalAccessException    the illegal access exception
@@ -3471,17 +3234,21 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
      * @throws SecurityException         the security exception
      */
     private void fillDatatypesRecursive(CdaElement cdaElement)
-            throws JAXBException, ClassNotFoundException, IOException, IllegalAccessException,
+            throws ClassNotFoundException, IOException, IllegalAccessException,
             IllegalArgumentException, InvocationTargetException, InstantiationException,
             NoSuchFieldException, SecurityException {
 
         String logMsg;
 
         if (cdaElement != null) {
-            if (dataTypeIndex == null) dataTypeIndex = loadHl7CdaR2DataTypeIndex();
+            if (dataTypeIndex == null) {
+                dataTypeIndex = loadHl7CdaR2DataTypeIndex();
+            }
 
             String dataType = cdaElement.getDataType();
-            if (dataType != null) if ("running".equals(dataType)) dataType = null;
+            if (dataType != null) {
+                if ("running".equals(dataType)) dataType = null;
+            }
             if (dataType == null) {
                 dataType = getDataType(cdaElement, templateIndex);
                 cdaElement.setDataType(dataType);
@@ -3517,7 +3284,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
      * @throws SecurityException         the security exception
      * @throws IOException               Signals that an I/O exception has occurred.
      */
-    private String getDataType(CdaElement cdaElement, HashMap<String, CdaTemplate> templateIndex)
+    private String getDataType(CdaElement cdaElement, Map<String, CdaTemplate> templateIndex)
             throws InstantiationException, IllegalAccessException, ClassNotFoundException,
             IllegalArgumentException, InvocationTargetException, NoSuchFieldException,
             SecurityException, IOException {
@@ -3535,18 +3302,23 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
         }
 
         ArrayList<String> candidates = new ArrayList<>();
-        if (dataTypeIndex == null) dataTypeIndex = loadHl7CdaR2DataTypeIndex();
+        if (dataTypeIndex == null) {
+            dataTypeIndex = loadHl7CdaR2DataTypeIndex();
+        }
         for (String key : dataTypeIndex.keySet()) {
             String value = dataTypeIndex.get(key);
             if (key.startsWith(cdaElementName)
                     || key.startsWith("all.InfrastructureRoot." + cdaElementName)) {
                 if (parentDataType.startsWith("org.ehealth_connector.common.hl7cdar2")) {
-                    if (parentDataType.equals(value)) candidates.add(value);
+                    if (parentDataType.equals(value)) {
+                        candidates.add(value);
+                    }
                 } else candidates.add(value);
             }
         }
-        if (candidates.size() == 1) retVal = candidates.get(0);
-        else if (candidates.size() > 1) {
+        if (candidates.size() == 1) {
+            retVal = candidates.get(0);
+        } else if (candidates.size() > 1) {
             throw new RuntimeException(
                     "There are multiple data type candidates for " + cdaElement.getFullXmlName());
         }
@@ -3570,15 +3342,15 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
             }
         }
 
-        if (retVal == null)
-            if (parentDataType.startsWith("org.ehealth_connector.common.hl7cdar2"))
-                retVal = parentDataType;
-
-        if (retVal == null)
+        if (retVal == null && parentDataType.startsWith("org.ehealth_connector.common.hl7cdar2")) {
+            retVal = parentDataType;
+        }
+        if (retVal == null) {
             throw new RuntimeException(
                     "There is no data type candidate for "
                             + cdaElement.getFullXmlName()
                             + ". Make sure, the ART-DECOR model conforms to the XML schema (CDA_extPHARM.xsd).");
+        }
         return retVal;
     }
 
@@ -3613,8 +3385,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                                     || "javax.xml.bind.JAXBElement".equals(returnType)) {
                                 Field field = cl.getDeclaredField(prop);
                                 Type type = field.getGenericType();
-                                if (type instanceof ParameterizedType) {
-                                    ParameterizedType pt = (ParameterizedType) type;
+                                if (type instanceof final ParameterizedType pt) {
                                     if (pt.getActualTypeArguments().length > 1)
                                         throw new RuntimeException(
                                                 "Unhandled data type:" + type + " (multiple types in list)");
@@ -3634,13 +3405,17 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
             for (Field f : cl.getDeclaredFields()) {
                 XmlAttribute xmlAttribute = f.getAnnotation(XmlAttribute.class);
                 if (xmlAttribute != null) {
-                    if (cdaElementName.contentEquals(xmlAttribute.name())) retVal = f.getType().getName();
+                    if (cdaElementName.contentEquals(xmlAttribute.name())) {
+                        retVal = f.getType().getName();
+                    }
                 }
             }
         }
 
         if (retVal == null) {
-            if (parentClassName.endsWith(".AD")) retVal = "org.ehealth_connector.common.hl7cdar2.ADXP";
+            if (parentClassName.endsWith(".AD")) {
+                retVal = "org.ehealth_connector.common.hl7cdar2.ADXP";
+            }
         }
 
         return retVal;
@@ -3660,15 +3435,14 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
      *
      * @param className the class name
      * @return the parent data type
-     * @throws InstantiationException the instantiation exception
-     * @throws IllegalAccessException the illegal access exception
      * @throws ClassNotFoundException the class not found exception
      */
-    private String getSuperClassDataType(String className)
-            throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+    private String getSuperClassDataType(String className) throws ClassNotFoundException {
         String retVal = null;
         Class<?> cl = Class.forName(adjustDataType(className, null));
-        if (cl != null) if (cl.getSuperclass() != null) retVal = cl.getSuperclass().getName();
+        if (cl.getSuperclass() != null) {
+            retVal = cl.getSuperclass().getName();
+        }
         return retVal;
     }
 
@@ -3676,28 +3450,26 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
      * Loads the data type index of all classes in the HL7 CDA R2 Object Factory.
      *
      * @return the hash map
-     * @throws ClassNotFoundException    the class not found exception
-     * @throws IOException               Signals that an I/O exception has occurred.
      * @throws IllegalAccessException    the illegal access exception
      * @throws IllegalArgumentException  the illegal argument exception
      * @throws InvocationTargetException the invocation target exception
      */
     private HashMap<String, String> loadHl7CdaR2DataTypeIndex()
-            throws ClassNotFoundException, IOException, IllegalAccessException, IllegalArgumentException,
+            throws IllegalAccessException, IllegalArgumentException,
             InvocationTargetException {
         HashMap<String, String> retVal = new HashMap<>();
 
         ObjectFactory factory = new ObjectFactory();
         Method[] methods = factory.getClass().getMethods();
-        for (int j = 0; j < methods.length; j++) {
+        for (final Method method : methods) {
             String key = null;
             String value = null;
-            if ("javax.xml.bind.JAXBElement".equals(methods[j].getReturnType().getName())) {
-                JAXBElement jaxbElement = (JAXBElement) methods[j].invoke(factory, new Object[]{null});
+            if ("javax.xml.bind.JAXBElement".equals(method.getReturnType().getName())) {
+                JAXBElement<?> jaxbElement = (JAXBElement<?>) method.invoke(factory, new Object[]{null});
                 key = jaxbElement.getName().getLocalPart();
                 value = jaxbElement.getDeclaredType().getName();
-            } else if (methods[j].getName().startsWith("create")) {
-                Object obj = methods[j].invoke(factory);
+            } else if (method.getName().startsWith("create")) {
+                Object obj = method.invoke(factory);
                 value = obj.getClass().getName();
                 XmlType xmlType = obj.getClass().getAnnotation(XmlType.class);
                 key = xmlType.name();
@@ -3711,15 +3483,11 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                     }
                     i++;
                 }
-                if (i > -1) retVal.put(key + i, value);
+                if (i > -1) {
+                    retVal.put(key + i, value);
+                }
             }
         }
-
-        // This is for debugging purposes, only
-        // retVal.entrySet().forEach(entry -> {
-        // System.out.println(entry.getKey() + " " + entry.getValue());
-        // });
-
         return retVal;
     }
 
@@ -3747,23 +3515,17 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
      *
      * @param myTemplateList the my template list
      */
-    private void regroupTemplateElements(ArrayList<CdaTemplate> myTemplateList) {
-        for (CdaTemplate cdaTemplate : myTemplateList) {
-
-            String logMsg;
-            logMsg = "Processing " + cdaTemplate.getName();
-            LOG.debug(logMsg);
-            for (CdaElement cdaElement : cdaTemplate.getCdaElementList()) {
-                logMsg = " " + cdaElement.getXmlName();
-                LOG.debug(logMsg);
-                for (CdaTemplate cdaTemplate2 : cdaElement.getCdaTemplateList().keySet()) {
-                    ProcessModes mode = cdaElement.getCdaTemplateList().get(cdaTemplate2);
-                    logMsg = " " + mode + " " + cdaTemplate2.getName();
-                    LOG.debug(logMsg);
+    private void regroupTemplateElements(final List<CdaTemplate> myTemplateList) {
+        for (final CdaTemplate cdaTemplate : myTemplateList) {
+            LOG.debug("Processing {}", cdaTemplate.getName());
+            for (final CdaElement cdaElement : cdaTemplate.getCdaElementList()) {
+                LOG.debug(" {}", cdaElement.getXmlName());
+                for (final CdaTemplate cdaTemplate2 : cdaElement.getCdaTemplateList().keySet()) {
+                    final ProcessModes mode = cdaElement.getCdaTemplateList().get(cdaTemplate2);
+                    LOG.debug(" {} {}", mode, cdaTemplate2.getName());
                     if (mode != ProcessModes.CONTAINS) {
-                        for (CdaElement cdaElement2 : cdaTemplate2.getCdaElementList()) {
-                            logMsg = "Adding " + cdaElement2.getXmlName();
-                            LOG.debug(logMsg);
+                        for (final CdaElement cdaElement2 : cdaTemplate2.getCdaElementList()) {
+                            LOG.debug("Adding {}", cdaElement2.getXmlName());
                             cdaElement.addChild(cdaElement2);
                         }
                     }

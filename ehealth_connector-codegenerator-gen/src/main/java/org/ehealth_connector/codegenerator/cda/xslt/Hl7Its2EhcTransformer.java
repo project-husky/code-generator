@@ -22,14 +22,6 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-//import org.ehealth_connector.validation.service.schematron.RuleSetTransformer;
-//import org.ehealth_connector.validation.service.transform.StylesheetFactory;
-//import org.ehealth_connector.validation.service.transform.StylesheetURIResolver;
-//import org.ehealth_connector.validation.service.transform.Transformation;
-//import org.ehealth_connector.validation.service.transform.TransformationException;
-//import org.ehealth_connector.validation.service.util.JarUtils;
-//
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.Serializer;
@@ -52,7 +44,7 @@ import net.sf.saxon.s9api.XsltTransformer;
 public class Hl7Its2EhcTransformer {
 
 	/** The log. */
-	protected final static Logger log = LoggerFactory.getLogger(Hl7Its2EhcTransformer.class);
+	protected static final Logger log = LoggerFactory.getLogger(Hl7Its2EhcTransformer.class);
 
 	/**
 	 * <div class="en">Performs one XSL transformation. The inputFile will be
@@ -72,16 +64,12 @@ public class Hl7Its2EhcTransformer {
 	 */
 	public static void transform(File inputFile, File outputFile) throws SaxonApiException {
 
-		String logMsg;
-
-		logMsg = "Transforming " + inputFile.getName() + "...";
-		log.debug(logMsg);
-		System.out.println(logMsg);
+		log.debug("Transforming {}...", inputFile.getName());
 		Processor processor = new Processor(false);
 		XsltCompiler compiler = processor.newXsltCompiler();
 		XsltExecutable xsl = compiler
 				.compile(new StreamSource(new File(System.getProperty("user.dir")
-						+ "/src/main/resources/stylesheets/Hl7Its2EhcCdaGen.xsl")));
+						+ "/ehealth_connector-codegenerator-gen/src/main/resources/stylesheets/Hl7Its2EhcCdaGen.xsl")));
 		XsltTransformer transformer = xsl.load();
 
 		Serializer out = processor.newSerializer();
@@ -95,10 +83,7 @@ public class Hl7Its2EhcTransformer {
 		transformer.setDestination(out);
 
 		transformer.transform();
-		logMsg = "Transforming " + inputFile.getName() + " done.";
-		log.debug(logMsg);
-		System.out.println(logMsg);
-
+		log.debug("Transforming {} done.", inputFile.getName());
 	}
 
 	/**
