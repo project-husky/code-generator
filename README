@@ -1,0 +1,12 @@
+# ehealth_connector-codegenerator
+
+This is a code generator for the eHealth Connector library, helping to maintain part of the code. It's made of two 
+parts:
+
+- An enum generator for the common value sets of the Swiss EPR. More details in the [wiki](https://gitlab.
+  com/ehealth-connector/api/-/wikis/Updating-the-Swiss-EPR-metadata).
+- A class and enum generator for the CDA-CH-EMED project. More details in the [wiki](https://gitlab.
+  com/ehealth-connector/api/-/wikis/ART-DECOR-to-Java-Code-Generator).
+
+When cloning the project, some classes will be missing (package `org.ehealth_connector.codegenerator.cda.antlr`).
+They are generated when compiling the Maven package (see the `antlr4-maven-plugin` plugin).

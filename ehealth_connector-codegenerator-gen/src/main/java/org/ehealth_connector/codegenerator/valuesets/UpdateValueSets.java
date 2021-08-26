@@ -74,13 +74,6 @@ public class UpdateValueSets {
             "Code for ", GERMAN, "Code für ", FRENCH, "Code de ", ITALIAN, "Code per ");
 
     /**
-     * <div class="en">Base path where to find the config files for the
-     * generator (YAML and JSON files).</div>
-     */
-    private static final String CONFIG_FILE_BASE_PATH = RuntimeUtils.getCodeGeneratorGenPath()
-            + "/src/main/resources/valuesets/";
-
-    /**
      * <div class="en">List of all languages that should be used to generate
      * javadoc comments.</div>
      */
@@ -93,11 +86,6 @@ public class UpdateValueSets {
      */
     private static final Type STRING_TYPE = com.github.javaparser.StaticJavaParser
             .parseClassOrInterfaceType("String");
-
-    /**
-     * As published on April 1, 2021: https://www.e-health-suisse.ch/technik-semantik/semantische-interoperabilitaet/metadaten.html
-     */
-    private static final String SWISS_EPR_VALUE_SET_PACKAGE_CONFIG = "SwissEprValueSetPackageConfig-20210401.yaml";
 
     /**
      * <div class="en">Relative path where to find the Java template text
@@ -229,50 +217,18 @@ public class UpdateValueSets {
     /**
      * The main entry for the value set generator.
      *
-     * @param args command line arguments. A single value is expected.
+     * @param javaSourceDir The Java source directory.
+     * @param packageConfig The package config file.
      */
-    public static void main(String[] args) {
-        LOG.info("Update value sets");
-
-        if (args.length != 1) {
-            LOG.info("Usage:");
-            LOG.info("UpdateValueSets <javaSourceDir>");
-            LOG.info("  javaSourceDir: This parameter must be the full path to the eHealthConnector-Suisse project " +
-                    "directory (e.g. D:/Java/ehealtconnector-suisse)");
-            LOG.info("");
-            LOG.info("Example:");
-            LOG.info("UpdateValueSets D:/Java/ehealtconnector-suisse");
-            return;
-        }
-        final String javaSourceDirString = args[0];
-
-        final File javaSourceDir;
-        if (javaSourceDirString != null) {
-            javaSourceDir = new File(javaSourceDirString);
-            if (!javaSourceDir.exists()) {
-                LOG.error("ERROR: Java source directory does not exist ({})", javaSourceDirString);
-                return;
-            } else {
-                if (!javaSourceDir.isDirectory()) {
-                    LOG.error(
-                            "ERROR: Java source is not a directory ({})", javaSourceDirString);
-                    return;
-                }
-            }
-        } else {
-            LOG.error("ERROR: Java source directory is null");
-            return;
-        }
-
-        LOG.info("Config base dir: {}", new File(CONFIG_FILE_BASE_PATH).getAbsolutePath());
+    public static void updateValueSets(final File javaSourceDir,
+                                       final File packageConfig) {
         LOG.info("Java source dir: {}", javaSourceDir.getAbsolutePath());
-
-        final String fnPackageConfig = CONFIG_FILE_BASE_PATH + SWISS_EPR_VALUE_SET_PACKAGE_CONFIG;
+        LOG.info("Package config : {}", packageConfig.getAbsolutePath());
 
         try {
             final ValueSetPackageManager valueSetPackageManager = new ValueSetPackageManager();
             final ValueSetPackageConfig valueSetPackageConfig =
-                    valueSetPackageManager.loadValueSetPackageConfig(fnPackageConfig);
+                    valueSetPackageManager.loadValueSetPackageConfig(packageConfig.getAbsolutePath());
 
             final ValueSetManager valueSetManager = new ValueSetManager();
             for (ValueSetConfig valueSetConfig : valueSetPackageConfig.getValueSetConfigList()) {
