@@ -20,6 +20,7 @@ import java.io.File;
 
 import javax.xml.transform.stream.StreamSource;
 
+import org.ehealth_connector.codegenerator.java.RuntimeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import net.sf.saxon.s9api.Processor;
@@ -63,16 +64,16 @@ public class Hl7Its2EhcTransformer {
 	 *             the saxon api exception
 	 */
 	public static void transform(File inputFile, File outputFile) throws SaxonApiException {
-
 		log.debug("Transforming {}...", inputFile.getName());
-		Processor processor = new Processor(false);
-		XsltCompiler compiler = processor.newXsltCompiler();
-		XsltExecutable xsl = compiler
-				.compile(new StreamSource(new File(System.getProperty("user.dir")
-						+ "/ehealth_connector-codegenerator-gen/src/main/resources/stylesheets/Hl7Its2EhcCdaGen.xsl")));
-		XsltTransformer transformer = xsl.load();
+		final Processor processor = new Processor(false);
+		final XsltCompiler compiler = processor.newXsltCompiler();
 
-		Serializer out = processor.newSerializer();
+		final XsltExecutable xsl = compiler.compile(new StreamSource(
+				new File(RuntimeUtils.getCodeGeneratorGenPath() + "/src/main/resources/stylesheets/Hl7Its2EhcCdaGen.xsl")
+		));
+		final XsltTransformer transformer = xsl.load();
+
+		final Serializer out = processor.newSerializer();
 		out.setOutputFile(outputFile);
 		out.setOutputProperty(Serializer.Property.METHOD, "xml");
 		out.setOutputProperty(Serializer.Property.ENCODING, "UTF-8");

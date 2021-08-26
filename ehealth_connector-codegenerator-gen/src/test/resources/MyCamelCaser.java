@@ -25,40 +25,40 @@ import org.ehealth_connector.codegenerator.cda.java.JavaCodeGenerator;
  */
 public class MyCamelCaser extends Blah {
 
-	/**
-	 * This is a sample constant.
-	 */
-	public static int A_CONSTANT;
+    /**
+     * This is a sample constant.
+     */
+    public static int A_CONSTANT;
 
-	/**
-	 * This is a sample constant.
-	 */
-	public static int B_TEST_CONSTANT;
+    /**
+     * This is a sample constant.
+     */
+    public static int B_TEST_CONSTANT;
 
-	/**
-	 * This is a sample field member.
-	 */
-	public String abc;
+    /**
+     * This is a sample field member.
+     */
+    public String abc;
 
-	private String anotherMember;
+    private String anotherMember;
 
-	/**
-	 * This is a sample field member
-	 */
-	public int myInt;
+    /**
+     * This is a sample field member
+     */
+    public int myInt;
 
-	private String name;
+    private String name;
 
-	/**
-	 * This is a sample void method having a long Javadoc description string that will be splitted into multiple lines by the Java code formatter at the very end of the Java class file creation by the JavaGenerator. Formatting is not tested, here. Therefore this comment is intended to appear on one single line!.
-	 */
-	public void anotherGreatMethod() {
-	}
+    /**
+     * This is a sample void method having a long Javadoc description string that will be splitted into multiple lines by the Java code formatter at the very end of the Java class file creation by the JavaGenerator. Formatting is not tested, here. Therefore this comment is intended to appear on one single line!.
+     */
+    public void anotherGreatMethod() {
+    }
 
-	/**
-	 * This is a sample method (function returning a value).
-	 */
-	public boolean myMethod(String myString, ContentProfileConfig myEhcType, int myIntParam) {
-		return true;
-	}
+    /**
+     * This is a sample method (function returning a value).
+     */
+    public boolean myMethod(String myString, ContentProfileConfig myEhcType, int myIntParam) {
+        return true;
+    }
 }

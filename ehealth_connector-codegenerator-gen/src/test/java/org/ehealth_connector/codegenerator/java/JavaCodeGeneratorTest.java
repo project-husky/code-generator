@@ -19,12 +19,14 @@ package org.ehealth_connector.codegenerator.java;
 import static com.github.javaparser.ast.Modifier.privateModifier;
 import static com.github.javaparser.ast.Modifier.publicModifier;
 import static com.github.javaparser.ast.Modifier.staticModifier;
+import static com.github.javaparser.printer.configuration.DefaultPrinterConfiguration.ConfigOption.*;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
 
+import com.github.javaparser.printer.configuration.*;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.ehealth_connector.codegenerator.cda.config.ContentProfileConfig;
@@ -41,8 +43,6 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
-import com.github.javaparser.printer.PrettyPrinterConfiguration;
-import com.github.javaparser.printer.PrettyPrinterConfiguration.IndentType;
 
 /**
  * The test class for JavaCodeGenerator.
@@ -157,8 +157,11 @@ public class JavaCodeGeneratorTest {
 				.findAll(ClassOrInterfaceDeclaration.class)) {
 			cl.getMembers().sort(new BodyDeclarationsComparator());
 		}
-		PrettyPrinterConfiguration ppc = new PrettyPrinterConfiguration()
-				.setIndentType(IndentType.TABS).setIndentSize(1);
+
+		final PrinterConfiguration ppc = new DefaultPrinterConfiguration();
+		ppc.addOption(new DefaultConfigurationOption(ORDER_IMPORTS, true));
+		ppc.addOption(new DefaultConfigurationOption(COLUMN_ALIGN_PARAMETERS, true));
+		ppc.addOption(new DefaultConfigurationOption(INDENTATION, new Indentation(Indentation.IndentType.SPACES, 4)));
 		ParseResult<CompilationUnit> javaSource = new JavaParser()
 				.parse(compilationUnit.toString());
 

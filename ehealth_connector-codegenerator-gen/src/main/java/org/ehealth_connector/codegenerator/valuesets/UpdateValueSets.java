@@ -29,6 +29,7 @@ import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.type.Type;
 import org.apache.commons.io.FileUtils;
 import org.ehealth_connector.codegenerator.java.JavaCodeGenerator;
+import org.ehealth_connector.codegenerator.java.RuntimeUtils;
 import org.ehealth_connector.common.enums.LanguageCode;
 import org.ehealth_connector.common.mdht.enums.ValueSetEnumInterface;
 import org.ehealth_connector.valueset.api.ValueSetManager;
@@ -76,8 +77,8 @@ public class UpdateValueSets {
      * <div class="en">Base path where to find the config files for the
      * generator (YAML and JSON files).</div>
      */
-    private static final String CONFIG_FILE_BASE_PATH = System.getProperty("user.dir")
-            + "/ehealth_connector-codegenerator-gen/src/main/resources/valuesets/";
+    private static final String CONFIG_FILE_BASE_PATH = RuntimeUtils.getCodeGeneratorGenPath()
+            + "/src/main/resources/valuesets/";
 
     /**
      * <div class="en">List of all languages that should be used to generate
@@ -102,8 +103,8 @@ public class UpdateValueSets {
      * <div class="en">Relative path where to find the Java template text
      * file.</div>
      */
-    private static final String TEMPLATE_FILE_LOCATION = "ehealth_connector-codegenerator-gen/src/main/resources" +
-            "/format/template.java.txt";
+    private static final String TEMPLATE_FILE_LOCATION = RuntimeUtils.getCodeGeneratorGenPath()
+            + "/src/main/resources/format/template.java.txt";
 
     /**
      * <div class="en">Class name in the template that will be replaced with the
