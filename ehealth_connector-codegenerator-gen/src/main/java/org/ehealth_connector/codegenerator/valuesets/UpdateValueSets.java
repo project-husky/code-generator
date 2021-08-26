@@ -27,9 +27,8 @@ import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.type.Type;
-import com.github.javaparser.printer.PrettyPrinterConfiguration;
-import com.github.javaparser.printer.PrettyPrinterConfiguration.IndentType;
 import org.apache.commons.io.FileUtils;
+import org.ehealth_connector.codegenerator.java.JavaCodeGenerator;
 import org.ehealth_connector.common.enums.LanguageCode;
 import org.ehealth_connector.common.mdht.enums.ValueSetEnumInterface;
 import org.ehealth_connector.valueset.api.ValueSetManager;
@@ -87,13 +86,6 @@ public class UpdateValueSets {
     private static final List<LanguageCode> LANGUAGE_CODES = asList(ENGLISH, GERMAN, FRENCH, ITALIAN);
 
     private static final Logger LOG = LoggerFactory.getLogger(UpdateValueSets.class);
-
-    /**
-     * <div class="en">Java code formatter/pretty printer configuration used to
-     * write Java code.</div>
-     */
-    private static final PrettyPrinterConfiguration PRETTY_PRINTER_CONFIGURATION = new PrettyPrinterConfiguration()
-            .setIndentType(IndentType.TABS).setIndentSize(1).setOrderImports(true);
 
     /**
      * <div class="en">Shortcut for the internal type of a string.</div>
@@ -228,7 +220,7 @@ public class UpdateValueSets {
         ParseResult<CompilationUnit> javaSource = new JavaParser().parse(templateString);
 
         FileUtils.write(getSourceFileName(baseJavaFolder, fullyQualifiedClassName),
-                javaSource.getResult().get().toString(PRETTY_PRINTER_CONFIGURATION),
+                javaSource.getResult().get().toString(JavaCodeGenerator.getPrinterConfiguration()),
                 StandardCharsets.UTF_8);
 
     }
@@ -435,7 +427,7 @@ public class UpdateValueSets {
         }
 
         final File destFile = getSourceFileName(baseJavaFolder, className);
-        String classFileContent = javaSource.getResult().get().toString(PRETTY_PRINTER_CONFIGURATION);
+        String classFileContent = javaSource.getResult().get().toString(JavaCodeGenerator.getPrinterConfiguration());
         classFileContent = classFileContent.replace("import java.util.Map;", "import java.util.Map;\n");
         classFileContent = classFileContent.replace("import javax.annotation.processing.Generated;",
                 "import javax.annotation.processing.Generated;\n");

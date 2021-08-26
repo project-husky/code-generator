@@ -7,18 +7,17 @@
 	<parent>
 		<groupId>org.ehealth_connector.codegenerator</groupId>
 		<artifactId>ehealth_connector-codegenerator</artifactId>
-		<version>1.9-SNAPSHOT</version>
+		<version>1.9-SNAPSHOT</version> <!-- TODO: update to 2.0-ALPHA -->
 	</parent>
 
 	<dependencies>
-
 		<dependency>
 			<groupId>org.ehealth_connector.common</groupId>
-			<artifactId>ehealth_connector-common-gen</artifactId>
+			<artifactId>ehealth_connector-common-gen</artifactId> <!-- TODO: still needed? -->
 		</dependency>
 		<dependency>
 			<groupId>org.ehealth_connector.valueset</groupId>
-			<artifactId>ehealth_connector-valueset-gen</artifactId>
+			<artifactId>ehealth_connector-valueset-gen</artifactId> <!-- TODO: still needed? -->
 		</dependency>
 
 		<dependency>
@@ -46,12 +45,12 @@
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr4-runtime</artifactId>
-			<version>4.7.2</version>
+			<version>4.9.2</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.javaparser</groupId>
 			<artifactId>javaparser-symbol-solver-core</artifactId>
-			<version>3.14.5</version>
+			<version>3.22.1</version>
 		</dependency>
 
 		<!-- test stuff -->
@@ -68,7 +67,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.6.0</version>
+				<version>3.0.0</version>
 				<configuration>
 					<mainClass>org.ehealth_connector.codegenerator.valuesets.UpdateValueSets</mainClass>
 					<executable>java</executable>
@@ -82,7 +81,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>3.0.0</version><!--$NO-MVN-MAN-VER$-->
+				<version>3.2.0</version><!--$NO-MVN-MAN-VER$-->
 				<executions>
 					<execution>
 						<id>add-source</id>
@@ -102,7 +101,7 @@
 			<plugin>
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr4-maven-plugin</artifactId>
-				<version>4.7.1</version>
+				<version>4.9.2</version>
 				<configuration>
 					<outputDirectory>${project.build.directory}/generated-sources/antlr4/org/ehealth_connector/codegenerator/cda/antlr/</outputDirectory>
 					<sourceDirectory>${basedir}/src/main/resources/antlr4</sourceDirectory>

@@ -21,6 +21,10 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.github.javaparser.printer.configuration.DefaultConfigurationOption;
+import com.github.javaparser.printer.configuration.DefaultPrinterConfiguration;
+import com.github.javaparser.printer.configuration.Indentation;
+import com.github.javaparser.printer.configuration.PrinterConfiguration;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.text.CaseUtils;
@@ -31,8 +35,8 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.printer.PrettyPrinterConfiguration;
-import com.github.javaparser.printer.PrettyPrinterConfiguration.IndentType;
+
+import static com.github.javaparser.printer.configuration.DefaultPrinterConfiguration.ConfigOption.*;
 
 /**
  * <div class="en">This class contains some methods to assist the Java Code
@@ -85,21 +89,28 @@ public class JavaCodeGenerator {
 		for (final ClassOrInterfaceDeclaration cl : compilationUnit.findAll(ClassOrInterfaceDeclaration.class)) {
 			cl.getMembers().sort(new BodyDeclarationsComparator());
 		}
-		final PrettyPrinterConfiguration ppc = new PrettyPrinterConfiguration().setIndentType(IndentType.TABS)
-				.setIndentSize(1);
 		final ParseResult<CompilationUnit> javaSource = new JavaParser().parse(compilationUnit.toString());
 		final String fileHeader = JavaCodeGenerator.getFileHeader();
-		String generatedClassFileContent = javaSource.getResult().get().toString(ppc);
+		String generatedClassFileContent = javaSource.getResult().get().toString(getPrinterConfiguration());
 
 		if (!generatedClassFileContent.startsWith(fileHeader)) {
 			generatedClassFileContent = JavaCodeGenerator.getFileHeader() + "\r\n" + generatedClassFileContent;
 		}
-
-		// This is for debugging purposes, only:
-		// System.out.println(generatedClassFileContent);
-
 		FileUtils.writeStringToFile(outFile, generatedClassFileContent, Charsets.UTF_8);
+	}
 
+	/**
+	 * Gets the pretty printer configuration that is used to generate Java code.
+	 *
+	 * @return the pretty printer configuration.
+	 */
+	public static PrinterConfiguration getPrinterConfiguration() {
+		final PrinterConfiguration config = new DefaultPrinterConfiguration();
+		config.addOption(new DefaultConfigurationOption(ORDER_IMPORTS, true));
+		config.addOption(new DefaultConfigurationOption(COLUMN_ALIGN_PARAMETERS, true));
+		config.addOption(new DefaultConfigurationOption(INDENTATION, new Indentation(Indentation.IndentType.SPACES,
+				4)));
+		return config;
 	}
 
 	/**
