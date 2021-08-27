@@ -37,51 +37,51 @@ import com.github.javaparser.ast.body.MethodDeclaration;
  */
 public class BodyDeclarationsComparator implements Comparator<BodyDeclaration<?>> {
 
-	/**
-	 *
-	 * <div class="en">Compares two members on their type and name.</div>
-	 *
-	 * <div class="de">Vergleicht zwei Member nach Typ und Name.</div>
-	 *
-	 * {@inheritDoc}
-	 *
-	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public int compare(BodyDeclaration<?> a, BodyDeclaration<?> b) {
-		if (a == null && b == null)
-			return 0;
-		else if (a == null)
-			return -1;
-		else if (b == null)
-			return 1;
-		else {
+    /**
+     *
+     * <div class="en">Compares two members on their type and name.</div>
+     *
+     * <div class="de">Vergleicht zwei Member nach Typ und Name.</div>
+     *
+     * {@inheritDoc}
+     *
+     * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+     */
+    @Override
+    public int compare(BodyDeclaration<?> a, BodyDeclaration<?> b) {
+        if (a == null && b == null)
+            return 0;
+        else if (a == null)
+            return -1;
+        else if (b == null)
+            return 1;
+        else {
 
-			// TODO: static declarations need to come first!
+            // TODO: static declarations need to come first!
 
-			if (a instanceof ConstructorDeclaration && b instanceof ConstructorDeclaration) {
-				// TODO when there are multiple constructors, add a comparision
-				// on their arg list, here
-				return 0;
-			} else if (a instanceof final FieldDeclaration fieldA && b instanceof final FieldDeclaration fieldB) {
-				return fieldA.getVariable(0).getNameAsString() .compareTo(fieldB.getVariable(0).getNameAsString());
-			} else if (a instanceof final MethodDeclaration methodA && b instanceof final MethodDeclaration methodB) {
-				return methodA.getNameAsString().compareTo(methodB.getNameAsString());
-			} else if (a instanceof ConstructorDeclaration && b instanceof FieldDeclaration) {
-				return -1;
-			} else if (a instanceof FieldDeclaration && b instanceof ConstructorDeclaration) {
-				return 1;
-			} else if (a instanceof ConstructorDeclaration && b instanceof MethodDeclaration) {
-				return -1;
-			} else if (a instanceof MethodDeclaration && b instanceof ConstructorDeclaration) {
-				return 1;
-			} else if (a instanceof FieldDeclaration && b instanceof MethodDeclaration) {
-				return -1;
-			} else if (a instanceof MethodDeclaration && b instanceof FieldDeclaration) {
-				return 1;
-			} else {
-				return 0;
-			}
-		}
-	}
+            if (a instanceof ConstructorDeclaration && b instanceof ConstructorDeclaration) {
+                // TODO when there are multiple constructors, add a comparision
+                // on their arg list, here
+                return 0;
+            } else if (a instanceof final FieldDeclaration fieldA && b instanceof final FieldDeclaration fieldB) {
+                return fieldA.getVariable(0).getNameAsString() .compareTo(fieldB.getVariable(0).getNameAsString());
+            } else if (a instanceof final MethodDeclaration methodA && b instanceof final MethodDeclaration methodB) {
+                return methodA.getNameAsString().compareTo(methodB.getNameAsString());
+            } else if (a instanceof ConstructorDeclaration && b instanceof FieldDeclaration) {
+                return -1;
+            } else if (a instanceof FieldDeclaration && b instanceof ConstructorDeclaration) {
+                return 1;
+            } else if (a instanceof ConstructorDeclaration && b instanceof MethodDeclaration) {
+                return -1;
+            } else if (a instanceof MethodDeclaration && b instanceof ConstructorDeclaration) {
+                return 1;
+            } else if (a instanceof FieldDeclaration && b instanceof MethodDeclaration) {
+                return -1;
+            } else if (a instanceof MethodDeclaration && b instanceof FieldDeclaration) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+    }
 }

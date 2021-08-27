@@ -34,26 +34,26 @@ import com.github.javaparser.ast.ImportDeclaration;
  */
 public class ImportComparator implements Comparator<ImportDeclaration> {
 
-	/**
-	 *
-	 * <div class="en">Compares two members on their name.</div>
-	 *
-	 * <div class="de">Vergleicht zwei Member nach Name.</div>
-	 *
-	 * {@inheritDoc}
-	 *
-	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public int compare(final ImportDeclaration a, final ImportDeclaration b) {
-		if (a == null && b == null)
-			return 0;
-		else if (a == null)
-			return -1;
-		else if (b == null)
-			return 1;
-		else {
-			return a.getNameAsString().compareTo(b.getNameAsString());
-		}
-	}
+    /**
+     *
+     * <div class="en">Compares two members on their name.</div>
+     *
+     * <div class="de">Vergleicht zwei Member nach Name.</div>
+     *
+     * {@inheritDoc}
+     *
+     * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+     */
+    @Override
+    public int compare(final ImportDeclaration a, final ImportDeclaration b) {
+        if (a == null && b == null)
+            return 0;
+        else if (a == null)
+            return -1;
+        else if (b == null)
+            return 1;
+        else {
+            return a.getNameAsString().compareTo(b.getNameAsString());
+        }
+    }
 }

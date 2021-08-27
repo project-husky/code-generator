@@ -27,32 +27,32 @@ import java.io.Serial;
  */
 public class ConfigurationException extends Exception {
 
-	/** The generated constant serialVersionUID. */
-	@Serial
-	private static final long serialVersionUID = -836975789021093767L;
+    /** The generated constant serialVersionUID. */
+    @Serial
+    private static final long serialVersionUID = -836975789021093767L;
 
-	/**
-	 * <div class="en">Default constructor to instantiate the object. A
-	 * predefined text message will be used.</div>
-	 *
-	 * <div class="de">Standardkonstruktor zum Instanziieren des Objekts. Eine
-	 * vordefinierte Textnachricht wird verwendet.<div>
-	 */
-	public ConfigurationException() {
-		super("The content profile configuration cannot be loaded. Please check the config file/stream.");
-	}
+    /**
+     * <div class="en">Default constructor to instantiate the object. A
+     * predefined text message will be used.</div>
+     *
+     * <div class="de">Standardkonstruktor zum Instanziieren des Objekts. Eine
+     * vordefinierte Textnachricht wird verwendet.<div>
+     */
+    public ConfigurationException() {
+        super("The content profile configuration cannot be loaded. Please check the config file/stream.");
+    }
 
-	/**
-	 * <div class="en">Instantiates a new configuration exception by using the
-	 * given text message.</div>
-	 *
-	 * <div class="de">Instanziiert eine neue Konfigurationsausnahme unter
-	 * Verwendung der angegebenen Textnachricht.<div>
-	 *
-	 * @param message
-	 *            the message
-	 */
-	public ConfigurationException(String message) {
-		super(message);
-	}
+    /**
+     * <div class="en">Instantiates a new configuration exception by using the
+     * given text message.</div>
+     *
+     * <div class="de">Instanziiert eine neue Konfigurationsausnahme unter
+     * Verwendung der angegebenen Textnachricht.<div>
+     *
+     * @param message
+     *            the message
+     */
+    public ConfigurationException(String message) {
+        super(message);
+    }
 }

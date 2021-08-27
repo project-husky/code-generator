@@ -18,6 +18,6 @@ package org.ehealth_connector.codegenerator.cda.enums;
 
 public enum ProcessModes {
 
-	CONTAINS, INCLUDE;
+    CONTAINS, INCLUDE;
 
 }
