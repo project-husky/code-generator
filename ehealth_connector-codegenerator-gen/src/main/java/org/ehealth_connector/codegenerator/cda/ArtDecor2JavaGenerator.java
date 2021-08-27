@@ -1203,153 +1203,114 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
      *
      * <p><div class="de">Hauptzugang zum ART-DECOR to Java Code Generator.</div>
      *
-     * @param args Command line arguments. Two values are expected.
+     * @param javaSourceDir The Java source directory.
+     * @param packageConfig The package config file.
      */
-    public static void main(String[] args) throws Exception {
+    public static void generate(final File javaSourceDir,
+                                final File packageConfig) {
         LOG.info("ArtDecor2JavaGenerator started");
 
-        if (args.length != 2) {
-            LOG.info("Usage:");
-            LOG.info("ArtDecor2JavaGenerator <configFile> <javaSourceDir>");
-            LOG.info("  configFile: This parameter is the path to the YAML configuration file to use (e.g. " +
-                    "D:/Java/ehealthconnector-codegenerator/ehealth_connector-codegenerator-gen/src/main" +
-                    "/resources/cda/ContentProfilePackageConfigCdaChEmedV097.yml)");
-            LOG.info("  javaSourceDir: This parameter must be the path to the eHealthConnector-Suisse project " +
-                    "directory (e.g. D:/Java/ehealtconnector-suisse)");
-            LOG.info("");
-            LOG.info("Example:");
-            LOG.info("ArtDecor2JavaGenerator D:/Java/ehealthconnector-codegenerator/ehealth_connector-codegenerator-gen/" +
-                    "src/main/resources/cda/ContentProfilePackageConfigCdaChEmedV097.yml D:/Java/ehealtconnector-suisse");
-            return;
-        }
-
-        final String configFileString = args[0];
-        final File configFile;
-        if (configFileString != null) {
-            configFile = new File(configFileString);
-            if (!configFile.exists()) {
-                LOG.error("ERROR: Config file does not exist ({})", configFileString);
-                return;
-            } else {
-                if (!configFile.isFile()) {
-                    LOG.error(
-                            "ERROR: Config file is not a file ({})", configFileString);
-                    return;
-                }
-            }
-        } else {
-            LOG.error("ERROR: Config file is null");
-            return;
-        }
-
-        final String javaSourceDirString = args[1];
-        final File javaSourceDir;
-        if (javaSourceDirString != null) {
-            javaSourceDir = new File(javaSourceDirString);
-            if (!javaSourceDir.exists()) {
-                LOG.error("ERROR: Java source directory does not exist ({})", javaSourceDirString);
-                return;
-            } else {
-                if (!javaSourceDir.isDirectory()) {
-                    LOG.error(
-                            "ERROR: Java source is not a directory ({})", javaSourceDirString);
-                    return;
-                }
-            }
-        } else {
-            LOG.error("ERROR: Java source directory is null");
-            return;
-        }
-
-        final String tempDownloadPathString = Util.getTempDirectory() + "/eHC_Arde_Download/";
-        final File tempDownloadPath = new File(tempDownloadPathString);
-        FileUtils.deleteDirectory(tempDownloadPath);
+        final File tempDownloadPath = new File(Util.getTempDirectory() + "/eHC_Arde_Download/");
 
         LOG.info("Settings:");
-        LOG.info("Config file: {}", configFile.getAbsolutePath());
+        LOG.info("Java source dir: {}", javaSourceDir.getAbsolutePath());
+        LOG.info("Package config : {}", packageConfig.getAbsolutePath());
+        LOG.info("Temp dir       : {}", tempDownloadPath.getAbsolutePath());
 
-        // Load Config
-        LOG.info("Configuration:");
-        LOG.info("Loading configuration...");
-        final ArtDecor2JavaManager artDecor2JavaManager2 = new ArtDecor2JavaManager();
-        final ContentProfilePackageConfig contentProfilePackageConfig =
-                artDecor2JavaManager2.loadContentProfilePackageConfig(configFile.getAbsolutePath());
-        LOG.info("Loading configuration done.");
+        try {
+            FileUtils.deleteDirectory(tempDownloadPath);
 
-        LOG.debug("Loaded configuration:");
-        for (final ContentProfileConfig contentProfile : contentProfilePackageConfig.getContentProfileConfigList()) {
-            LOG.debug("- Target namespace: {}", contentProfile.getTargetNamespace());
-            for (final String templateId : contentProfile.getArtDecorDocTemplateMap().keySet()) {
-                LOG.debug("  - template id: {}", templateId);
+            // Load Config
+            LOG.info("Configuration:");
+            LOG.info("Loading configuration...");
+            final ArtDecor2JavaManager artDecor2JavaManager2 = new ArtDecor2JavaManager();
+            final ContentProfilePackageConfig contentProfilePackageConfig =
+                    artDecor2JavaManager2.loadContentProfilePackageConfig(packageConfig.getAbsolutePath());
+            LOG.info("Loading configuration done.");
+
+            LOG.debug("Loaded configuration:");
+            for (final ContentProfileConfig contentProfile : contentProfilePackageConfig.getContentProfileConfigList()) {
+                LOG.debug("- Target namespace: {}", contentProfile.getTargetNamespace());
+                for (final String templateId : contentProfile.getArtDecorDocTemplateMap().keySet()) {
+                    LOG.debug("  - template id: {}", templateId);
+                }
             }
+            LOG.info("Configuration done.");
+
+            // Perform REST calls
+            LOG.info("Download from ART-DECOR");
+            for (final ContentProfileConfig contentProfile : contentProfilePackageConfig.getContentProfileConfigList()) {
+                String dir = tempDownloadPath.getAbsolutePath() + "/" + contentProfile.getTargetNamespace() + "/";
+                ArtDecorRestClient artDecorRestClient = new ArtDecorRestClient(contentProfile.getArtDecorProjectMap(), dir);
+
+                for (final String templateId : contentProfile.getArtDecorDocTemplateMap().keySet()) {
+                    final String effectiveTime = contentProfile.getArtDecorDocTemplateMap().get(templateId);
+                    artDecorRestClient.downloadTemplateRecursive(templateId, effectiveTime);
+                }
+            }
+            LOG.info("Download from ART-DECOR done.");
+
+            // Perform Java code generation
+            LOG.info("Perform Java code generation");
+            final List<String> dstPathList = new ArrayList<>();
+            for (final ContentProfileConfig contentProfile : contentProfilePackageConfig.getContentProfileConfigList()) {
+                String srcFilePath = tempDownloadPath.getAbsolutePath() + "/" + contentProfile.getTargetNamespace() + "/";
+                final Map<String, CdaTemplate> templateIndex = new HashMap<>();
+                final Map<String, String> valueSetIndex = new HashMap<>();
+                final List<CdaTemplate> templateList = new ArrayList<>();
+
+
+                String dstFilePath = contentProfile.getTargetDir(); //TODO REMOVE
+                if (!(dstFilePath.startsWith("/")
+                        || dstFilePath.startsWith("\\")
+                        || ":".equals(dstFilePath.subSequence(2, 3)))) {
+                    // is not an absolute path, so we adjust the relative path
+                    dstFilePath = "../../" + dstFilePath;
+                }
+                if (!dstFilePath.endsWith("/")) {
+                    dstFilePath += "/";
+                }
+
+                final ArtDecor2JavaGenerator artDecor2JavaGenerator = new ArtDecor2JavaGenerator(
+                        null,
+                        templateIndex,
+                        valueSetIndex,
+                        templateList,
+                        srcFilePath,
+                        javaSourceDir.getAbsolutePath(),
+                        contentProfile.getTargetNamespace(),
+                        JavaCodeGenerator.getFileHeader(),
+                        contentProfile.getArtDecorMainPrefix(),
+                        new URL(contentProfile.getArtDecorMainBaseUrl())
+                );
+                for (final String templateId : contentProfile.getArtDecorDocTemplateMap().keySet()) {
+                    artDecor2JavaGenerator.prepareForAnotherTemplate();
+                    artDecor2JavaGenerator.doOneTemplate(templateId);
+                }
+                artDecor2JavaGenerator.createJavaClasses();
+                if (!dstPathList.contains(artDecor2JavaGenerator.getFullDstFilePath())) {
+                    dstPathList.add(artDecor2JavaGenerator.getFullDstFilePath());
+                }
+                if (!dstPathList.contains(artDecor2JavaGenerator.getFullDstFilePath() + "/enums")) {
+                    dstPathList.add(artDecor2JavaGenerator.getFullDstFilePath() + "enums/");
+                }
+            }
+            LOG.info("Java code generation done.");
+            FileUtils.deleteDirectory(tempDownloadPath);
+            LOG.info("Generated Java classes and enums in the following folders:");
+            for (final String path : dstPathList) {
+                LOG.info("- {}", path);
+            }
+            LOG.info("ArtDecor2JavaGenerator finished.");
+        } catch (final Exception e) {
+            LOG.error("Uncaught exception: ", e);
         }
-        LOG.info("Configuration done.");
 
-        // Perform REST calls
-        LOG.info("Download from ART-DECOR");
-        for (final ContentProfileConfig contentProfile : contentProfilePackageConfig.getContentProfileConfigList()) {
-            String dir = tempDownloadPath.getAbsolutePath() + "/" + contentProfile.getTargetNamespace() + "/";
-            ArtDecorRestClient artDecorRestClient = new ArtDecorRestClient(contentProfile.getArtDecorProjectMap(), dir);
-
-            for (final String templateId : contentProfile.getArtDecorDocTemplateMap().keySet()) {
-                final String effectiveTime = contentProfile.getArtDecorDocTemplateMap().get(templateId);
-                artDecorRestClient.downloadTemplateRecursive(templateId, effectiveTime);
-            }
+        // Clean behind the script
+        try {
+            FileUtils.deleteDirectory(tempDownloadPath);
+        } catch (final Exception ignored) {
         }
-        LOG.info("Download from ART-DECOR done.");
-
-        // Perform Java code generation
-        LOG.info("Perform Java code generation");
-        final List<String> dstPathList = new ArrayList<>();
-        for (final ContentProfileConfig contentProfile : contentProfilePackageConfig.getContentProfileConfigList()) {
-            String srcFilePath = tempDownloadPath.getAbsolutePath() + "/" + contentProfile.getTargetNamespace() + "/";
-            final Map<String, CdaTemplate> templateIndex = new HashMap<>();
-            final Map<String, String> valueSetIndex = new HashMap<>();
-            final List<CdaTemplate> templateList = new ArrayList<>();
-
-
-            String dstFilePath = contentProfile.getTargetDir(); //TODO REMOVE
-            if (!(dstFilePath.startsWith("/")
-                    || dstFilePath.startsWith("\\")
-                    || ":".equals(dstFilePath.subSequence(2, 3)))) {
-                // is not an absolute path, so we adjust the relative path
-                dstFilePath = "../../" + dstFilePath;
-            }
-            if (!dstFilePath.endsWith("/")) {
-                dstFilePath += "/";
-            }
-
-            final ArtDecor2JavaGenerator artDecor2JavaGenerator = new ArtDecor2JavaGenerator(
-                null,
-                templateIndex,
-                valueSetIndex,
-                templateList,
-                srcFilePath,
-                javaSourceDir.getAbsolutePath(),
-                contentProfile.getTargetNamespace(),
-                JavaCodeGenerator.getFileHeader(),
-                contentProfile.getArtDecorMainPrefix(),
-                new URL(contentProfile.getArtDecorMainBaseUrl())
-            );
-            for (final String templateId : contentProfile.getArtDecorDocTemplateMap().keySet()) {
-                artDecor2JavaGenerator.prepareForAnotherTemplate();
-                artDecor2JavaGenerator.doOneTemplate(templateId);
-            }
-            artDecor2JavaGenerator.createJavaClasses();
-            if (!dstPathList.contains(artDecor2JavaGenerator.getFullDstFilePath())) {
-                dstPathList.add(artDecor2JavaGenerator.getFullDstFilePath());
-            }
-            if (!dstPathList.contains(artDecor2JavaGenerator.getFullDstFilePath() + "/enums")) {
-                dstPathList.add(artDecor2JavaGenerator.getFullDstFilePath() + "enums/");
-            }
-        }
-        LOG.info("Java code generation done.");
-        FileUtils.deleteDirectory(tempDownloadPath);
-        LOG.info("Generated Java classes and enums in the following folders:");
-        for (final String path : dstPathList) {
-            LOG.info("- {}", path);
-        }
-        LOG.info("ArtDecor2JavaGenerator finished.");
     }
 
     /**

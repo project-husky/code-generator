@@ -36,7 +36,7 @@ public class SwissEprCodeGenerator {
      *
      * @param args command line arguments. A single value is expected.
      */
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         LOG.info("Update Swiss EPR enums");
 
         if (args.length != 1) {
