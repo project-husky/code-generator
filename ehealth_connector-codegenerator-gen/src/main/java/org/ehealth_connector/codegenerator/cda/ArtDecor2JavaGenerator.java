@@ -2672,10 +2672,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                             | NoSuchFieldException
                             | SecurityException e) {
                         throw new RuntimeException(
-                                "Template data type cannot be set for "
-                                        + currentCdaTemplate.getName()
-                                        + ": "
-                                        + e.getMessage());
+                                "Template data type cannot be set for " + currentCdaTemplate.getName(),
+                                e
+                        );
                     }
                 }
             }

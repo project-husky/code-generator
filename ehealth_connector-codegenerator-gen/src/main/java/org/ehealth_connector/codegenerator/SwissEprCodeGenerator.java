@@ -24,7 +24,7 @@ public class SwissEprCodeGenerator {
      * Base path where to find the config files for the generator (YAML and JSON files).
      */
     private static final String CONFIG_FILE_BASE_PATH = RuntimeUtils.getCodeGeneratorGenPath()
-            + "/src/updateValueSets/resources/valuesets/";
+            + "/src/main/resources/valuesets/";
 
     /**
      * The logger.

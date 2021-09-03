@@ -24,7 +24,7 @@ public class CdaChEmedCodeGenerator {
      * Base path where to find the config files for the generator (YAML and JSON files).
      */
     private static final String CONFIG_FILE_BASE_PATH = RuntimeUtils.getCodeGeneratorGenPath()
-            + "/src/updateValueSets/resources/valuesets/";
+            + "/src/main/resources/cda/";
 
     /**
      * The logger.
@@ -46,7 +46,7 @@ public class CdaChEmedCodeGenerator {
             return;
         }
 
-        final String javaSourceDirString = args[0];
+        final String javaSourceDirString = args[0] + "/ehealth_connector-emed/ehealth_connector-emed-cda/";
         final File javaSourceDir;
         if (javaSourceDirString != null) {
             javaSourceDir = new File(javaSourceDirString);
@@ -70,7 +70,6 @@ public class CdaChEmedCodeGenerator {
         final File packageConfig = new File(CONFIG_FILE_BASE_PATH, CDACHEMED_PACKAGE_CONFIG);
         if (!packageConfig.exists() || !packageConfig.isFile()) {
             LOG.error("The package config file doesn't exist ({})", packageConfig.getAbsolutePath());
-            printUsage();
             printUsage();
         }
 
