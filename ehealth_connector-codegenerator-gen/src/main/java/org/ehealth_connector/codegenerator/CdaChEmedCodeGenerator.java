@@ -32,9 +32,7 @@ public class CdaChEmedCodeGenerator {
     protected static final Logger LOG = LoggerFactory.getLogger(CdaChEmedCodeGenerator.class);
 
     /**
-     * <div class="en">The main entry for the ART-DECOR to Java Code Generator.</div>
-     *
-     * <p><div class="de">Hauptzugang zum ART-DECOR to Java Code Generator.</div>
+     * The main entry for the ART-DECOR to Java Code Generator.
      *
      * @param args Command line arguments. A single value is expected.
      */
@@ -46,26 +44,20 @@ public class CdaChEmedCodeGenerator {
             return;
         }
 
-        final String javaSourceDirString = args[0] + "/ehealth_connector-emed/ehealth_connector-emed-cda/";
-        final File javaSourceDir;
-        if (javaSourceDirString != null) {
-            javaSourceDir = new File(javaSourceDirString);
-            if (!javaSourceDir.exists()) {
-                LOG.error("Java source directory does not exist ({})", javaSourceDirString);
-                printUsage();
-                return;
-            } else {
-                if (!javaSourceDir.isDirectory()) {
-                    LOG.error("Java source is not a directory ({})", javaSourceDirString);
-                    printUsage();
-                    return;
-                }
-            }
-        } else {
-            LOG.error("Java source directory is null");
+        final String javaSourceDirString = args[0] + "/husky-emed/husky-emed-cda/";
+        final File javaSourceDir = new File(javaSourceDirString);
+        if (!javaSourceDir.exists()) {
+            LOG.error("Java source directory does not exist ({})", javaSourceDirString);
             printUsage();
             return;
+        } else {
+            if (!javaSourceDir.isDirectory()) {
+                LOG.error("Java source is not a directory ({})", javaSourceDirString);
+                printUsage();
+                return;
+            }
         }
+
 
         final File packageConfig = new File(CONFIG_FILE_BASE_PATH, CDACHEMED_PACKAGE_CONFIG);
         if (!packageConfig.exists() || !packageConfig.isFile()) {
@@ -82,10 +74,10 @@ public class CdaChEmedCodeGenerator {
     private static void printUsage() {
         LOG.info("Usage:");
         LOG.info("CdaChEmedCodeGenerator <javaSourceDir>");
-        LOG.info("  javaSourceDir: This parameter must be the path to the eHealthConnector-Suisse project " +
-                "directory (e.g. D:/Java/ehealtconnector-suisse)");
+        LOG.info("  javaSourceDir: This parameter must be the path to the Husky project " +
+                "directory (e.g. D:/Java/husky)");
         LOG.info("");
         LOG.info("Example:");
-        LOG.info("CdaChEmedCodeGenerator D:/Java/ehealtconnector-suisse");
+        LOG.info("CdaChEmedCodeGenerator D:/Java/husky");
     }
 }

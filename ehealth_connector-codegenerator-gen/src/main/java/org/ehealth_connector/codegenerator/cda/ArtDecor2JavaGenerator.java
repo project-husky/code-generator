@@ -316,21 +316,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
     }
 
     /**
-     * Adds an import statement to the compilation unit.
-     *
-     * @param compilationUnit the compilation unit
-     * @param value           the value
-     */
-    private static void addImport(final CompilationUnit compilationUnit, final String value) {
-        for (final ImportDeclaration item : compilationUnit.getImports()) {
-            if (item.getNameAsString().equals(value)) {
-                compilationUnit.addImport(value);
-                return;
-            }
-        }
-    }
-
-    /**
      * Completes the creator method for fixed contents.
      *
      * @param creatorForFixedContentsMethod the creator for fixed contents method
@@ -404,9 +389,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                         cdaElement.getXmlName().replace("hl7:", "").replace("pharm:", "").replace("xsi:", "");
                 String enPartU = toUpperFirstChar(enPartL);
 
-                addImport(compilationUnit, "javax.xml.namespace.QName");
-                addImport(compilationUnit, "org.ehealth_connector.common.hl7cdar2.En" + enPartU);
-                addImport(compilationUnit, "javax.xml.bind.JAXBElement");
+                compilationUnit.addImport("javax.xml.namespace.QName");
+                compilationUnit.addImport("org.ehealth_connector.common.hl7cdar2.En" + enPartU);
+                compilationUnit.addImport("javax.xml.bind.JAXBElement");
 
                 body.addStatement("En" + enPartU + " obj = new En" + enPartU + "();");
                 body.addStatement("obj.xmlContent = value.xmlContent;");
@@ -525,15 +510,16 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
         }
         else {
             if (isClassCollection(memberType)) {
-                addImport(compilationUnit, "java.util.ArrayList");
-                field = myClass.addPrivateField("ArrayList<" + dataType + ">", name);
+                compilationUnit.addImport("java.util.ArrayList");
+                compilationUnit.addImport("java.util.List");
+                field = myClass.addPrivateField("List<" + dataType + ">", name);
                 field.getVariable(0).setInitializer("new ArrayList<" + dataType + ">()");
             } else {
                 field = myClass.addPrivateField(dataType, name);
             }
 
             // We do not want to have this member serialized!
-            addImport(compilationUnit, "javax.xml.bind.annotation.XmlTransient");
+            compilationUnit.addImport("javax.xml.bind.annotation.XmlTransient");
             field.addAnnotation(createXmlTransientAnnotation());
         }
         String comment = null;
@@ -558,10 +544,13 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
     /**
      * Creates the method for getting the given element to the resulting class.
      *
+     * @param compilationUnit the compilation unit
      * @param myClass    the my class
      * @param cdaElement the cda element
      */
-    private static void createGetter(final ClassOrInterfaceDeclaration myClass, final CdaElement cdaElement) {
+    private static void createGetter(final CompilationUnit compilationUnit,
+                                     final ClassOrInterfaceDeclaration myClass,
+                                     final CdaElement cdaElement) {
 
         if (cdaElement.getDataType() == null)
             throw new NotImplementedException("Type undefined for " + cdaElement.getJavaName());
@@ -592,12 +581,15 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
             boolean isLocalField = myClass.getExtendedTypes().isEmpty();
 
             if ("effectiveTime".equals(name) && !isLocalField) {
-                dataType = "org.ehealth_connector.common.hl7cdar2.SXCMTS";
+                compilationUnit.addImport("org.ehealth_connector.common.hl7cdar2.SXCMTS");
+                dataType = "SXCMTS";
             }
             if ("value".equals(name)) {
-                dataType = "org.ehealth_connector.common.hl7cdar2.ANY";
+                compilationUnit.addImport("org.ehealth_connector.common.hl7cdar2.ANY");
+                dataType = "ANY";
             }
-            dataType = "java.util.List<" + dataType + ">";
+            compilationUnit.addImport("java.util.List");
+            dataType = "List<" + dataType + ">";
         }
 
         String baseName = cdaElement.getJavaName();
@@ -676,9 +668,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
      */
     private static void createInitVersionMethods(final CompilationUnit compilationUnit,
                                                  final ClassOrInterfaceDeclaration myClass) {
-
-        addImport(compilationUnit, "org.ehealth_connector.common.Identificator");
-        addImport(compilationUnit, "org.ehealth_connector.common.utils.Hl7CdaR2Util");
+        compilationUnit.addImport("org.ehealth_connector.emed.cda.utils.CdaR2Utils");
+        compilationUnit.addImport("org.ehealth_connector.common.hl7cdar2.II");
+        compilationUnit.addImport("java.util.UUID");
 
         MethodDeclaration method;
         BlockStmt body;
@@ -687,177 +679,56 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
         method = myClass.addMethod("initFirstVersion", publicModifier().getKeyword());
         method.setJavadocComment(
                 "Sets the version number to 1 and makes sure the setId is the same as the document id.\n@param newDocId the new doc id");
-        method.addAndGetParameter("Identificator", "newDocId");
+        method.addAndGetParameter("String", "newDocId");
 
         body = method.createBody();
-        body.addStatement("Identificator docId = newDocId;");
-        body.addStatement(
-                "if (docId == null) docId = new Identificator(Identificator.builder().withRoot(org.openhealthtools.ihe.utils.UUID.generate()).build());");
-        body.addStatement("super.setId(docId.getHl7CdaR2Ii());");
-        body.addStatement("setVersion(docId, 1);");
+        body.addStatement("II docId = new II();");
+        body.addStatement("docId.setRoot(newDocId);");
+        body.addStatement("""
+                if (newDocId == null) {
+                    docId.setRoot(UUID.randomUUID().toString());
+                }
+                """);
+        body.addStatement("this.setId(docId);");
+        body.addStatement("this.setVersion(docId.getRoot(), 1);");
+
 
         // initNextVersion
         method = myClass.addMethod("initNextVersion", publicModifier().getKeyword());
         method.setJavadocComment(
                 "Increases the version number by one and makes sure the setId remains the same as previously.\n@param newDocId the new doc id");
-        method.addAndGetParameter("Identificator", "newDocId");
+        method.addAndGetParameter("String", "newDocId");
 
         body = method.createBody();
-        body.addStatement("org.ehealth_connector.common.hl7cdar2.II setId = getSetId();");
-        body.addStatement("if (setId == null) setId = getId();");
-        body.addStatement("if (setId == null) setId = newDocId.getHl7CdaR2Ii();");
-        body.addStatement("Integer version = CdaUtil.getInt(getVersionNumber());");
-        body.addStatement("setId(newDocId.getHl7CdaR2Ii());");
-        body.addStatement("setVersion(new Identificator(setId), version + 1);");
+        body.addStatement("final var id = new II();");
+        body.addStatement("id.setRoot(newDocId);");
+        body.addStatement("II setId = this.getSetId();");
+        body.addStatement("""
+                if (setId == null) {
+                    setId = this.getId();
+                }
+                """);
+        body.addStatement("""
+                if (setId == null) {
+                    setId = id;
+                }
+                """);
+        body.addStatement("Integer version = this.getVersionNumber().getValue().intValue();");
+        body.addStatement("this.setId(id);");
+        body.addStatement("this.setVersion(setId.getRoot(), version + 1);");
 
         // setVersion
         method = myClass.addMethod("setVersion", publicModifier().getKeyword());
         method.setJavadocComment(
                 "<div class=\"en\">Sets the document set Id and version number.</div>\n\n<div class=\"de\">Weist dem Dokument eine Set Id und eine Versionsnummer zu.</div>\n@param idVersion1 the set Id (if null, the document ID will be used)\n@param version the version of the document");
-        method.addAndGetParameter("Identificator", "idVersion1");
+        method.addAndGetParameter("String", "idVersion1");
         method.addAndGetParameter("int", "version");
 
         body = method.createBody();
-        body.addStatement("super.setSetId(idVersion1.getHl7CdaR2Ii());");
-        body.addStatement("super.setVersionNumber(Hl7CdaR2Util.createHl7CdaR2Int(version));");
-    }
-
-    /**
-     * Creates the loadFromFile methods to the resulting class.
-     *
-     * @param compilationUnit the compilation unit
-     * @param myClass         the my class
-     */
-    private static void createLoaderMethods(final CompilationUnit compilationUnit,
-                                            final ClassOrInterfaceDeclaration myClass) {
-        addImport(compilationUnit, "java.io.File");
-        addImport(compilationUnit, "javax.xml.bind.JAXBContext");
-        addImport(compilationUnit, "javax.xml.bind.JAXBElement");
-        addImport(compilationUnit, "javax.xml.bind.JAXBException");
-        addImport(compilationUnit, "java.io.IOException");
-        addImport(compilationUnit, "javax.xml.bind.Unmarshaller");
-        addImport(compilationUnit, "javax.xml.transform.stream.StreamSource");
-
-        MethodDeclaration method;
-        String comment = "Loads the CDA document from file.";
-
-        // The one with the file name as parameter
-        method =
-                myClass.addMethod(
-                        "loadFromFile", publicModifier().getKeyword(), staticModifier().getKeyword());
-        method.setType(myClass.getNameAsString());
-        method.setJavadocComment(
-                comment
-                        + "\n@param inputFileName the full path and filename of the sourcefile.\n@return the CDA document\\n@throws JAXBException the JAXB exception\\n@throws IOException Signals that an I/O exception has occurred.");
-        method.addAndGetParameter("String", "inputFileName");
-        method.addThrownException(JAXBException.class);
-        method.addThrownException(IOException.class);
-
-        BlockStmt body = method.createBody();
-        body.addStatement("return loadFromFile(new File(inputFileName));");
-
-        // The one with the file as parameter
-        method =
-                myClass.addMethod(
-                        "loadFromFile", publicModifier().getKeyword(), staticModifier().getKeyword());
-        method.setType(myClass.getNameAsString());
-        method.setJavadocComment(
-                comment
-                        + "\n@param inputFile the source file.\nn@return the CDA document\\n@throws JAXBException the JAXB exception\\n@throws IOException Signals that an I/O exception has occurred.");
-        method.addAndGetParameter("File", "inputFile");
-        method.addThrownException(JAXBException.class);
-        method.addThrownException(IOException.class);
-
-        body = method.createBody();
-        body.addStatement(myClass.getNameAsString() + " retVal;");
-        body.addStatement(
-                "JAXBContext context = JAXBContext.newInstance(" + myClass.getNameAsString() + ".class);");
-        body.addStatement("Unmarshaller mar = context.createUnmarshaller();");
-        body.addStatement("StreamSource source = new StreamSource(inputFile);");
-        body.addStatement(
-                "JAXBElement<"
-                        + myClass.getNameAsString()
-                        + "> root = mar.unmarshal(source, "
-                        + myClass.getNameAsString()
-                        + ".class);");
-        body.addStatement("retVal = root.getValue();");
-        body.addStatement("return retVal;");
-    }
-
-    /**
-     * Creates the saveToFile methods to the resulting class.
-     *
-     * @param compilationUnit the compilation unit
-     * @param myClass         the my class
-     */
-    private static void createSaverMethods(final CompilationUnit compilationUnit,
-                                           final ClassOrInterfaceDeclaration myClass) {
-
-        addImport(compilationUnit, "org.ehealth_connector.cda.utils.CdaUtil");
-
-        MethodDeclaration method;
-        BlockStmt body;
-        String comment = "Saves the current CDA document to file.";
-
-        // The one with the file name as parameter
-        method = myClass.addMethod("saveToFile", publicModifier().getKeyword());
-        method.setJavadocComment(
-                comment
-                        + "\n@param outputFileName the full path and filename of the destination file.\n@throws JAXBException the JAXB exception\n@throws ParserConfigurationException the parser configuration exception\n@throws TransformerException the transformer exception\n@throws FileNotFoundException the file not found exception");
-        method.addAndGetParameter("String", "outputFileName");
-        method.addThrownException(JAXBException.class);
-        method.addThrownException(ParserConfigurationException.class);
-        method.addThrownException(TransformerException.class);
-        method.addThrownException(FileNotFoundException.class);
-
-        body = method.createBody();
-        body.addStatement("saveToFile(new File(outputFileName), null, null);");
-
-        // The one with the file name as parameter
-        method = myClass.addMethod("saveToFile", publicModifier().getKeyword());
-        method.setJavadocComment(
-                comment
-                        + "\n@param outputFile the destination file.\n@throws JAXBException the JAXB exception\n@throws ParserConfigurationException the parser configuration exception\n@throws TransformerException the transformer exception\n@throws FileNotFoundException the file not found exception");
-        method.addAndGetParameter("File", "outputFile");
-        method.addThrownException(JAXBException.class);
-        method.addThrownException(ParserConfigurationException.class);
-        method.addThrownException(TransformerException.class);
-        method.addThrownException(FileNotFoundException.class);
-
-        body = method.createBody();
-        body.addStatement("saveToFile(outputFile, null, null);");
-
-        // The one with the file name and xsl, css as parameter
-        method = myClass.addMethod("saveToFile", publicModifier().getKeyword());
-        method.setJavadocComment(
-                comment
-                        + "\n@param outputFileName the full path and filename of the destination file.\n@param xsl the path and filename or url to the rendering stylesheet\n@param css the path and filename or url to the rendering css\n@throws JAXBException the JAXB exception\n@throws ParserConfigurationException the parser configuration exception\n@throws TransformerException the transformer exception\\n@throws FileNotFoundException the file not found exception");
-        method.addAndGetParameter("String", "outputFileName");
-        method.addAndGetParameter("String", "xsl");
-        method.addAndGetParameter("String", "css");
-        method.addThrownException(JAXBException.class);
-        method.addThrownException(ParserConfigurationException.class);
-        method.addThrownException(TransformerException.class);
-        method.addThrownException(FileNotFoundException.class);
-
-        body = method.createBody();
-        body.addStatement("saveToFile(new File(outputFileName), xsl, css);");
-
-        // The one with the file as parameter
-        method = myClass.addMethod("saveToFile", publicModifier().getKeyword());
-        method.setJavadocComment(
-                comment
-                        + "\n@param outputFile the destination file.\n@param xsl the path and filename or url to the rendering stylesheet\n@param css the path and filename or url to the rendering css\n@throws JAXBException the JAXB exception\n@throws ParserConfigurationException the parser configuration exception\n@throws TransformerException the transformer exception\\n@throws FileNotFoundException the file not found exception");
-        method.addAndGetParameter("File", "outputFile");
-        method.addAndGetParameter("String", "xsl");
-        method.addAndGetParameter("String", "css");
-        method.addThrownException(JAXBException.class);
-        method.addThrownException(ParserConfigurationException.class);
-        method.addThrownException(TransformerException.class);
-        method.addThrownException(FileNotFoundException.class);
-
-        body = method.createBody();
-        body.addStatement("CdaUtil.saveJaxbObjectToFile(this, outputFile, xsl, css);");
+        body.addStatement("final var id = new II();");
+        body.addStatement("id.setRoot(idVersion1);");
+        body.addStatement("super.setSetId(id);");
+        body.addStatement("super.setVersionNumber(CdaR2Utils.createInt(version));");
     }
 
     /**
@@ -905,9 +776,10 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
             boolean isLocalField = (myClass.getExtendedTypes().size() == 0);
 
-            if ("effectiveTime".equals(name) && !isLocalField) {
-                dataType = "org.ehealth_connector.common.hl7cdar2.SXCMTS";
-            }
+            /*if ("effectiveTime".equals(name) && !isLocalField) {
+                compilationUnit.addImport("org.ehealth_connector.common.hl7cdar2.SXCMTS");
+                dataType = "SXCMTS";
+            }*/
         }
 
         String comment = "Sets the " + cdaElement.getJavaName();
@@ -944,8 +816,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                 if (memberType.getName().endsWith(".IVLTS") && !(dataType.endsWith(".IVLTS"))) {
                     if (memberType.getName().endsWith(".IVLTS") && (dataType.endsWith(".TS"))) {
                         // Create Interval from single TimeStamp
-                        addImport(compilationUnit, "org.ehealth_connector.common.hl7cdar2.IVLTS");
-                        addImport(compilationUnit, "org.ehealth_connector.common.hl7cdar2.ObjectFactory");
+                        compilationUnit.addImport("org.ehealth_connector.common.hl7cdar2.IVLTS");
+                        compilationUnit.addImport("org.ehealth_connector.common.hl7cdar2.ObjectFactory");
 
                         body.addStatement("ObjectFactory factory = new ObjectFactory();");
                         body.addStatement("IVLTS ivlts = factory.createIVLTS();");
@@ -1259,18 +1131,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                 final Map<String, String> valueSetIndex = new HashMap<>();
                 final List<CdaTemplate> templateList = new ArrayList<>();
 
-
-                String dstFilePath = contentProfile.getTargetDir(); //TODO REMOVE
-                if (!(dstFilePath.startsWith("/")
-                        || dstFilePath.startsWith("\\")
-                        || ":".equals(dstFilePath.subSequence(2, 3)))) {
-                    // is not an absolute path, so we adjust the relative path
-                    dstFilePath = "../../" + dstFilePath;
-                }
-                if (!dstFilePath.endsWith("/")) {
-                    dstFilePath += "/";
-                }
-
                 final ArtDecor2JavaGenerator artDecor2JavaGenerator = new ArtDecor2JavaGenerator(
                         null,
                         templateIndex,
@@ -1469,7 +1329,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
             if (cdaElement.getDataType().endsWith(".ENXP")) {
                 method.setType(dataType);
                 String enPartU = toUpperFirstChar(name);
-                addImport(compilationUnit, "org.ehealth_connector.common.hl7cdar2.En" + enPartU);
+                compilationUnit.addImport("org.ehealth_connector.common.hl7cdar2.En" + enPartU);
                 body.addStatement("En" + enPartU + " retVal = new En" + enPartU + "();");
             } else
                 throw new RuntimeException(
@@ -1768,13 +1628,13 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                                         .replace("xsi:", "");
                         String fieldName =
                                 "vocab" + toUpperFirstChar(elementName) + toUpperFirstChar(cdaAttribute.getName());
-                        String methodType = "ArrayList<org.ehealth_connector.common.Code>";
-                        addImport(compilationUnit, "org.ehealth_connector.common.Code");
-                        addImport(compilationUnit, "org.ehealth_connector.common.basetypes.CodeBaseType");
-                        addImport(compilationUnit, "java.util.ArrayList");
-                        FieldDeclaration field =
-                                myClass.addPrivateField("ArrayList<org.ehealth_connector.common.Code>", fieldName);
-                        field.getVariable(0).setInitializer("new " + methodType + "()");
+                        compilationUnit.addImport("org.ehealth_connector.emed.cda.models.common.Code");
+                        compilationUnit.addImport("org.ehealth_connector.emed.cda.models.common.basetypes.CodeBaseType");
+                        compilationUnit.addImport("java.util.ArrayList");
+                        compilationUnit.addImport("java.util.List");
+                        FieldDeclaration field = myClass.addPrivateField("List<Code>", fieldName);
+                        field.getVariable(0).setInitializer("new ArrayList<>()");
+                        field.setFinal(true);
 
                         String dataType = null;
                         try {
@@ -1807,7 +1667,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                             String myCodeSystemName = code.getCodeSystemName();
                             String myDisplayName = code.getDisplayName();
 
-                            if ("org.ehealth_connector.common.hl7cdar2.CS".equals(fieldDataClass.getName()))
+                            if ("CS".equals(fieldDataClass.getName()))
                                 codeComplete = (myCode != null);
                             else codeComplete = ((myCode != null) && (myCodeSystem != null));
 
@@ -1878,7 +1738,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
                         String comment = "Returns a list of vocab codes as defined in the ART-DECOR model";
                         method.setJavadocComment(comment);
-                        method.setType(methodType);
+                        method.setType("List<Code>");
                         BlockStmt body = method.createBody();
                         body.addStatement("return " + fieldName + ";");
                     }
@@ -2168,6 +2028,10 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
         String className = JavaCodeGenerator.toPascalCase(cdaTemplate.getName());
 
+        if ("DosageInstructionsStartStopFrequency".equalsIgnoreCase(className)) {
+            System.out.println("DosageInstructionsStartStopFrequency");
+        }
+
         boolean isSingleElementTemplate = (cdaTemplate.getCdaElementList().size() == 1);
 
         for (CdaElement cdaElement : cdaTemplate.getCdaElementList()) {
@@ -2190,7 +2054,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                             .equals(cdaElement.getDataType());
 
             if (isCdaRootElement) {
-                addImport(compilationUnit, "javax.xml.bind.annotation.XmlRootElement");
+                compilationUnit.addImport("javax.xml.bind.annotation.XmlRootElement");
                 myClass.addAnnotation(createXmlRootElementAnnotation("ClinicalDocument"));
             }
 
@@ -2237,8 +2101,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                 inheritanceOf = null;
             }
 
-            if (inheritanceOf != null)
-                myClass.setExtendedTypes(new NodeList<>(new ClassOrInterfaceType(null, inheritanceOf)));
+            if (inheritanceOf != null) {
+                compilationUnit.addImport(inheritanceOf);
+                myClass.setExtendedTypes(new NodeList<>(new ClassOrInterfaceType(null,
+                        getClassWithoutPackage(inheritanceOf))));
+            }
+
 
             if (isSingleElementTemplate) {
                 createFixedAttributeValues(compilationUnit, myClass, cdaElement);
@@ -2255,8 +2123,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
             if ("org.ehealth_connector.common.hl7cdar2.POCDMT000040ClinicalDocument"
                     .equals(cdaElement.getDataType())) {
-                createLoaderMethods(compilationUnit, myClass);
-                createSaverMethods(compilationUnit, myClass);
                 createInitVersionMethods(compilationUnit, myClass);
             }
 
@@ -2316,7 +2182,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                 createAdder(compilationUnit, myClass, cdaElement);
                 createClearer(myClass, cdaElement);
             } else {
-                createGetter(myClass, cdaElement);
+                createGetter(compilationUnit, myClass, cdaElement);
                 createSetter(compilationUnit, myClass, cdaElement);
             }
         }
@@ -3528,7 +3394,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                                 name + " is neither an accessible field nor an accessible getter");
                 } else {
                     if ("nullFlavor".equals(attrName)) {
-                        addImport(compilationUnit, "java.util.ArrayList");
+                        compilationUnit.addImport("java.util.ArrayList");
                         body.addStatement("retVal.nullFlavor = new ArrayList<String>();");
                         body.addStatement("retVal.nullFlavor.add(nullFlavor);");
                     } else if (isClassCollection(memberType)) {

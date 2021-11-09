@@ -80,10 +80,10 @@ public class SwissEprCodeGenerator {
     private static void printUsage() {
         LOG.info("Usage:");
         LOG.info("SwissEprCodeGenerator <javaSourceDir>");
-        LOG.info("  javaSourceDir: This parameter must be the full path to the eHealthConnector-Suisse project " +
-                "directory (e.g. D:/Java/ehealtconnector-suisse)");
+        LOG.info("  javaSourceDir: This parameter must be the full path to the Husky project " +
+                "directory (e.g. D:/Java/husky)");
         LOG.info("");
         LOG.info("Example:");
-        LOG.info("SwissEprCodeGenerator D:/Java/ehealtconnector-suisse");
+        LOG.info("SwissEprCodeGenerator D:/Java/husky");
     }
 }
