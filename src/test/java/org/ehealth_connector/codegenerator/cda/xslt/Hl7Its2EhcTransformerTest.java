@@ -110,7 +110,7 @@ public class Hl7Its2EhcTransformerTest {
 
 		File destFile = new File(
 				Util.getTempDirectory() + FileUtil.getPlatformSpecificPathSeparator()
-						+ "2.16.756.5.30.1.1.10.1.10_transformed.xml");
+						+ "src/test/resources/2.16.756.5.30.1.1.10.1.10_transformed.xml");
 
 		File srcFile = new File(System.getProperty("user.dir")
 				+ "/src/test/resources/2.16.756.5.30.1.1.10.1.10.xml");
@@ -122,7 +122,7 @@ public class Hl7Its2EhcTransformerTest {
 
 		String expectedContent = IOUtils
 				.toString(getClass().getResourceAsStream(
-						"/2.16.756.5.30.1.1.10.1.10_transformed.xml"), Charsets.UTF_8)
+                        "/src/test/resources/2.16.756.5.30.1.1.10.1.10_transformed.xml"), Charsets.UTF_8)
 				.replace("\r\n", "\n");
 
 		String content = FileUtils.readFileToString(destFile, Charsets.UTF_8).replace("\r\n", "\n");
