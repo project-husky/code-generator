@@ -14,11 +14,11 @@
  * This line is intended for UTF-8 encoding checks, do not modify/delete: äöüéè
  *
  */
-package org.ehealth_connector.codegenerator.cda;
+package org.husky.codegenerator.cda;
 
 import com.sun.xml.bind.v2.*;
 import java.util.Comparator;
-import org.ehealth_connector.codegenerator.cda.java.JavaCodeGenerator;
+import org.husky.codegenerator.cda.java.JavaCodeGenerator;
 
 /**
  * This is a sample Class

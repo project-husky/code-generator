@@ -19,7 +19,7 @@
 parser grammar Hl7ItsParser;
 
 @header {
-package org.ehealth_connector.codegenerator.cda.antlr;
+package org.husky.codegenerator.cda.antlr;
 }
 
 options { tokenVocab=Hl7ItsLexer; }

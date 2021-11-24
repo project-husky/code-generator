@@ -19,7 +19,7 @@
 lexer grammar Hl7ItsLexer;
 
 @header {
-package org.ehealth_connector.codegenerator.cda.antlr;
+package org.husky.codegenerator.cda.antlr;
 }
 
 // Default "mode": Everything OUTSIDE of a tag

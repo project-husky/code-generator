@@ -1,5 +1,5 @@
 # This line is intended for UTF-8 encoding checks, do not modify/delete: äöüéè
-# The list of all configured value sets that will used for static and dynamic value set handling in the eHealth Connector
+# The list of all configured value sets that will used for static and dynamic value set handling in Husky
 #
 # Required fields for each item in the list are:
 #  className:	The fully qualified class name of the enum class that will be generated/overwritten (for static value set handling, only)
