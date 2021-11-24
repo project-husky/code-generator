@@ -731,41 +731,45 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
     private static void createSetter(final CompilationUnit compilationUnit,
                                      final ClassOrInterfaceDeclaration myClass,
                                      final CdaElement cdaElement) {
-        if (cdaElement.getDataType() == null)
+        if (cdaElement.getDataType() == null) {
             throw new NotImplementedException("Type undefined for " + cdaElement.getJavaName());
+        }
 
-        MethodDeclaration method;
-
-        method =
-                myClass.addMethod(
-                        createSetterNamePascalCase(cdaElement.getJavaName()), publicModifier().getKeyword());
+        final var methodName = createSetterNamePascalCase(cdaElement.getJavaName());
+        final var fieldName = cdaElement.getXmlName().replace("hl7:", "").replace("pharm:", "").replace("xsi:", "");
 
         String dataType = cdaElement.getDataType();
         if ("hl7:typeId".equals(cdaElement.getXmlName())) {
             dataType = "org.husky.common.hl7cdar2.POCDMT000040InfrastructureRootTypeId";
         }
-        String name =
-                cdaElement.getXmlName().replace("hl7:", "").replace("pharm:", "").replace("xsi:", "");
+
+        // Check if the setter with this name and data type already exists
+        if (!myClass.getMethodsBySignature(methodName, dataType).isEmpty()) {
+            return;
+        }
 
         CdaElement elForType = cdaElement.getParentCdaElement();
         if (elForType == null) {
             elForType = cdaElement;
         }
 
-        Class<?> memberType = getFieldDatatype(elForType.getDataType(), name);
+        Class<?> memberType = getFieldDatatype(elForType.getDataType(), fieldName);
         boolean isMethod = false;
         if (memberType == null) {
-            memberType = getMethodDatatype(elForType.getDataType(), name);
+            memberType = getMethodDatatype(elForType.getDataType(), fieldName);
             isMethod = (memberType != null);
         }
         if (memberType == null && dataType.endsWith(".ADXP")) {
             memberType = getClass(dataType);
         }
+        if (myClass.getExtendedTypes().isEmpty()) {
+            isMethod = false;
+        }
+
+        final MethodDeclaration method = myClass.addMethod(methodName, publicModifier().getKeyword());
 
         if (isClassCollection(memberType)) {
-
             boolean isLocalField = (myClass.getExtendedTypes().size() == 0);
-
             /*if ("effectiveTime".equals(name) && !isLocalField) {
                 compilationUnit.addImport("org.husky.common.hl7cdar2.SXCMTS");
                 dataType = "SXCMTS";
@@ -775,23 +779,18 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
         String comment = "Sets the " + cdaElement.getJavaName();
         String desc = cdaElement.getDescription();
         if (desc != null) {
-            comment += "/" + desc;
+            comment += "<br/>\n" + desc;
         }
 
         method.setJavadocComment(comment);
-
         method.addAndGetParameter(dataType, "value");
-
         BlockStmt body = method.createBody();
 
-        if (myClass.getExtendedTypes().size() == 0) {
-            isMethod = false;
-        }
         if (memberType != null) {
-            String temp = name;
+            String temp = fieldName;
             if (isClassCollection(memberType)) {
                 if (isMethod) {
-                    temp = createGetterNameUpperFirstChar(name) + "()";
+                    temp = createGetterNameUpperFirstChar(fieldName) + "()";
                 }
                 body.addStatement(temp + ".clear();");
                 body.addStatement(temp + ".add(value);");
@@ -3198,10 +3197,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
             }
         }
 
-        if (retVal == null) {
-            if (parentClassName.endsWith(".AD")) {
-                retVal = "org.husky.common.hl7cdar2.ADXP";
-            }
+        if (retVal == null && parentClassName.endsWith(".AD")) {
+            retVal = "org.husky.common.hl7cdar2.ADXP";
         }
 
         return retVal;
@@ -3241,8 +3238,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
      * @throws InvocationTargetException the invocation target exception
      */
     private HashMap<String, String> loadHl7CdaR2DataTypeIndex()
-            throws IllegalAccessException, IllegalArgumentException,
-            InvocationTargetException {
+            throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         HashMap<String, String> retVal = new HashMap<>();
 
         ObjectFactory factory = new ObjectFactory();
