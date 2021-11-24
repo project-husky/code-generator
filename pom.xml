@@ -3,9 +3,9 @@
 	<groupId>org.husky.codegenerator</groupId>
 	<artifactId>husky-codegenerator</artifactId>
 	<version>2.0-ALPHA</version>
-	<packaging>pom</packaging>
+	<packaging>jar</packaging>
 	<name>Husky project Code Generator</name>
-	<description>The Code Generator produces Java Classes for the Husky Convenience API.</description>
+	<description>The Code Generator produces Java Classes for the Husky library.</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -25,9 +25,9 @@
 	</parent>
 
 	<scm>
-		<connection>scm:git:https://gitlab.com/ehealth-connector/codegenerator.git</connection>
-		<developerConnection>scm:git:git@gitlab.com:ehealth-connector/codegenerator.git</developerConnection>
-		<url>https://gitlab.com/ehealth-connector/codegenerator/tree/master</url>
+		<connection>scm:git:https://github.com/project-husky/codegenerator.git</connection>
+		<developerConnection>scm:git:git@github.com:project-husky/codegenerator.git</developerConnection>
+		<url>https://github.com/project-husky/codegenerator/tree/master</url>
 		<tag>HEAD</tag>
 	</scm>
 
@@ -63,14 +63,15 @@
 			<groupId>net.sf.saxon</groupId>
 			<artifactId>Saxon-HE</artifactId>
 		</dependency>
+
+		<!-- Logs -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-jdk14</artifactId>
 			<version>1.7.32</version>
 		</dependency>
 
-
-		<!-- stuff used by code generator, only (do not move this in the main api pom) -->
+		<!-- stuff used by code generator, only -->
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr4-runtime</artifactId>
@@ -93,22 +94,6 @@
 
     <build>
         <plugins>
-			<!--
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>3.0.0</version>
-                <configuration>
-                    <mainClass>org.husky.codegenerator.valuesets.UpdateValueSets</mainClass>
-                    <executable>java</executable>
-                    <workingDirectory>.</workingDirectory>
-                    <arguments>
-                        <argument>-classpath</argument>
-                        <!- automatically creates the classpath using all project dependencies, also adding the project build directory ->
-                    </arguments>
-                </configuration>
-            </plugin>
-			-->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -144,13 +129,6 @@
                     </execution>
                 </executions>
             </plugin>
-			<!--
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-            </plugin>
-            -->
         </plugins>
     </build>
 </project>
