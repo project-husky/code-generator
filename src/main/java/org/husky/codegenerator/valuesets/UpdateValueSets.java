@@ -22,6 +22,7 @@ import com.github.javaparser.ast.type.Type;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.husky.codegenerator.java.JavaCodeGenerator;
+import org.husky.common.basetypes.CodeBaseType;
 import org.husky.common.enums.LanguageCode;
 import org.husky.common.enums.ValueSetEnumInterface;
 import org.husky.valueset.api.ValueSetManager;
@@ -40,10 +41,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 import static com.github.javaparser.ast.Modifier.*;
 import static java.util.Arrays.asList;
@@ -364,10 +362,21 @@ public class UpdateValueSets {
                 generated = templateType.getAnnotationByClass(Generated.class).get();
                 primaryType.addAnnotation(generated);
             }
-
             replaceParameterValue(generated, "value",
                     "org.husky.codegenerator.ch.valuesets.UpdateValueSets");
             replaceParameterValue(generated, "date", LocalDate.now().toString());
+
+            // check if there is a unique code system, add it as a constant if so
+            final List<String> codeSystemIds = valueSet.getValueSetEntryList().stream()
+                    .map(ValueSetEntry::getCodeBaseType)
+                    .map(CodeBaseType::getCodeSystem)
+                    .distinct()
+                    .toList();
+            if (codeSystemIds.size() == 1 && codeSystemIds.get(0) != null) {
+                replaceConstantValue(enumType, "CODE_SYSTEM_ID", codeSystemIds.get(0));
+            } else {
+                primaryType.getFieldByName("CODE_SYSTEM_ID").ifPresent(primaryType::remove);
+            }
         } else {
             throw new IllegalStateException("Class with name " + className + " does not declare an Enum type.");
         }
@@ -382,8 +391,18 @@ public class UpdateValueSets {
         return destFile.getAbsoluteFile();
     }
 
+    /**
+     * Returns the enum template file content.
+     *
+     * @throws IOException if the file is not readable.
+     */
     private static String getTemplate() throws IOException {
-        return IOUtils.toString(UpdateValueSets.class.getClassLoader().getResourceAsStream(TEMPLATE_FILE_LOCATION),
-                StandardCharsets.UTF_8);
+        return IOUtils.toString(
+                Objects.requireNonNull(
+                        UpdateValueSets.class.getClassLoader().getResourceAsStream(TEMPLATE_FILE_LOCATION),
+                        "The template file is not found in " + TEMPLATE_FILE_LOCATION
+                ),
+                StandardCharsets.UTF_8
+        );
     }
 }

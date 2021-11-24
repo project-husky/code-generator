@@ -35,6 +35,11 @@ public enum TemplateNameToReplace implements ValueSetEnumInterface {
     public static final String VALUE_SET_NAME = "dummy-will-be-replaced";
 
     /**
+     * Identifier of the code system (all values share the same).
+     */
+    public static final String CODE_SYSTEM_ID = "dummy-will-be-replaced";
+
+    /**
      * Gets the Enum with a given code.
      * 
      * @param code The code value.
