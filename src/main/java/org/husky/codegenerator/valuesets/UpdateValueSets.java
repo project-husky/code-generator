@@ -191,8 +191,8 @@ public class UpdateValueSets {
                 fullyQualifiedClassName.lastIndexOf('.'));
 
         String templateString = getTemplate()
-                .replaceAll(TEMPLATE_NAME_TO_REPLACE, className)
-                .replaceAll(TEMPLATE_PACKAGE_NAME_TO_REPLACE, packageName);
+                .replace(TEMPLATE_NAME_TO_REPLACE, className)
+                .replace(TEMPLATE_PACKAGE_NAME_TO_REPLACE, packageName);
 
         ParseResult<CompilationUnit> javaSource = new JavaParser().parse(templateString);
 
@@ -341,7 +341,7 @@ public class UpdateValueSets {
 
             // add all members from template file
             final String templateString = getTemplate()
-                    .replaceAll(TEMPLATE_NAME_TO_REPLACE, enumType.getNameAsString());
+                    .replace(TEMPLATE_NAME_TO_REPLACE, enumType.getNameAsString());
             final ParseResult<CompilationUnit> templateSource = javaParser.parse(templateString);
             final TypeDeclaration<?> templateType = templateSource.getResult().get().getType(0);
             templateType.getMembers().forEach(enumType::addMember);
