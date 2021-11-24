@@ -1993,7 +1993,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
         regroupTemplateElements(templateList);
         LOG.debug("Writing Java Class files:");
         for (CdaTemplate cdaTemplate : templateList) {
-            LOG.debug("- " + cdaTemplate.getName());
+            LOG.debug("- {}", cdaTemplate.getName());
             createJavaClassFile(cdaTemplate, packageName, fullDstFilePath);
         }
         LOG.debug("Writing Java Class files done.");
@@ -2114,18 +2114,19 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
             // complete pending actions
             for (MethodDeclaration method : myClass.getMethods()) {
                 if (existBodyComment(method, PENDING_ACTIONS)) {
-                    Optional<BlockStmt> bodyOpt = method.getBody();
-                    if (bodyOpt.isPresent()) {
-                        for (Comment c : bodyOpt.get().getOrphanComments()) {
+                    method.getBody().ifPresent(bodyOpt -> {
+                        // Copy the list because calls to bodyOpt.removeOrphanComment(c) will modify it
+                        final List<Comment> comments = new ArrayList<>(bodyOpt.getOrphanComments());
+                        for (final Comment c : comments) {
                             if (c.asLineComment().getContent().equals(PENDING_ACTIONS))
-                                bodyOpt.get().removeOrphanComment(c);
+                                bodyOpt.removeOrphanComment(c);
                             if (c.asLineComment().getContent().startsWith(PENDING_ACTIONS_ADJUST_NAME)) {
-                                bodyOpt.get().removeOrphanComment(c);
+                                bodyOpt.removeOrphanComment(c);
                                 String methodName = c.getContent().substring(PENDING_ACTIONS_ADJUST_NAME.length());
                                 method.setName(methodName);
                             }
                         }
-                    }
+                    });
                 }
             }
 
