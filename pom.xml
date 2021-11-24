@@ -97,7 +97,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.2.0</version><!--$NO-MVN-MAN-VER$-->
+                <version>3.2.0</version>
                 <executions>
                     <execution>
                         <id>add-source</id>
@@ -116,7 +116,7 @@
             <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-maven-plugin</artifactId>
-                <version>4.9.2</version>
+                <version>4.9.3</version>
                 <configuration>
                     <outputDirectory>${project.build.directory}/generated-sources/antlr4/org/husky/codegenerator/cda/antlr/</outputDirectory>
                     <sourceDirectory>${basedir}/src/main/resources/antlr4</sourceDirectory>
