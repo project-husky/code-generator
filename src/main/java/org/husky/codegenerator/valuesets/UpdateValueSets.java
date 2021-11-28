@@ -10,7 +10,6 @@
 package org.husky.codegenerator.valuesets;
 
 import com.github.javaparser.JavaParser;
-import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
@@ -50,53 +49,47 @@ import static org.husky.codegenerator.valuesets.ValueSetUtil.loadPrimaryType;
 import static org.husky.common.enums.LanguageCode.*;
 
 /**
- * <div class="en">This class generates the CH-EPR value sets from the
- * downloaded JSON files from art-decor.org.
- * <a href="https://gitlab.com/ehealth-connector/api/-/wikis/Updating-the-Swiss-EPR-metadata">See
- * the wiki</a> for additional information on how to use this class.</div>
+ * This class generates the CH-EPR value sets from the downloaded JSON files from art-decor.org.
+ * <a href="https://gitlab.com/ehealth-connector/api/-/wikis/Updating-the-Swiss-EPR-metadata">See the wiki</a>
+ * for additional information on how to use this class.
  */
 public class UpdateValueSets {
 
     /**
-     * <div class="en">Javadoc comment prefix for the code fields.</div>
+     * Javadoc comment prefix for the code fields.
      */
     private static final Map<LanguageCode, String> CODE_JAVADOC_PREFIX = Map.of(ENGLISH,
             "Code for ", GERMAN, "Code für ", FRENCH, "Code de ", ITALIAN, "Code per ");
 
     /**
-     * <div class="en">List of all languages that should be used to generate
-     * javadoc comments.</div>
+     * List of all languages that should be used to generate javadoc comments.
      */
     private static final List<LanguageCode> LANGUAGE_CODES = asList(ENGLISH, GERMAN, FRENCH, ITALIAN);
 
     private static final Logger LOG = LoggerFactory.getLogger(UpdateValueSets.class);
 
     /**
-     * <div class="en">Shortcut for the internal type of a string.</div>
+     * Shortcut for the internal type of a string.
      */
     private static final Type STRING_TYPE = com.github.javaparser.StaticJavaParser
             .parseClassOrInterfaceType("String");
 
     /**
-     * <div class="en">Relative path where to find the Java template text
-     * file.</div>
+     * Relative path where to find the Java template text file.
      */
     private static final String TEMPLATE_FILE_LOCATION = "format/template.java.txt";
 
     /**
-     * <div class="en">Class name in the template that will be replaced with the
-     * actual generated enum name.</div>
+     * Class name in the template that will be replaced with the actual generated enum name.
      */
     private static final String TEMPLATE_NAME_TO_REPLACE = "TemplateNameToReplace";
     /**
-     * <div class="en">Package name in the template that will be replaced with
-     * the actual generated enum name.</div>
+     * Package name in the template that will be replaced with the actual generated enum name.
      */
     private static final String TEMPLATE_PACKAGE_NAME_TO_REPLACE = "TemplatePackageNameToReplace";
 
     /**
-     * <div class="en">Adds all concepts of the value set definition as enum
-     * elements to the given enum type.</div>
+     * Adds all concepts of the value set definition as enum elements to the given enum type.
      *
      * @param enumType The enum type representing parsed Java enum class.
      * @param valueSet The concepts from the value set definition file.
@@ -162,44 +155,46 @@ public class UpdateValueSets {
     }
 
     /**
-     * <div class="en">Formats a javadoc comment HTML snippet in the given
-     * language.</div>
+     * Formats a javadoc comment HTML snippet in the given language.
      *
      * @param language The language code to add.
      * @param comment  The comment to add.
      * @return The HTML snippet of the comment.
      */
-    private static String buildJavadocComment(LanguageCode language, String comment) {
-        return language.getCodeValue().substring(0, 2).toUpperCase(Locale.ROOT) + ": " + comment
+    private static String buildJavadocComment(final LanguageCode language,
+                                              final String comment) {
+        return language.getCodeValue().substring(0, 2).toUpperCase(Locale.ROOT)
+                + ": "
+                + comment
+                + (!comment.endsWith(".") ? "." : "")
                 + "<br>\n";
     }
 
     /**
-     * <div class="en">Creates an enum definition class.</div>
+     * Creates an enum definition class.
      *
      * @param baseJavaFolder          The base Java source folder (relative to the root of the project hierarchy) where
      *                                the Java package structure begins.
      * @param fullyQualifiedClassName the fully qualified class name
      * @throws IOException When reading or writing the Java source file fails.
      */
-    public static void createEnumClassFromTemplate(String baseJavaFolder,
-                                                   String fullyQualifiedClassName) throws IOException {
+    public static void createEnumClassFromTemplate(final String baseJavaFolder,
+                                                   final String fullyQualifiedClassName) throws IOException {
+        final String className = fullyQualifiedClassName.substring(fullyQualifiedClassName.lastIndexOf('.') + 1);
+        final String packageName = fullyQualifiedClassName.substring(0, fullyQualifiedClassName.lastIndexOf('.'));
 
-        String className = fullyQualifiedClassName
-                .substring(fullyQualifiedClassName.lastIndexOf('.') + 1);
-        String packageName = fullyQualifiedClassName.substring(0,
-                fullyQualifiedClassName.lastIndexOf('.'));
-
-        String templateString = getTemplate()
+        final String templateString = getTemplate()
                 .replace(TEMPLATE_NAME_TO_REPLACE, className)
                 .replace(TEMPLATE_PACKAGE_NAME_TO_REPLACE, packageName);
 
-        ParseResult<CompilationUnit> javaSource = new JavaParser().parse(templateString);
+        final Optional<CompilationUnit> javaSource = new JavaParser().parse(templateString).getResult();
+        if (javaSource.isEmpty()) {
+            throw new RuntimeException("The enum source parsing has failed");
+        }
 
         FileUtils.write(getSourceFileName(baseJavaFolder, fullyQualifiedClassName),
-                javaSource.getResult().get().toString(JavaCodeGenerator.getPrinterConfiguration()),
+                javaSource.get().toString(JavaCodeGenerator.getPrinterConfiguration()),
                 StandardCharsets.UTF_8);
-
     }
 
     /**
@@ -244,8 +239,7 @@ public class UpdateValueSets {
     }
 
     /**
-     * <div class="en">Remove everything from an enum type, leaving an empty
-     * definition body.</div>
+     * Remove everything from an enum type, leaving an empty definition body.
      *
      * @param enumType The enum to clean out.
      */
@@ -260,8 +254,7 @@ public class UpdateValueSets {
     }
 
     /**
-     * <div class="en">Replaces the value of a constant in the parsed type
-     * declaration of a Java class.</div>
+     * Replaces the value of a constant in the parsed type declaration of a Java class.
      *
      * @param body         The parsed body declaration of the Java class that holds the constant.
      * @param constantName The name of the constant to replace the value of.
@@ -274,7 +267,7 @@ public class UpdateValueSets {
     }
 
     /**
-     * <div class="en">Replaces the value of a annotation parameter.</div>
+     * Replaces the value of a annotation parameter.
      *
      * @param annotationExpr The annotation that holds the parameter.
      * @param parameterName  The name of the parameter to replace the value of.
@@ -290,9 +283,8 @@ public class UpdateValueSets {
     }
 
     /**
-     * <div class="en">Updates an existing enum definition and adds the value
-     * set elements as enum constants. Modifies the Java code of the enum
-     * class.</div>
+     * Updates an existing enum definition and adds the value set elements as enum constants. Modifies the Java code of
+     * the enum class.
      *
      * @param id             The unique code id that identifies the enum.
      * @param valueSetName   The value set name of the enum.
@@ -304,13 +296,19 @@ public class UpdateValueSets {
      * @throws IOException           When reading or writing the Java source file fails.
      * @throws IllegalStateException If the class does not declare an Enum type.
      */
-    public static File updateEnumClass(String id, String valueSetName, String baseJavaFolder,
-                                       String className, ValueSet valueSet) throws IOException, IllegalStateException {
-
-        final JavaParser javaParser = new JavaParser();
-        final ParseResult<CompilationUnit> javaSource = javaParser
-                .parse(getSourceFileName(baseJavaFolder, className));
-        final TypeDeclaration<?> primaryType = loadPrimaryType(javaSource.getResult().get());
+    @SuppressWarnings("squid:S3457")
+    public static File updateEnumClass(final String id,
+                                       final String valueSetName,
+                                       final String baseJavaFolder,
+                                       final String className,
+                                       final ValueSet valueSet) throws IOException, IllegalStateException {
+        final var javaParser = new JavaParser();
+        final Optional<CompilationUnit> javaSource = javaParser
+                .parse(getSourceFileName(baseJavaFolder, className)).getResult();
+        if (javaSource.isEmpty()) {
+            throw new RuntimeException("");
+        }
+        final TypeDeclaration<?> primaryType = loadPrimaryType(javaSource.get());
 
         if (primaryType.isTopLevelType() && primaryType.isEnumDeclaration()) {
             final EnumDeclaration enumType = ((EnumDeclaration) primaryType);
@@ -322,7 +320,7 @@ public class UpdateValueSets {
             addEnumElements(enumType, valueSet);
 
             // add main javadoc
-            final StringBuilder javadoc = new StringBuilder();
+            final var javadoc = new StringBuilder();
             javadoc.append(String.format("Enumeration of %s values\n", valueSet.getName()));
             javadoc.append("<p>\n");
             for (final LanguageCode language : LANGUAGE_CODES) {
@@ -342,8 +340,11 @@ public class UpdateValueSets {
             // add all members from template file
             final String templateString = getTemplate()
                     .replace(TEMPLATE_NAME_TO_REPLACE, enumType.getNameAsString());
-            final ParseResult<CompilationUnit> templateSource = javaParser.parse(templateString);
-            final TypeDeclaration<?> templateType = templateSource.getResult().get().getType(0);
+            final Optional<CompilationUnit> templateSource = javaParser.parse(templateString).getResult();
+            if (templateSource.isEmpty()) {
+                throw new RuntimeException("");
+            }
+            final TypeDeclaration<?> templateType = templateSource.get().getType(0);
             templateType.getMembers().forEach(enumType::addMember);
 
             // replace constant values and imports
@@ -351,8 +352,8 @@ public class UpdateValueSets {
             replaceConstantValue(enumType, "VALUE_SET_NAME", valueSetName);
 
             // replace imports with those found in the template
-            new ArrayList<>(javaSource.getResult().get().getImports()).forEach(javaSource.getResult().get()::remove);
-            templateSource.getResult().get().getImports().forEach(javaSource.getResult().get()::addImport);
+            new ArrayList<>(javaSource.get().getImports()).forEach(javaSource.get()::remove);
+            templateSource.get().getImports().forEach(javaSource.get()::addImport);
 
             // @generated annotation
             final AnnotationExpr generated;
@@ -382,7 +383,7 @@ public class UpdateValueSets {
         }
 
         final File destFile = getSourceFileName(baseJavaFolder, className);
-        String classFileContent = javaSource.getResult().get().toString(JavaCodeGenerator.getPrinterConfiguration());
+        String classFileContent = javaSource.get().toString(JavaCodeGenerator.getPrinterConfiguration());
         classFileContent = classFileContent.replace("import java.util.Map;", "import java.util.Map;\n");
         classFileContent = classFileContent.replace("import javax.annotation.processing.Generated;",
                 "import javax.annotation.processing.Generated;\n");
