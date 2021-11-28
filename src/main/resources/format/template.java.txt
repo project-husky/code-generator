@@ -14,6 +14,8 @@ import java.util.Map;
 
 import javax.annotation.processing.Generated;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.husky.common.enums.CodeSystems;
 import org.husky.common.enums.LanguageCode;
 import org.husky.common.enums.ValueSetEnumInterface;
@@ -44,7 +46,8 @@ public enum TemplateNameToReplace implements ValueSetEnumInterface {
      * @param code The code value.
      * @return the enum value found or {@code null}.
      */
-    public static TemplateNameToReplace getEnum(final String code) {
+    @Nullable
+    public static TemplateNameToReplace getEnum(@Nullable final String code) {
         for (final TemplateNameToReplace x : values()) {
             if (x.getCodeValue().equals(code)) {
                 return x;
@@ -59,7 +62,7 @@ public enum TemplateNameToReplace implements ValueSetEnumInterface {
      * @param enumName The name of the enum.
      * @return {@code true} if the name is found in this value set, {@code false} otherwise.
      */
-    public static boolean isEnumOfValueSet(final String enumName) {
+    public static boolean isEnumOfValueSet(@Nullable final String enumName) {
         if (enumName == null) {
             return false;
         }
@@ -77,7 +80,7 @@ public enum TemplateNameToReplace implements ValueSetEnumInterface {
      * @param codeValue The code value.
      * @return {@code true} if the value is found in this value set, {@code false} otherwise.
      */
-    public static boolean isInValueSet(final String codeValue) {
+    public static boolean isInValueSet(@Nullable final String codeValue) {
         for (final TemplateNameToReplace x : values()) {
             if (x.getCodeValue().equals(codeValue)) {
                 return true;
@@ -94,7 +97,8 @@ public enum TemplateNameToReplace implements ValueSetEnumInterface {
     /**
      * Identifier of the referencing code system.
      */
-    private String codeSystem;
+    @NonNull
+    private final String codeSystem;
 
     /**
      * The display names per language.
@@ -132,6 +136,7 @@ public enum TemplateNameToReplace implements ValueSetEnumInterface {
      * @return the code system identifier.
      */
     @Override
+    @NonNull
     public String getCodeSystemId() {
         return this.codeSystem;
     }
@@ -142,10 +147,11 @@ public enum TemplateNameToReplace implements ValueSetEnumInterface {
      * @return the code system identifier.
      */
     @Override
+    @NonNull
     public String getCodeSystemName() {
-        final CodeSystems cs = CodeSystems.getEnum(this.codeSystem);
-        if (cs != null) {
-            return cs.getCodeSystemName();
+        final var codeSystem = CodeSystems.getEnum(this.codeSystem);
+        if (codeSystem != null) {
+            return codeSystem.getCodeSystemName();
         }
         return "";
     }
@@ -156,6 +162,7 @@ public enum TemplateNameToReplace implements ValueSetEnumInterface {
      * @return the code value.
      */
     @Override
+    @NonNull
     public String getCodeValue() {
         return this.code;
     }
@@ -182,6 +189,7 @@ public enum TemplateNameToReplace implements ValueSetEnumInterface {
      * @return the value set identifier.
      */
     @Override
+    @NonNull
     public String getValueSetId() {
         return VALUE_SET_ID;
     }
@@ -192,6 +200,7 @@ public enum TemplateNameToReplace implements ValueSetEnumInterface {
      * @return the value set name.
      */
     @Override
+    @NonNull
     public String getValueSetName() {
         return VALUE_SET_NAME;
     }
