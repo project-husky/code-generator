@@ -9,8 +9,7 @@
  */
 package TemplatePackageNameToReplace;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Objects;
 
 import javax.annotation.processing.Generated;
 
@@ -92,7 +91,8 @@ public enum TemplateNameToReplace implements ValueSetEnumInterface {
     /**
      * Machine interpretable and (inside this class) unique code.
      */
-    private String code;
+    @NonNull
+    private final String code;
     
     /**
      * Identifier of the referencing code system.
@@ -101,9 +101,11 @@ public enum TemplateNameToReplace implements ValueSetEnumInterface {
     private final String codeSystem;
 
     /**
-     * The display names per language.
+     * The display names per language. It's always stored in the given order: default display name (0), in English (1),
+     * in German (2), in French (3) and in Italian (4).
      */
-    private Map<LanguageCode, String> displayNames;
+    @NonNull
+    private final String[] displayNames;
 
     /**
      * Instantiates this enum with a given code and display names.
@@ -116,18 +118,21 @@ public enum TemplateNameToReplace implements ValueSetEnumInterface {
      * @param displayNameFr The display name in French.
      * @param displayNameIt The display name in Italian.
      */
-    TemplateNameToReplace(final String code,
-    final String codeSystem, final String displayName,
-            final String displayNameEn, final String displayNameDe, final String displayNameFr,
-            final String displayNameIt) {
-        this.code = code;
-        this.codeSystem = codeSystem;
-        this.displayNames = new HashMap<>();
-        this.displayNames.put(null, displayName);
-        this.displayNames.put(LanguageCode.ENGLISH, displayNameEn);
-        this.displayNames.put(LanguageCode.GERMAN, displayNameDe);
-        this.displayNames.put(LanguageCode.FRENCH, displayNameFr);
-        this.displayNames.put(LanguageCode.ITALIAN, displayNameIt);
+    TemplateNameToReplace(@NonNull final String code,
+                          @NonNull final String codeSystem,
+                          @NonNull final String displayName,
+                          @NonNull final String displayNameEn,
+                          @NonNull final String displayNameDe,
+                          @NonNull final String displayNameFr,
+                          @NonNull final String displayNameIt) {
+        this.code = Objects.requireNonNull(code);
+        this.codeSystem = Objects.requireNonNull(codeSystem);
+        this.displayNames = new String[5];
+        this.displayNames[0] = Objects.requireNonNull(displayName);
+        this.displayNames[1] = Objects.requireNonNull(displayNameEn);
+        this.displayNames[2] = Objects.requireNonNull(displayNameDe);
+        this.displayNames[3] = Objects.requireNonNull(displayNameFr);
+        this.displayNames[4] = Objects.requireNonNull(displayNameIt);
     }
 
     /**
@@ -168,19 +173,24 @@ public enum TemplateNameToReplace implements ValueSetEnumInterface {
     }
 
     /**
-     * Gets the display name defined by the language param. If there is no english translation, the default display name
-      is returned.
+     * Gets the display name defined by the language param.
      * 
-     * @param languageCode The language code to get the display name for.
-     * @return the display name in the desired language. if language not found, display name in german will be returned.
+     * @param languageCode The language code to get the display name for, {@code null} to get the default display name.
+     * @return the display name in the desired language.
      */
     @Override
-    public String getDisplayName(final LanguageCode languageCode) {
-        final String displayName = this.displayNames.get(languageCode);
-        if (displayName == null && languageCode == LanguageCode.ENGLISH) {
-          return this.displayNames.get(null);
+    @NonNull
+    public String getDisplayName(@Nullable final LanguageCode languageCode) {
+        if (languageCode == null) {
+            return this.displayNames[0];
         }
-        return displayName;
+        return switch (languageCode) {
+            case ENGLISH -> this.displayNames[1];
+            case GERMAN  -> this.displayNames[2];
+            case FRENCH  -> this.displayNames[3];
+            case ITALIAN -> this.displayNames[4];
+            default      -> "TOTRANSLATE";
+        };
     }
     
     /**
