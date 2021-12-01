@@ -107,13 +107,9 @@ public class JavaCodeGenerator {
 	}
 
 	/**
-	 * <div class="en">Gets the eHealth Connectors default Java file
-	 * header.</div>
+	 * Gets the Husky default Java file header.
 	 *
-	 * <div class="de">Ruft den Standard Java File Header des eHealth Connectors
-	 * ab.</div>
-	 *
-	 * @return the file header
+	 * @return the file header.
 	 */
 	public static String getFileHeader() {
 		final File fileHeaderFile = new File(

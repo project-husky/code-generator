@@ -84,7 +84,7 @@ import static com.github.javaparser.ast.Modifier.*;
  * the individual modules (such as REST Client to ART-DECOR, XSLT, ANTLR and the final Java Class
  * file creation). This class generates Java Classes for all templates used for a HL7 CDA Document
  * Template modeled in ART-DECOR. <a
- * href="https://gitlab.com/ehealth-connector/api/-/wikis/ART-DECOR-to-Java-Code-Generator">See the
+ * href="https://github.com/project-husky/code-generator/wiki">See the
  * wiki</a> for additional information on how to use this class.</div>
  *
  * <p><div class="de">Dies ist die Hauptklasse des ART-DECOR to Java Code Generators. Sie
@@ -344,8 +344,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
         }
 
         final MethodDeclaration method = myClass.addMethod(
-                        "add" + JavaCodeGenerator.toPascalCase(cdaElement.getJavaName()),
-                        publicModifier().getKeyword());
+                "add" + JavaCodeGenerator.toPascalCase(cdaElement.getJavaName()),
+                publicModifier().getKeyword());
 
         String comment = "Adds a " + cdaElement.getJavaName();
         final String desc = cdaElement.getDescription();
@@ -497,8 +497,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
         final FieldDeclaration field;
         if (fieldOpt.isPresent()) {
             field = fieldOpt.get();
-        }
-        else {
+        } else {
             if (isClassCollection(memberType)) {
                 compilationUnit.addImport("java.util.ArrayList");
                 compilationUnit.addImport("java.util.List");
@@ -535,8 +534,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
      * Creates the method for getting the given element to the resulting class.
      *
      * @param compilationUnit the compilation unit
-     * @param myClass    the my class
-     * @param cdaElement the cda element
+     * @param myClass         the my class
+     * @param cdaElement      the cda element
      */
     private static void createGetter(final CompilationUnit compilationUnit,
                                      final ClassOrInterfaceDeclaration myClass,
@@ -945,7 +944,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
      */
     private static Class<?> getDeclaredFieldDatatype(final String className, final String memberName) {
         try {
-           return getDeclaredFieldDatatype(Class.forName(className), memberName);
+            return getDeclaredFieldDatatype(Class.forName(className), memberName);
         } catch (ClassNotFoundException e) {
             return null;
         }
@@ -989,7 +988,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
             Method m = null;
             try {
                 m = c.getDeclaredMethod(
-                                createGetterNamePascalCase(JavaCodeGenerator.toPascalCase(memberName)));
+                        createGetterNamePascalCase(JavaCodeGenerator.toPascalCase(memberName)));
             } catch (NoSuchMethodException | SecurityException e) {
                 // Do nothing
             }
@@ -1213,8 +1212,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
             if (retVal.endsWith("running")) {
                 retVal = null;
-            }
-            else {
+            } else {
                 if (retVal.startsWith("IVL_PQ")) {
                     retVal = "IVLPQ";
                 }
@@ -2395,16 +2393,14 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
             int temp = 0;
             if ("*".equals(maxOccursStr)) {
                 temp = Integer.MAX_VALUE;
-            }
-            else temp = Integer.parseInt(maxOccursStr);
+            } else temp = Integer.parseInt(maxOccursStr);
             cdaElement.setMaxOccurs(temp);
         }
         if (minOccursStr != null) {
             int temp = 0;
             if ("*".equals(minOccursStr)) {
                 temp = Integer.MAX_VALUE;
-            }
-            else temp = Integer.parseInt(minOccursStr);
+            } else temp = Integer.parseInt(minOccursStr);
             cdaElement.setMinOccurs(temp);
         }
 
@@ -2530,8 +2526,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
         if (isTemplateElement) {
             currentCdaTemplate.addCdaElement(cdaElement);
-        }
-        else parentCdaElement.addChild(cdaElement);
+        } else parentCdaElement.addChild(cdaElement);
 
         currentCdaElement = cdaElement;
 
@@ -2551,16 +2546,16 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                     throw new RuntimeException("parent is null for contains " + ref);
                 // Process contains
                 final ArtDecor2JavaGenerator artDecor2JavaGenerator = new ArtDecor2JavaGenerator(
-                                parentForContains,
-                                templateIndex,
-                                valueSetIndex,
-                                templateList,
-                                srcFilePath,
-                                dstFilePath,
-                                packageName,
-                                fileHeader,
-                                artDecorPrefix,
-                                artDecorBaseUrl);
+                        parentForContains,
+                        templateIndex,
+                        valueSetIndex,
+                        templateList,
+                        srcFilePath,
+                        dstFilePath,
+                        packageName,
+                        fileHeader,
+                        artDecorPrefix,
+                        artDecorBaseUrl);
                 final CdaTemplate template = artDecor2JavaGenerator.doOneTemplate(ref);
                 currentCdaElement.addCdaTemplate(template, ProcessModes.CONTAINS);
             } catch (SaxonApiException
@@ -2616,16 +2611,16 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
             try {
                 // Process includes
                 final ArtDecor2JavaGenerator artDecor2JavaGenerator = new ArtDecor2JavaGenerator(
-                                parentForIncludes,
-                                templateIndex,
-                                valueSetIndex,
-                                templateList,
-                                srcFilePath,
-                                dstFilePath,
-                                packageName,
-                                fileHeader,
-                                artDecorPrefix,
-                                artDecorBaseUrl);
+                        parentForIncludes,
+                        templateIndex,
+                        valueSetIndex,
+                        templateList,
+                        srcFilePath,
+                        dstFilePath,
+                        packageName,
+                        fileHeader,
+                        artDecorPrefix,
+                        artDecorBaseUrl);
                 final CdaTemplate template = artDecor2JavaGenerator.doOneTemplate(ref);
 
                 if (isChildElement) {

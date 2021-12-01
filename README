@@ -3,10 +3,10 @@
 This is a code generator for the Husky library, helping to maintain part of the code. It's made of two
 parts:
 
-- An enum generator for the common value sets of the Swiss EPR. More details in the [wiki](https://gitlab.
-  com/ehealth-connector/api/-/wikis/Updating-the-Swiss-EPR-metadata).
-- A class and enum generator for the CDA-CH-EMED project. More details in the [wiki](https://gitlab.
-  com/ehealth-connector/api/-/wikis/ART-DECOR-to-Java-Code-Generator).
+- An enum generator for the common value sets of the Swiss EPR. More details in the
+[wiki](https://github.com/project-husky/code-generator/wiki/Swiss-EPR-code-generator).
+- A class and enum generator for the CDA-CH-EMED project. More details in the
+[wiki](https://github.com/project-husky/code-generator/wiki/CDA-CH-EMED-code-generator).
 
 When cloning the project, some classes will be missing (package `org.husky.codegenerator.cda.antlr`).
 They are generated when compiling the Maven package (see the `antlr4-maven-plugin` plugin).

@@ -18,8 +18,9 @@ import java.io.File;
 /**
  * Entry point of the Swiss EPR code generator.
  *
- * @see <a href="https://gitlab.com/ehealth-connector/api/-/wikis/Updating-the-Swiss-EPR-metadata">Updating the Swiss EPR metadata</a>
  * @author Quentin Ligier
+ * @see <a href="https://github.com/project-husky/code-generator/wiki/Swiss-EPR-code-generator">Updating the Swiss EPR
+ * metadata</a>
  */
 public class SwissEprCodeGenerator {
 

@@ -18,7 +18,7 @@ import java.io.File;
 /**
  * Entry point of the CDA-CH-EMED code generator.
  *
- * @see <a href="https://gitlab.com/ehealth-connector/api/-/wikis/ART-DECOR-to-Java-Code-Generator">ART DECOR to Java Code Generator</a>
+ * @see <a href="https://github.com/project-husky/code-generator/wiki/CDA-CH-EMED-code-generator">CDA-CH-EMED Code Generator</a>
  * @author Quentin Ligier
  */
 public class CdaChEmedCodeGenerator {

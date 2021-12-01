@@ -8,7 +8,7 @@
     <relationship type="SPEC" template="2.16.840.1.113883.10.12.2" flexibility="2005-09-07T00:00:00"></relationship>
     <context path="/"></context>
     <example>
-      <!-- See https://svn.code.sf.net/p/hl7ch/code/trunk/projects/eHealthSuisse/eLaborbefund/v1.0/ for examples -->
+      <!-- See https://github.com/hl7ch/hl7ch-cda/tree/master/projects/eHealthSuisse/eLaborbefund/v1.0 for examples -->
     </example>
     <element name="hl7:ClinicalDocument" minimumMultiplicity="1" maximumMultiplicity="1" conformance="R" isMandatory="true" id="2.16.840.1.113883.3.1937.777.1.9.18">
       <desc language="en-US">

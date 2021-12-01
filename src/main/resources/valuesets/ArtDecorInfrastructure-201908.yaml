@@ -8,16 +8,16 @@
 
 
 # The list of all configured ART-DECOR value sets that will be used for static and dynamic
-# value set handling in the eHealth Connector
+# value set handling in the Husky library
 #
 # Required fields for each item in the list are:
-#  className:					The fully qualified class name of the enum class that will be generated/overwritten (for static value set handling, only)
+#  className:			The fully qualified class name of the enum class that will be generated/overwritten (for static value set handling, only)
 #  projectFolder:   	The base folder where the project containing the enum Java class can be found
 #  effectiveDate:   	The date and time stamp of the version to download from the CH-EPR repository
 #  codeSystemName:  	The code system name that should be set (CODE_SYSTEM_NAME)
 #  sourceFormatType: 	JSON, XML or IHESVS
 #  sourceSystemType: 	ARTDECOR_FHIR (later also TERMINOLOGIESERVER_SOAP, but this is not implemented, yet)
-#  sourceUrl: 				URL where to get the value Set in the mentioned sourceFormat from the mentioned sourceSystem
+#  sourceUrl: 			URL where to get the value Set in the mentioned sourceFormat from the mentioned sourceSystem
 #
 
 description: Basic ART-DECOR ValueSets

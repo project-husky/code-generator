@@ -50,7 +50,7 @@ import static org.husky.common.enums.LanguageCode.*;
 
 /**
  * This class generates the CH-EPR value sets from the downloaded JSON files from art-decor.org.
- * <a href="https://gitlab.com/ehealth-connector/api/-/wikis/Updating-the-Swiss-EPR-metadata">See the wiki</a>
+ * <a href="https://github.com/project-husky/code-generator/wiki/Swiss-EPR-code-generator">See the wiki</a>
  * for additional information on how to use this class.
  */
 public class UpdateValueSets {
