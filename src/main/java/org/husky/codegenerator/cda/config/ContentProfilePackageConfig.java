@@ -10,6 +10,8 @@
 package org.husky.codegenerator.cda.config;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.processing.Generated;
 
@@ -191,5 +193,4 @@ public class ContentProfilePackageConfig {
     public void setDescription(String description) {
         this.description = description;
     }
-
 }

@@ -38,6 +38,7 @@ public class ContentProfileConfig {
         private String artDecorBaseUrl;
         private Map<String, String> artDecorDocTemplateMap;
         private Map<String, String> artDecorProjectMap;
+        private Map<String, String> enums;
         private String targetDir;
         private String targetNamespace;
 
@@ -60,6 +61,11 @@ public class ContentProfileConfig {
 
         public Builder withArtDecorProjectMap(HashMap<String, String> artDecorProjectMap) {
             this.artDecorProjectMap = artDecorProjectMap;
+            return this;
+        }
+
+        public Builder withEnums(HashMap<String, String> enums) {
+            this.enums = enums;
             return this;
         }
 
@@ -93,6 +99,9 @@ public class ContentProfileConfig {
     /** The art decor project references. */
     private Map<String, String> artDecorProjectMap;
 
+    /** The enums mapping to use. The key is the name of the value set, the value is the fully qualified class name. */
+    private Map<String, String> enums;
+
     /** The art decor main prefix. */
     private String artDecorMainPrefix;
 
@@ -111,6 +120,7 @@ public class ContentProfileConfig {
     public ContentProfileConfig() {
         this.artDecorDocTemplateMap = new HashMap<>();
         this.artDecorProjectMap = new HashMap<>();
+        this.enums = new HashMap<>();
     }
 
     @Generated("SparkTools")
@@ -118,6 +128,7 @@ public class ContentProfileConfig {
         this.artDecorBaseUrl = builder.artDecorBaseUrl;
         this.artDecorDocTemplateMap = builder.artDecorDocTemplateMap;
         this.artDecorProjectMap = builder.artDecorProjectMap;
+        this.enums = builder.enums;
         this.targetDir = builder.targetDir;
         this.targetNamespace = builder.targetNamespace;
     }
@@ -135,6 +146,7 @@ public class ContentProfileConfig {
     public ContentProfileConfig(URL artDecorBaseUrl, String targetNamespace, String targetDir) {
         this.artDecorDocTemplateMap = new HashMap<>();
         this.artDecorProjectMap = new HashMap<>();
+        this.enums = new HashMap<>();
         this.artDecorBaseUrl = artDecorBaseUrl.toString();
         this.targetNamespace = targetNamespace;
         this.targetDir = targetDir;
@@ -273,6 +285,12 @@ public class ContentProfileConfig {
         return this.artDecorProjectMap;
     }
 
+    public Map<String, String> getEnums() {
+        if (this.enums == null)
+            this.enums = new HashMap<>();
+        return this.enums;
+    }
+
     /**
      * <div class="en">Gets the target dir. That's where the Java class files
      * will be generated to.</div>
@@ -368,6 +386,10 @@ public class ContentProfileConfig {
         if (this.artDecorProjectMap == null)
             this.artDecorProjectMap = new HashMap<>();
         this.artDecorProjectMap = artDecorProjectMap;
+    }
+
+    public void setEnums(Map<String, String> enums) {
+        this.enums = enums;
     }
 
     /**

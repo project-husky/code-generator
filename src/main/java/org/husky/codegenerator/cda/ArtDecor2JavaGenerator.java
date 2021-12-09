@@ -1116,7 +1116,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
             for (final ContentProfileConfig contentProfile : contentProfilePackageConfig.getContentProfileConfigList()) {
                 String srcFilePath = tempDownloadPath.getAbsolutePath() + "/" + contentProfile.getTargetNamespace() + "/";
                 final Map<String, CdaTemplate> templateIndex = new HashMap<>();
-                final Map<String, String> valueSetIndex = new HashMap<>();
+                final Map<String, String> valueSetIndex = contentProfile.getEnums();
                 final List<CdaTemplate> templateList = new ArrayList<>();
 
                 final ArtDecor2JavaGenerator artDecor2JavaGenerator = new ArtDecor2JavaGenerator(
@@ -1615,8 +1615,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                                         .replace("xsi:", "");
                         String fieldName =
                                 "vocab" + toUpperFirstChar(elementName) + toUpperFirstChar(cdaAttribute.getName());
-                        compilationUnit.addImport("org.husky.emed.cda.models.common.Code");
-                        compilationUnit.addImport("org.husky.emed.cda.models.common.basetypes.CodeBaseType");
+                        compilationUnit.addImport("org.husky.common.model.Code");
+                        compilationUnit.addImport("org.husky.common.basetypes.CodeBaseType");
                         compilationUnit.addImport("java.util.ArrayList");
                         compilationUnit.addImport("java.util.List");
                         FieldDeclaration field = myClass.addPrivateField("List<Code>", fieldName);
@@ -2833,33 +2833,37 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                         throw new RuntimeException("valueSet (" + valueSetId + ") cannot be downloaded: " + e.getMessage());
                     }
                     if (valueSet != null) {
-                        LOG.debug("  creating enum class file ...");
-                        String fullValueSetClassName =
-                                packageName + ".enums." + JavaCodeGenerator.toPascalCase(valueSet.getName());
-                        valueSetIndex.put(valueSetId, fullValueSetClassName);
-                        valueSetConfig.setClassName(fullValueSetClassName);
-                        String baseJavaFolder = valueSetConfig.getProjectFolder();
-                        String fullyQualifiedclassName = valueSetConfig.getClassName();
-                        // delete existing class file
-                        ValueSetUtil.getSourceFileName(baseJavaFolder, fullyQualifiedclassName).delete();
+                        if (this.valueSetIndex.containsKey(valueSetId)) {
+                            LOG.debug("  enum class file {} is already known", valueSetId);
+                        } else {
+                            LOG.debug("  creating enum class file ...");
+                            String fullValueSetClassName =
+                                    packageName + ".enums." + JavaCodeGenerator.toPascalCase(valueSet.getName());
+                            valueSetIndex.put(valueSetId, fullValueSetClassName);
+                            valueSetConfig.setClassName(fullValueSetClassName);
+                            String baseJavaFolder = valueSetConfig.getProjectFolder();
+                            String fullyQualifiedclassName = valueSetConfig.getClassName();
+                            // delete existing class file
+                            ValueSetUtil.getSourceFileName(baseJavaFolder, fullyQualifiedclassName).delete();
 
-                        // create the class file
-                        try {
-                            UpdateValueSets.createEnumClassFromTemplate(baseJavaFolder, fullyQualifiedclassName);
-                            UpdateValueSets.updateEnumClass(
-                                    valueSet.getIdentificator().getRoot(),
-                                    valueSet.getName(),
-                                    baseJavaFolder,
-                                    valueSetConfig.getClassName(),
-                                    valueSet);
-                        } catch (IOException e) {
-                            throw new RuntimeException(
-                                    "valueSet ("
-                                            + valueSetId
-                                            + ") cannot be created as Java enum file: "
-                                            + e.getMessage());
+                            // create the class file
+                            try {
+                                UpdateValueSets.createEnumClassFromTemplate(baseJavaFolder, fullyQualifiedclassName);
+                                UpdateValueSets.updateEnumClass(
+                                        valueSet.getIdentificator().getRoot(),
+                                        valueSet.getName(),
+                                        baseJavaFolder,
+                                        valueSetConfig.getClassName(),
+                                        valueSet);
+                            } catch (IOException e) {
+                                throw new RuntimeException(
+                                        "valueSet ("
+                                                + valueSetId
+                                                + ") cannot be created as Java enum file: "
+                                                + e.getMessage());
+                            }
+                            LOG.debug("  creating enum class file done");
                         }
-                        LOG.debug("  creating enum class file done");
                     }
                     LOG.debug("- downloading ValueSet {} done.", valueSetId);
                 }

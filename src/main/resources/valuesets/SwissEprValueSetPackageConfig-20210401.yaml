@@ -57,6 +57,11 @@ valueSetConfigList:
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=&id=2.16.756.5.30.1.127.3.10.8.3&effectiveDate=2020-05-18T20%3A00%3A07&format=json
+- className: org.husky.common.ch.enums.ParticipationFunction
+  projectFolder: husky-common/husky-common-ch
+  sourceFormatType: JSON
+  sourceSystemType: ARTDECOR_FHIR
+  sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=hl7chcda-&language=en-US&version=&id=2.16.840.1.113883.1.11.10267&effectiveDate=2014-03-26T00%3A00%3A00&format=json
 # husky-communication/husky-communication-ch
 - className: org.husky.communication.ch.enums.FormatCode
   projectFolder: husky-communication/husky-communication-ch

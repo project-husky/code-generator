@@ -10,6 +10,7 @@
 package org.husky.codegenerator;
 
 import org.husky.codegenerator.cda.ArtDecor2JavaGenerator;
+import org.husky.codegenerator.valuesets.UpdateValueSets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,12 +27,12 @@ public class CdaChEmedCodeGenerator {
     /**
      * CDA-CH-EMED package config, v0.97
      */
-    private static final String CDACHEMED_PACKAGE_CONFIG = "ContentProfilePackageConfigCdaChEmedV097.yml";
+    private static final String CDACHEMED_PACKAGE_CONFIG = System.getProperty("user.dir") + "/src/main/resources/cda/ContentProfilePackageConfigCdaChEmedV097.yml";
 
     /**
-     * Base path where to find the config files for the generator (YAML and JSON files).
+     * CDA-CH-EMED value set package config, current
      */
-    private static final String CONFIG_FILE_BASE_PATH = System.getProperty("user.dir") + "/src/main/resources/cda/";
+    private static final String CDACHEMED_VALUE_SET_PACKAGE_CONFIG = System.getProperty("user.dir") + "/src/main/resources/valuesets/CdaChEmedValueSetPackageConfig-current.yaml";
 
     /**
      * The logger.
@@ -51,27 +52,43 @@ public class CdaChEmedCodeGenerator {
             return;
         }
 
-        final String javaSourceDirString = args[0] + "/husky-emed/husky-emed-cda/";
+        final String javaSourceDirString = args[0];
         final File javaSourceDir = new File(javaSourceDirString);
         if (!javaSourceDir.exists()) {
             LOG.error("Java source directory does not exist ({})", javaSourceDirString);
             printUsage();
             return;
-        } else {
-            if (!javaSourceDir.isDirectory()) {
-                LOG.error("Java source is not a directory ({})", javaSourceDirString);
-                printUsage();
-                return;
-            }
+        } else if (!javaSourceDir.isDirectory()) {
+            LOG.error("Java source is not a directory ({})", javaSourceDirString);
+            printUsage();
+            return;
+        }
+        final var cdaSourceDirString = javaSourceDirString + "/husky-emed/husky-emed-cda/";
+        final File cdaSourceDir = new File(cdaSourceDirString);
+        if (!cdaSourceDir.exists()) {
+            LOG.error("Java source directory does not exist ({})", cdaSourceDirString);
+            printUsage();
+            return;
+        } else if (!cdaSourceDir.isDirectory()) {
+            LOG.error("Java source is not a directory ({})", cdaSourceDirString);
+            printUsage();
+            return;
         }
 
-        final File packageConfig = new File(CONFIG_FILE_BASE_PATH, CDACHEMED_PACKAGE_CONFIG);
+        final File packageConfig = new File(CDACHEMED_PACKAGE_CONFIG);
         if (!packageConfig.exists() || !packageConfig.isFile()) {
             LOG.error("The package config file doesn't exist ({})", packageConfig.getAbsolutePath());
             printUsage();
         }
 
-        ArtDecor2JavaGenerator.generate(javaSourceDir, packageConfig);
+        final File packageConfig2 = new File(CDACHEMED_VALUE_SET_PACKAGE_CONFIG);
+        if (!packageConfig2.exists() || !packageConfig2.isFile()) {
+            LOG.error("The package config file doesn't exist ({})", packageConfig2.getAbsolutePath());
+            printUsage();
+        }
+
+        ArtDecor2JavaGenerator.generate(cdaSourceDir, packageConfig);
+        UpdateValueSets.updateValueSets(javaSourceDir, packageConfig2);
     }
 
     /**
