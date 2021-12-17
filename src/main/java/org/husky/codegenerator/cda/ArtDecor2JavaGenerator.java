@@ -43,6 +43,7 @@ import org.husky.codegenerator.cda.model.CdaElement;
 import org.husky.codegenerator.cda.model.CdaTemplate;
 import org.husky.codegenerator.cda.rest.ArtDecorRestClient;
 import org.husky.codegenerator.cda.xslt.Hl7Its2EhcTransformer;
+import org.husky.codegenerator.java.JavadocUtils;
 import org.husky.codegenerator.java.JavaCodeGenerator;
 import org.husky.codegenerator.valuesets.UpdateValueSets;
 import org.husky.codegenerator.valuesets.ValueSetUtil;
@@ -348,9 +349,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                 publicModifier().getKeyword());
 
         String comment = "Adds a " + cdaElement.getJavaName();
-        final String desc = cdaElement.getDescription();
+        String desc = JavadocUtils.cleanArtDecorHtml(cdaElement.getDescription());
         if (desc != null) {
-            comment += "/" + desc;
+            comment += "<br/>\n" + desc;
         }
 
         method.setJavadocComment(comment);
@@ -441,9 +442,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                             publicModifier().getKeyword());
 
             String comment = "Adds a " + cdaElement.getJavaName();
-            String desc = cdaElement.getDescription();
+            String desc = JavadocUtils.cleanArtDecorHtml(cdaElement.getDescription());
             if (desc != null) {
-                comment += "/" + desc;
+                comment += "<br/>\n" + desc;
             }
 
             method.setJavadocComment(comment);
@@ -604,9 +605,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
             method.setType(dataType);
 
             String comment = "Gets the " + cdaElement.getJavaName();
-            String desc = cdaElement.getDescription();
+            String desc = JavadocUtils.cleanArtDecorHtml(cdaElement.getDescription());
             if (desc != null) {
-                comment += "/" + desc;
+                comment += "<br/>\n" + desc;
             }
 
             method.setJavadocComment(comment);
@@ -657,8 +658,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
      */
     private static void createInitVersionMethods(final CompilationUnit compilationUnit,
                                                  final ClassOrInterfaceDeclaration myClass) {
-        compilationUnit.addImport("org.husky.emed.cda.utils.CdaR2Utils");
         compilationUnit.addImport("org.husky.common.hl7cdar2.II");
+        compilationUnit.addImport("org.husky.common.hl7cdar2.INT");
         compilationUnit.addImport("java.util.UUID");
 
         MethodDeclaration method;
@@ -717,7 +718,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
         body.addStatement("final var id = new II();");
         body.addStatement("id.setRoot(idVersion1);");
         body.addStatement("super.setSetId(id);");
-        body.addStatement("super.setVersionNumber(CdaR2Utils.createInt(version));");
+        body.addStatement("super.setVersionNumber(new INT(version));");
     }
 
     /**
@@ -776,7 +777,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
         }
 
         String comment = "Sets the " + cdaElement.getJavaName();
-        String desc = cdaElement.getDescription();
+        String desc = JavadocUtils.cleanArtDecorHtml(cdaElement.getDescription());
         if (desc != null) {
             comment += "<br/>\n" + desc;
         }
@@ -2049,10 +2050,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
             javadoc.append(String.format("%s\n", cdaTemplate.getName()));
             javadoc.append("<p>\n");
             if (cdaTemplate.getDescription() != null) {
-                javadoc.append(String.format("Template description: %s<br>\n", cdaTemplate.getDescription()));
+                javadoc.append(String.format("Template description: %s<br>\n",
+                        JavadocUtils.cleanArtDecorHtml(cdaTemplate.getDescription())));
             }
             if (cdaElement.getDescription() != null) {
-                javadoc.append(String.format("Element description: %s<br>\n", cdaElement.getDescription()));
+                javadoc.append(String.format("Element description: %s<br>\n",
+                        JavadocUtils.cleanArtDecorHtml(cdaElement.getDescription())));
             }
             javadoc.append("<p>\n");
             javadoc.append(String.format("Identifier: %s<br>\n", cdaTemplate.getId()));

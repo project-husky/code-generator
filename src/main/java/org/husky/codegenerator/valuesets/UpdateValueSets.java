@@ -20,6 +20,7 @@ import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.type.Type;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.husky.codegenerator.java.JavadocUtils;
 import org.husky.codegenerator.java.JavaCodeGenerator;
 import org.husky.common.basetypes.CodeBaseType;
 import org.husky.common.enums.LanguageCode;
@@ -125,16 +126,15 @@ public class UpdateValueSets {
 
             // build comments per language
             for (final LanguageCode language : LANGUAGE_CODES) {
-                String designation = valueSetEntry.getDesignation(language, DesignationType.PREFERRED);
-                if (designation == null)
-                    designation = valueSetEntry.getDesignation(language, DesignationType.PREFERRED);
+                String designation = valueSetEntry.getDesignation(language,
+                        DesignationType.PREFERRED);
                 if (designation == null && ENGLISH == language)
                     designation = valueSetEntry.getCodeBaseType().getDisplayName();
                 if (designation != null) {
                     values.add(new StringLiteralExpr(designation));
-                    javadocEnum.append(buildJavadocComment(language, designation));
+                    javadocEnum.append(buildJavadocComment(language, JavadocUtils.cleanArtDecorHtml(designation)));
                     javadocConstant.append(buildJavadocComment(language,
-                            CODE_JAVADOC_PREFIX.get(language) + designation));
+                            CODE_JAVADOC_PREFIX.get(language) + JavadocUtils.cleanArtDecorHtml(designation)));
                 } else
                     values.add(new StringLiteralExpr("TOTRANSLATE"));
 
@@ -324,7 +324,7 @@ public class UpdateValueSets {
             javadoc.append(String.format("Enumeration of %s values\n", valueSet.getName()));
             javadoc.append("<p>\n");
             for (final LanguageCode language : LANGUAGE_CODES) {
-                String desc = valueSet.getDescription(language);
+                String desc = JavadocUtils.cleanArtDecorHtml(valueSet.getDescription(language));
                 if (desc == null) {
                     desc = "No designation found.";
                 }
