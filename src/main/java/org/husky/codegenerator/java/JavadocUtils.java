@@ -25,10 +25,9 @@ public class JavadocUtils {
                 .replace(" class=\"\"", "")                     // empty attribute
                 .replaceAll("<span.*?>", "")                    // useless tag
                 .replace("</span>", "")                         // useless tag
-                .replaceAll("& ", "&amp; ")                     // escape &
+                .replaceAll("<font.*?>", "")                    // useless tag
+                .replace("</font>", "")                         // useless tag
+                .replace("& ", "&amp; ")                        // escape &
                 .replace("@", "{@literal @}");                  // escape @
     }
-
-    // replace & with &amp;
-    // replace &sth; with &amp;sth; or decode.
 }
