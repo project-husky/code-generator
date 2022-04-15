@@ -24,9 +24,9 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * The test class for Hl7Its2EhcTransformer.
+ * The test class for Hl7Its2HuskyTransformer.
  */
-public class Hl7Its2EhcTransformerTest {
+public class Hl7Its2HuskyTransformerTest {
 
 	/**
 	 * Transformation test for all ART-DECOR HL7 ITS XML files of the content
@@ -108,7 +108,7 @@ public class Hl7Its2EhcTransformerTest {
 		// Prepare Cleanup
 		destFile.deleteOnExit();
 
-		Hl7Its2EhcTransformer.transform(srcFile, destFile);
+		Hl7Its2HuskyTransformer.transform(srcFile, destFile);
 
 		String expectedContent = IOUtils
 				.toString(new File(System.getProperty("user.dir") + "/src/test/resources/2.16.756.5.30.1.1.10.1" +
@@ -139,7 +139,7 @@ public class Hl7Its2EhcTransformerTest {
 			test.templateTestRecursiveCdaChLrep();
 		}
 
-		Hl7Its2EhcTransformer.transform(srcFile, dstFile);
+		Hl7Its2HuskyTransformer.transform(srcFile, dstFile);
 
 		int countTransformed = 0;
 		for (final File file : folder.listFiles()) {
@@ -148,7 +148,7 @@ public class Hl7Its2EhcTransformerTest {
 					srcFile = file;
 					dstFile = new File(file.getAbsolutePath().replace(".xml", "_transformed.xml"));
 
-					Hl7Its2EhcTransformer.transform(srcFile, dstFile);
+					Hl7Its2HuskyTransformer.transform(srcFile, dstFile);
 					countTransformed++;
 				}
 			}

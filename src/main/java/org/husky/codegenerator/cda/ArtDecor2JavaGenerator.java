@@ -42,7 +42,7 @@ import org.husky.codegenerator.cda.model.CdaAttribute;
 import org.husky.codegenerator.cda.model.CdaElement;
 import org.husky.codegenerator.cda.model.CdaTemplate;
 import org.husky.codegenerator.cda.rest.ArtDecorRestClient;
-import org.husky.codegenerator.cda.xslt.Hl7Its2EhcTransformer;
+import org.husky.codegenerator.cda.xslt.Hl7Its2HuskyTransformer;
 import org.husky.codegenerator.java.JavadocUtils;
 import org.husky.codegenerator.java.JavaCodeGenerator;
 import org.husky.codegenerator.valuesets.UpdateValueSets;
@@ -50,7 +50,6 @@ import org.husky.codegenerator.valuesets.ValueSetUtil;
 import org.husky.common.model.Code;
 import org.husky.common.basetypes.CodeBaseType;
 import org.husky.common.hl7cdar2.ObjectFactory;
-import org.husky.common.utils.Util;
 import org.husky.valueset.api.ValueSetManager;
 import org.husky.valueset.config.ValueSetConfig;
 import org.husky.valueset.enums.SourceFormatType;
@@ -1071,7 +1070,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                                 final File packageConfig) {
         LOG.info("ArtDecor2JavaGenerator started");
 
-        final File tempDownloadPath = new File(Util.getTempDirectory() + "/eHC_Arde_Download/");
+        final File tempDownloadPath = new File(System.getProperty("java.io.tmpdir") + "/Husky_Arde_Download/");
 
         LOG.info("Settings:");
         LOG.info("Java source dir: {}", javaSourceDir.getAbsolutePath());
@@ -2220,7 +2219,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
             }
 
             if (!trnFile.exists()) {
-                Hl7Its2EhcTransformer.transform(orgFn, trnFn);
+                Hl7Its2HuskyTransformer.transform(orgFn, trnFn);
             }
 
             String content;
