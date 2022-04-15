@@ -42,62 +42,42 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * <div class="en">This class acts as "downloader" of all used templates by a
+ * This class acts as "downloader" of all used templates by a
  * given Document Template. It recursively goes through all includes and
  * contains of an ART-DECOR template and download each referenced template.
- * </div>
- *
- * <div class="de">Diese Klasse dient als "Downloader" aller von einer
- * bestimmten Dokumentvorlage verwendeten Templates. Er geht rekursiv alle
- * Includes und Contains jedes ART-DECOR Templates durch und lädt jedes
- * referenzierte Template herunter.</div>
- *
  */
 public class ArtDecorRestClient {
 
-    /** The log. */
-    protected final static Logger log = LoggerFactory.getLogger(ArtDecorRestClient.class);
+    /**
+     * The log.
+     */
+    protected static final Logger log = LoggerFactory.getLogger(ArtDecorRestClient.class);
 
     /**
+     * Downloads the ART-DECOR project index for the given
+     * project prefix.
      *
-     * <div class="en">Downloads the ART-DECOR project index for the given
-     * project prefix.</div>
-     *
-     * <div class="de">Lädt den ART-DECOR-Projektindex für den angegebenen
-     * Projekt-Prefix herunter.</div>
-     *
-     *
-     *
-     * @param baseUrl
-     *            the base url
-     * @param artDecorPrefix
-     *            the prefix
+     * @param baseUrl        the base url
+     * @param artDecorPrefix the prefix
      * @return the ART-DECOR project index
      * @throws MalformedURLException
-     * @throws IOException
-     *             Signals that an I/O exception has occurred.
+     * @throws IOException           Signals that an I/O exception has occurred.
      */
-    public static InputStream getArtDecorProjectIndex(URL baseUrl, String artDecorPrefix)
+    public static InputStream getArtDecorProjectIndex(final URL baseUrl, final String artDecorPrefix)
             throws MalformedURLException, IOException {
         return getArtDecorXml(new URL(
                 baseUrl.toString() + "ProjectIndex?prefix=" + artDecorPrefix + "&format=xml"));
     }
 
     /**
-     * <div class="en">Downloads the XML from the given ART-DECOR url.</div>
+     * Downloads the XML from the given ART-DECOR url.
      *
-     * <div class="de">Lädt das XML von der angegebenen ART-DECOR-URL
-     * herunter.</div>
-     *
-     * @param url
-     *            the url
+     * @param url the url
      * @return the ART-DECOR xml
-     * @throws ClientProtocolException
-     *             the client protocol exception
-     * @throws IOException
-     *             Signals that an I/O exception has occurred.
+     * @throws ClientProtocolException the client protocol exception
+     * @throws IOException             Signals that an I/O exception has occurred.
      */
-    public static InputStream getArtDecorXml(URL url) throws ClientProtocolException, IOException {
+    public static InputStream getArtDecorXml(final URL url) throws ClientProtocolException, IOException {
         InputStream retVal = null;
 
         // create HTTP Client
@@ -124,32 +104,35 @@ public class ArtDecorRestClient {
         return retVal;
     }
 
-    /** The base dir. */
-    private String baseDir;
-
-    /** The project indexes. */
-    private ArrayList<Document> projectIndexes = new ArrayList<Document>();
-
-    /** The templates. */
-    private ArrayList<String> templates;
-
-    /** The art decor project map. */
-    private Map<String, String> artDecorProjectMap;
+    /**
+     * The base dir.
+     */
+    private final String baseDir;
 
     /**
-     * <div class="en">Constructor for an ART-DECOR REST client instance. The
-     * base url on the web and the base directory where to store the files have
-     * to be provided (null is not allowed, here).</div>
-     *
-     * <div class="de">Konstruktor für eine ART-DECOR REST-Client-Instanz. Die
-     * Basis-URL im Web und das Basisverzeichnis, in dem die Dateien gespeichert
-     * werden sollen, müssen angegeben werden (null ist hier nicht
-     * zulässig).</div>
-     *
-     * @param baseDir
-     *            the base dir
+     * The project indexes.
      */
-    public ArtDecorRestClient(Map<String, String> artDecorProjectMap, String baseDir) {
+    private final ArrayList<Document> projectIndexes = new ArrayList<>();
+
+    /**
+     * The templates.
+     */
+    private final ArrayList<String> templates;
+
+    /**
+     * The art decor project map.
+     */
+    private final Map<String, String> artDecorProjectMap;
+
+    /**
+     * Constructor for an ART-DECOR REST client instance. The
+     * base url on the web and the base directory where to store the files have
+     * to be provided (null is not allowed, here).
+     *
+     * @param baseDir the base dir
+     */
+    public ArtDecorRestClient(final Map<String, String> artDecorProjectMap,
+                              String baseDir) {
 
         if (baseDir == null)
             throw new RuntimeException(
@@ -176,57 +159,30 @@ public class ArtDecorRestClient {
 
         this.artDecorProjectMap = artDecorProjectMap;
         this.baseDir = baseDir;
-        this.templates = new ArrayList<String>();
+        this.templates = new ArrayList<>();
 
         // download the project indexes
-        for (String prefix : artDecorProjectMap.keySet()) {
+        for (final String prefix : artDecorProjectMap.keySet()) {
             try {
-                addArtDecorProject(prefix, (String) artDecorProjectMap.get(prefix));
-            } catch (Exception e) {
+                addArtDecorProject(prefix, new URL(artDecorProjectMap.get(prefix)));
+            } catch (final Exception e) {
                 throw new RuntimeException(e);
             }
         }
     }
 
     /**
-     * Adds the ART-DECOR project. <div class="en">Adds the project with the
-     * given project prefix to the internal project list. The project list is
-     * needed to resolve the url's of referenced templates.</div>
+     * Adds the ART-DECOR project.
+     * <p>
+     * Adds the project with the given baseUrl and project prefix to the internal project list. The project list is
+     * needed to resolve the url's of referenced templates.
      *
-     * <div class="de">Fügt das Projekt mit dem angegebenen Projekt-Prefix zur
-     * internen Projektliste hinzu. Die Projektliste wird benötigt, um die URLs
-     * von referenzierten Vorlagen aufzulösen.</div>
-     *
-     * @param artDecorPrefix
-     *            the prefix
-     * @param artDecorBaseUrl
-     *            the art decor base url
-     * @throws Exception
-     *             the exception
+     * @param artDecorPrefix the art decor prefix
+     * @param baseUrl        the base url
+     * @throws Exception the exception
      */
-    public void addArtDecorProject(String artDecorPrefix, String artDecorBaseUrl) throws Exception {
-        addArtDecorProject(artDecorPrefix, new URL(artDecorBaseUrl));
-    }
-
-    /**
-     * Adds the ART-DECOR project. <div class="en">Adds the project with the
-     * given baseUrl and project prefix to the internal project list. The
-     * project list is needed to resolve the url's of referenced
-     * templates.</div>
-     *
-     * <div class="de">Fügt das Projekt mit der angegebenen Basis-URL und dem
-     * angegebenen Projekt-Prefix zur internen Projektliste hinzu. Die
-     * Projektliste wird benötigt, um die URLs von referenzierten Vorlagen
-     * aufzulösen.</div>
-     *
-     * @param artDecorPrefix
-     *            the art decor prefix
-     * @param baseUrl
-     *            the base url
-     * @throws Exception
-     *             the exception
-     */
-    public void addArtDecorProject(String artDecorPrefix, URL baseUrl) throws Exception {
+    public void addArtDecorProject(final String artDecorPrefix,
+                                   final URL baseUrl) throws Exception {
         log.debug("Downloading Project Index {}", artDecorPrefix);
         InputStream is = getArtDecorProjectIndex(baseUrl, artDecorPrefix);
         Document doc = this.getXmlDocument(is);
@@ -238,16 +194,11 @@ public class ArtDecorRestClient {
     }
 
     /**
-     * <div class="en">Downloads the given template and all recursively
-     * referenced "includes" or "contains" templates.</div>
+     * Downloads the given template and all recursively
+     * referenced "includes" or "contains" templates.
      *
-     * <div class="de">Lädt die angegebene Vorlage und alle rekursiv
-     * referenzierten "include" oder "contains" Vorlagen herunter.</div>
-     *
-     * @param documentTemplateId
-     *            the document template id
-     * @param effectiveDate
-     *            the effective date
+     * @param documentTemplateId the document template id
+     * @param effectiveDate      the effective date
      * @return true, if successful
      */
     public boolean downloadTemplateRecursive(String documentTemplateId, String effectiveDate) {
@@ -256,24 +207,17 @@ public class ArtDecorRestClient {
     }
 
     /**
-     * <div class="en">Downloads the given template and all recursively
-     * referenced "includes" or "contains" templates.</div>
+     * Downloads the given template and all recursively
+     * referenced "includes" or "contains" templates.
      *
-     * <div class="de">Lädt die angegebene Vorlage und alle rekursiv
-     * referenzierten "include" oder "contains" Vorlagen herunter.</div>
-     *
-     * @param documentTemplateId
-     *            the document template id
-     * @param effectiveDate
-     *            the effective date
-     * @param templateId
-     *            the template id
-     * @param type
-     *            the type
+     * @param documentTemplateId the document template id
+     * @param effectiveDate      the effective date
+     * @param templateId         the template id
+     * @param type               the type
      * @return true, if successful
      */
     public boolean downloadTemplateRecursive(String documentTemplateId, String effectiveDate,
-            String templateId, String type) {
+                                             String templateId, String type) {
         boolean retVal = false;
         try {
             // prepare directory, where to put the downloaded files
@@ -326,11 +270,9 @@ public class ArtDecorRestClient {
     /**
      * Gets the project prefix of the given template.
      *
-     * @param templateId
-     *            the template id
+     * @param templateId the template id
      * @return the prefix
-     * @throws XPathExpressionException
-     *             the x path expression exception
+     * @throws XPathExpressionException the x path expression exception
      */
     private String getArtDecorPrefix(String templateId) {
         String retVal = null;
@@ -358,48 +300,18 @@ public class ArtDecorRestClient {
     }
 
     /**
-     * <div class="en">Downloads the ART-DECOR template with the given id from
-     * the given project/base url.</div>
+     * Downloads the ART-DECOR template with the given id from
+     * the given project/base url.
      *
-     * <div class="de">Lädt das ART-DECOR Template mit der angegebenen ID von
-     * der angegebenen Projekt-/Basis-URL herunter.</div>
-     *
-     * @param templateId
-     *            the template id
-     * @param effectiveDate
-     *            the effective date
+     * @param documentTemplateId the document template id
+     * @param templateId         the template id
+     * @param effectiveDate      the effective date
      * @return the ART-DECOR template
-     * @throws ClientProtocolException
-     *             the client protocol exception
-     * @throws IOException
-     *             Signals that an I/O exception has occurred.
-     */
-    public InputStream getArtDecorTemplate(String templateId, String effectiveDate)
-            throws ClientProtocolException, IOException {
-        return getArtDecorTemplate(templateId, templateId, effectiveDate);
-    }
-
-    /**
-     * <div class="en">Downloads the ART-DECOR template with the given id from
-     * the given project/base url.</div>
-     *
-     * <div class="de">Lädt das ART-DECOR Template mit der angegebenen ID von
-     * der angegebenen Projekt-/Basis-URL herunter.</div>
-     *
-     * @param documentTemplateId
-     *            the document template id
-     * @param templateId
-     *            the template id
-     * @param effectiveDate
-     *            the effective date
-     * @return the ART-DECOR template
-     * @throws ClientProtocolException
-     *             the client protocol exception
-     * @throws IOException
-     *             Signals that an I/O exception has occurred.
+     * @throws ClientProtocolException the client protocol exception
+     * @throws IOException             Signals that an I/O exception has occurred.
      */
     public InputStream getArtDecorTemplate(String documentTemplateId, String templateId,
-            String effectiveDate) throws ClientProtocolException, IOException {
+                                           String effectiveDate) throws ClientProtocolException, IOException {
         String prefix = getArtDecorPrefix(templateId);
         String baseUrl = artDecorProjectMap.get(prefix);
         if (prefix == null)
@@ -409,26 +321,21 @@ public class ArtDecorRestClient {
             throw new RuntimeException("No ART-DECOR base url found for template " + templateId
                     + " (prefix: " + prefix + "). Please complete the project map.");
         return getArtDecorXml(
-                new URL(baseUrl.toString() + "RetrieveTemplate?prefix=" + prefix + "&id="
+                new URL(baseUrl + "RetrieveTemplate?prefix=" + prefix + "&id="
                         + templateId + "&effectiveDate=" + effectiveDate + "&format=xmlnowrapper"));
     }
 
     /**
      * Processes the given node list.
      *
-     * @param nl
-     *            the nl
-     * @param documentTemplateId
-     *            the document template id
-     * @param templateId
-     *            the template id
-     * @param type
-     *            the type
-     * @throws XPathExpressionException
-     *             the x path expression exception
+     * @param nl                 the nl
+     * @param documentTemplateId the document template id
+     * @param templateId         the template id
+     * @param type               the type
+     * @throws XPathExpressionException the x path expression exception
      */
     private void processNodeList(NodeList nl, String documentTemplateId, String templateId,
-            String type) throws XPathExpressionException {
+                                 String type) throws XPathExpressionException {
         for (int i = 0; i < nl.getLength(); i++) {
             Node node = null;
             String id = "";
