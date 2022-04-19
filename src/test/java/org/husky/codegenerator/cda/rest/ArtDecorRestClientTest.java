@@ -79,27 +79,27 @@ public class ArtDecorRestClientTest {
 		// MedicationCardDocument
 		String templateId;
 		templateId = "2.16.756.5.30.1.1.10.1.3";
-		artDecorRestClient.downloadTemplateRecursive(templateId, "dynamic");
+		artDecorRestClient.downloadTemplateRecursive(templateId, "dynamic", templateId);
 
 		// MedicationDispenseDocument
 		templateId = "2.16.756.5.30.1.1.10.1.5";
-		artDecorRestClient.downloadTemplateRecursive(templateId, "dynamic");
+		artDecorRestClient.downloadTemplateRecursive(templateId, "dynamic", templateId);
 
 		// MedicationListDocument
 		templateId = "2.16.756.5.30.1.1.10.1.13";
-		artDecorRestClient.downloadTemplateRecursive(templateId, "dynamic");
+		artDecorRestClient.downloadTemplateRecursive(templateId, "dynamic", templateId);
 
 		// MedicationPrescriptionDocument
 		templateId = "2.16.756.5.30.1.1.10.1.4";
-		artDecorRestClient.downloadTemplateRecursive(templateId, "dynamic");
+		artDecorRestClient.downloadTemplateRecursive(templateId, "dynamic", templateId);
 
 		// MedicationTreatmentPlanDocument
 		templateId = "2.16.756.5.30.1.1.10.1.7";
-		artDecorRestClient.downloadTemplateRecursive(templateId, "dynamic");
+		artDecorRestClient.downloadTemplateRecursive(templateId, "dynamic", templateId);
 
 		// PharmaceuticalAdviceDocument
 		templateId = "2.16.756.5.30.1.1.10.1.6";
-		artDecorRestClient.downloadTemplateRecursive(templateId, "dynamic");
+		artDecorRestClient.downloadTemplateRecursive(templateId, "dynamic", templateId);
 
 		// tests
 		dest = new File(dir);
@@ -135,7 +135,7 @@ public class ArtDecorRestClientTest {
 		ArtDecorRestClient artDecorRestClient = new ArtDecorRestClient(artDecorProjectMap, dir);
 
 		artDecorRestClient.downloadTemplateRecursive("2.16.756.5.30.1.1.10.1.10",
-				"2019-07-30T18:01:10");
+				"2019-07-30T18:01:10", "2.16.756.5.30.1.1.10.1.10");
 
 		File dest;
 		dest = new File(dir);

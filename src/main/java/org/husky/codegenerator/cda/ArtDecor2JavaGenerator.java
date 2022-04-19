@@ -1100,12 +1100,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
             // Perform REST calls
             LOG.info("Download from ART-DECOR");
             for (final ContentProfileConfig contentProfile : contentProfilePackageConfig.getContentProfileConfigList()) {
-                String dir = tempDownloadPath.getAbsolutePath() + "/" + contentProfile.getTargetNamespace() + "/";
-                ArtDecorRestClient artDecorRestClient = new ArtDecorRestClient(contentProfile.getArtDecorProjectMap(), dir);
+                final var dir = tempDownloadPath.getAbsolutePath() + "/" + contentProfile.getTargetNamespace() + "/";
+                final var artDecorRestClient = new ArtDecorRestClient(contentProfile.getArtDecorProjectMap(), dir);
 
                 for (final String templateId : contentProfile.getArtDecorDocTemplateMap().keySet()) {
                     final String effectiveTime = contentProfile.getArtDecorDocTemplateMap().get(templateId);
-                    artDecorRestClient.downloadTemplateRecursive(templateId, effectiveTime);
+                    artDecorRestClient.downloadTemplateRecursive(templateId, effectiveTime, templateId);
                 }
             }
             LOG.info("Download from ART-DECOR done.");

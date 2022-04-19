@@ -186,9 +186,9 @@ public class ArtDecorRestClient {
      */
     public void addArtDecorProject(final String artDecorPrefix,
                                    final URL baseUrl) throws Exception {
-        log.debug("Downloading Project Index {}", artDecorPrefix);
-        InputStream is = getArtDecorProjectIndex(baseUrl, artDecorPrefix);
-        Document doc = this.getXmlDocument(is);
+        log.info("Downloading Project Index {}", artDecorPrefix);
+        final InputStream is = getArtDecorProjectIndex(baseUrl, artDecorPrefix);
+        final Document doc = this.getXmlDocument(is);
         if (doc != null) {
             final NodeList nodes = doc.getElementsByTagName("template");
             for (int i = 0; i < nodes.getLength(); ++i) {
@@ -196,7 +196,7 @@ public class ArtDecorRestClient {
                 this.idsToPrefixMap.put(element.getAttribute("id"), artDecorPrefix);
             }
         }
-        String fn = baseDir + "ProjectIndex-" + artDecorPrefix + ".xml";
+        final String fn = baseDir + "ProjectIndex-" + artDecorPrefix + ".xml";
         this.writeXmlDocumentToFile(doc, new File(fn));
     }
 
@@ -206,27 +206,20 @@ public class ArtDecorRestClient {
      *
      * @param documentTemplateId the document template id
      * @param effectiveDate      the effective date
-     * @return true, if successful
-     */
-    public boolean downloadTemplateRecursive(String documentTemplateId, String effectiveDate) {
-        return downloadTemplateRecursive(documentTemplateId, effectiveDate, documentTemplateId,
-                null);
-    }
-
-    /**
-     * Downloads the given template and all recursively
-     * referenced "includes" or "contains" templates.
-     *
-     * @param documentTemplateId the document template id
-     * @param effectiveDate      the effective date
      * @param templateId         the template id
-     * @param type               the type
      * @return true, if successful
      */
-    public boolean downloadTemplateRecursive(String documentTemplateId, String effectiveDate,
-                                             String templateId, String type) {
-        boolean retVal = false;
+    public boolean downloadTemplateRecursive(final String documentTemplateId,
+                                             final String effectiveDate,
+                                             final String templateId) {
+        // download only, when it is not already there
+        if (templates.contains(templateId)) {
+            return false;
+        }
         try {
+            templates.add(templateId);
+            log.debug("Downloading template: {}", templateId);
+
             // prepare directory, where to put the downloaded files
             String dir = baseDir;
             if (!dir.endsWith("/"))
@@ -235,42 +228,35 @@ public class ArtDecorRestClient {
                 dir += "kit" + "/";
             }
 
-            // download only, when it is not already there
-            if (!templates.contains(templateId)) {
-                templates.add(templateId);
+            // download the template from ART-DECOR REST Service as stream
+            final InputStream is = getArtDecorTemplate(documentTemplateId, templateId, effectiveDate);
 
-                log.debug("Downloading template: {}", templateId);
+            // transform the stream to an XML document
+            final Document doc = this.getXmlDocument(is);
 
-                // download the template from ART-DECOR REST Service as stream
-                InputStream is = getArtDecorTemplate(documentTemplateId, templateId, effectiveDate);
+            // Write the downloaded yml to file
+            final var targetFile = new File(dir + templateId + ".xml");
+            this.writeXmlDocumentToFile(doc, targetFile);
 
-                // transform the stream to an XML document
-                Document doc = this.getXmlDocument(is);
+            // Process all contains and includes in the current template
+            NodeList nl;
+            XPathFactory xPathfactory = XPathFactory.newInstance();
+            XPath xpath = xPathfactory.newXPath();
+            XPathExpression expr = null;
 
-                // Write the downloaded yml to file
-                File targetFile = new File(dir + templateId + ".xml");
-                this.writeXmlDocumentToFile(doc, targetFile);
+            expr = xpath.compile("//include");
+            nl = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+            processNodeList(nl, documentTemplateId, templateId, "includes");
 
-                // Process all contains and includes in the current template
-                NodeList nl;
-                XPathFactory xPathfactory = XPathFactory.newInstance();
-                XPath xpath = xPathfactory.newXPath();
-                XPathExpression expr = null;
+            expr = xpath.compile("//@contains");
+            nl = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+            processNodeList(nl, documentTemplateId, templateId, "contains");
 
-                expr = xpath.compile("//include");
-                nl = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-                processNodeList(nl, documentTemplateId, templateId, "includes");
-
-                expr = xpath.compile("//@contains");
-                nl = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-                processNodeList(nl, documentTemplateId, templateId, "contains");
-
-                log.info("Downloading template complete: {}", templateId);
-            }
-        } catch (Exception e) {
+            log.debug("Downloading template complete: {}", templateId);
+        } catch (final Exception e) {
             e.printStackTrace();
         }
-        return retVal;
+        return false;
 
     }
 
@@ -299,16 +285,18 @@ public class ArtDecorRestClient {
      * @throws ClientProtocolException the client protocol exception
      * @throws IOException             Signals that an I/O exception has occurred.
      */
-    public InputStream getArtDecorTemplate(String documentTemplateId, String templateId,
-                                           String effectiveDate) throws ClientProtocolException, IOException {
-        String prefix = getArtDecorPrefix(templateId);
-        String baseUrl = artDecorProjectMap.get(prefix);
+    public InputStream getArtDecorTemplate(final String documentTemplateId,
+                                           final String templateId,
+                                           final String effectiveDate) throws IOException {
+        final String prefix = getArtDecorPrefix(templateId);
+        final String baseUrl = artDecorProjectMap.get(prefix);
         if (prefix == null)
             throw new RuntimeException("No prefix found for template " + templateId
                     + ". Please complete the project map.");
         if (baseUrl == null)
             throw new RuntimeException("No ART-DECOR base url found for template " + templateId
                     + " (prefix: " + prefix + "). Please complete the project map.");
+        log.info(prefix + " : " + templateId);
         return getArtDecorXml(
                 new URL(baseUrl + "RetrieveTemplate?prefix=" + prefix + "&id="
                         + templateId + "&effectiveDate=" + effectiveDate + "&format=xmlnowrapper"));
@@ -321,10 +309,11 @@ public class ArtDecorRestClient {
      * @param documentTemplateId the document template id
      * @param templateId         the template id
      * @param type               the type
-     * @throws XPathExpressionException the x path expression exception
      */
-    private void processNodeList(NodeList nl, String documentTemplateId, String templateId,
-                                 String type) throws XPathExpressionException {
+    private void processNodeList(final NodeList nl,
+                                 final String documentTemplateId,
+                                 final String templateId,
+                                 final String type) {
         for (int i = 0; i < nl.getLength(); i++) {
             Node node = null;
             String id = "";
@@ -344,12 +333,11 @@ public class ArtDecorRestClient {
                 log.debug("contains: {}", id);
             }
 
-            String prefix = getArtDecorPrefix(id);
-
+            final String prefix = getArtDecorPrefix(id);
             if ("".equals(prefix)) {
                 log.error("Prefix not found for templateId {}", id);
             } else
-                downloadTemplateRecursive(documentTemplateId, flexibility, id, type);
+                downloadTemplateRecursive(documentTemplateId, flexibility, id);
         }
     }
 
