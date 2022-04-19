@@ -2876,16 +2876,16 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                 tempName = currentCdaAttribute.getName();
             }
             if (currentCdaAttribute.getValue() != null) {
-                LOG.error("Attribute from vocab Element: {}={} (dataType: {})", tempName,
+                LOG.debug("Attribute from vocab Element: {}={} (dataType: {})", tempName,
                         currentCdaAttribute.getValue(), currentCdaAttribute.getDataType());
             } else if (currentCdaAttribute.getCode() != null) {
-                LOG.error("Attribute from vocab Element: {}={} (dataType: {})", tempName,
+                LOG.debug("Attribute from vocab Element: {}={} (dataType: {})", tempName,
                         currentCdaAttribute.getCode(), currentCdaAttribute.getDataType());
             } else if (currentCdaAttribute.getCodeList() != null) {
-                LOG.error("Attribute from vocab Element: {}={} (dataType: {})", tempName,
+                LOG.debug("Attribute from vocab Element: {}={} (dataType: {})", tempName,
                         currentCdaAttribute.getCodeList(), currentCdaAttribute.getDataType());
             } else if (currentCdaAttribute.getValueSetId() != null) {
-                LOG.error("Attribute from vocab Element: {}={} (dataType: {})", tempName,
+                LOG.debug("Attribute from vocab Element: {}={} (dataType: {})", tempName,
                         currentCdaAttribute.getValueSetId(), currentCdaAttribute.getDataType());
             } else {
                 LOG.error("Uups some wrong with logMsg in enterVocab()...");

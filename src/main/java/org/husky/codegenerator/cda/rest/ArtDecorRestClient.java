@@ -25,7 +25,6 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.io.FileUtils;
@@ -296,7 +295,7 @@ public class ArtDecorRestClient {
         if (baseUrl == null)
             throw new RuntimeException("No ART-DECOR base url found for template " + templateId
                     + " (prefix: " + prefix + "). Please complete the project map.");
-        log.info(prefix + " : " + templateId);
+        log.debug(prefix + " : " + templateId);
         return getArtDecorXml(
                 new URL(baseUrl + "RetrieveTemplate?prefix=" + prefix + "&id="
                         + templateId + "&effectiveDate=" + effectiveDate + "&format=xmlnowrapper"));
