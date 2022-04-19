@@ -1169,7 +1169,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
      */
     private static void printCdaAttributes(final String intend, final List<CdaAttribute> attrList) {
         for (final CdaAttribute attr : attrList) {
-            LOG.info(
+            LOG.debug(
                     "{} {} = {} (dataType: {})", intend, attr.getName(), attr.getValue(), attr.getDataType());
         }
     }
@@ -1181,7 +1181,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
      * @param cdaElement the cda element
      */
     private static void printCdaElementRecursive(final String intend, final CdaElement cdaElement) {
-        LOG.info("{} - CdaElement Name = {} (dataType: {})", intend, cdaElement.getJavaName(),
+        LOG.debug("{} - CdaElement Name = {} (dataType: {})", intend, cdaElement.getJavaName(),
                 cdaElement.getDataType());
         printCdaAttributes(intend, cdaElement.getCdaAttributeList());
         for (final CdaElement item : cdaElement.getChildrenCdaElementList()) {
@@ -2259,7 +2259,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
         }
 
         if (initialRun) {
-            LOG.info("Processing: {} done.", templateId);
+            LOG.debug("Processing: {} done.", templateId);
         }
 
         return retVal;
