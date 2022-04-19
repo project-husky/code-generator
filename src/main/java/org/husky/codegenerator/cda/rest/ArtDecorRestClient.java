@@ -14,6 +14,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -37,6 +38,7 @@ import org.husky.common.utils.xml.XmlFactories;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -110,11 +112,6 @@ public class ArtDecorRestClient {
     private final String baseDir;
 
     /**
-     * The project indexes.
-     */
-    private final ArrayList<Document> projectIndexes = new ArrayList<>();
-
-    /**
      * The templates.
      */
     private final ArrayList<String> templates;
@@ -123,6 +120,11 @@ public class ArtDecorRestClient {
      * The art decor project map.
      */
     private final Map<String, String> artDecorProjectMap;
+
+    /**
+     * The map of IDs to project prefix.
+     */
+    private final Map<String, String> idsToPrefixMap;
 
     /**
      * Constructor for an ART-DECOR REST client instance. The
@@ -160,6 +162,7 @@ public class ArtDecorRestClient {
         this.artDecorProjectMap = artDecorProjectMap;
         this.baseDir = baseDir;
         this.templates = new ArrayList<>();
+        this.idsToPrefixMap = new HashMap<>(64);
 
         // download the project indexes
         for (final String prefix : artDecorProjectMap.keySet()) {
@@ -187,7 +190,11 @@ public class ArtDecorRestClient {
         InputStream is = getArtDecorProjectIndex(baseUrl, artDecorPrefix);
         Document doc = this.getXmlDocument(is);
         if (doc != null) {
-            projectIndexes.add(doc);
+            final NodeList nodes = doc.getElementsByTagName("template");
+            for (int i = 0; i < nodes.getLength(); ++i) {
+                final Element element = (Element) nodes.item(i);
+                this.idsToPrefixMap.put(element.getAttribute("id"), artDecorPrefix);
+            }
         }
         String fn = baseDir + "ProjectIndex-" + artDecorPrefix + ".xml";
         this.writeXmlDocumentToFile(doc, new File(fn));
@@ -272,31 +279,13 @@ public class ArtDecorRestClient {
      *
      * @param templateId the template id
      * @return the prefix
-     * @throws XPathExpressionException the x path expression exception
      */
-    private String getArtDecorPrefix(String templateId) {
-        String retVal = null;
-        NodeList nl;
-        XPathFactory xPathfactory = XPathFactory.newInstance();
-        XPath xpath = xPathfactory.newXPath();
-        XPathExpression expr;
-
-        try {
-            expr = xpath.compile("//template[@id='" + templateId + "']");
-            for (Document projectIndex : projectIndexes) {
-                nl = (NodeList) expr.evaluate(projectIndex, XPathConstants.NODESET);
-                if (nl.getLength() > 0) {
-                    XPathExpression expr1 = xpath.compile("/return/@prefix");
-                    nl = (NodeList) expr1.evaluate(projectIndex, XPathConstants.NODESET);
-                    retVal = nl.item(0).getNodeValue();
-                }
-                if (retVal != null)
-                    break;
-            }
-        } catch (XPathExpressionException e) {
-            return null;
+    private String getArtDecorPrefix(final String templateId) {
+        final String prefix = this.idsToPrefixMap.getOrDefault(templateId, null);
+        if (prefix == null) {
+            log.error("Can't find prefix for id '{}'", templateId);
         }
-        return retVal;
+        return prefix;
     }
 
     /**
