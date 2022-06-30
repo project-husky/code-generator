@@ -9,21 +9,38 @@
  */
 package org.husky.codegenerator.cda;
 
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.Parameter;
-import com.github.javaparser.ast.body.*;
-import com.github.javaparser.ast.comments.Comment;
-import com.github.javaparser.ast.comments.JavadocComment;
-import com.github.javaparser.ast.comments.LineComment;
-import com.github.javaparser.ast.expr.Name;
-import com.github.javaparser.ast.expr.NormalAnnotationExpr;
-import com.github.javaparser.ast.expr.StringLiteralExpr;
-import com.github.javaparser.ast.stmt.BlockStmt;
-import com.github.javaparser.ast.stmt.Statement;
-import com.github.javaparser.ast.type.ClassOrInterfaceType;
-import com.github.javaparser.javadoc.Javadoc;
-import net.sf.saxon.s9api.SaxonApiException;
+import static com.github.javaparser.ast.Modifier.privateModifier;
+import static com.github.javaparser.ast.Modifier.publicModifier;
+import static com.github.javaparser.ast.Modifier.staticModifier;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
+import javax.annotation.processing.Generated;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.Interval;
@@ -33,7 +50,21 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.husky.codegenerator.cda.antlr.Hl7ItsLexer;
 import org.husky.codegenerator.cda.antlr.Hl7ItsParser;
-import org.husky.codegenerator.cda.antlr.Hl7ItsParser.*;
+import org.husky.codegenerator.cda.antlr.Hl7ItsParser.CodeAttrContext;
+import org.husky.codegenerator.cda.antlr.Hl7ItsParser.CodeSystemAttrContext;
+import org.husky.codegenerator.cda.antlr.Hl7ItsParser.CodeSystemNameAttrContext;
+import org.husky.codegenerator.cda.antlr.Hl7ItsParser.ConformanceAttrContext;
+import org.husky.codegenerator.cda.antlr.Hl7ItsParser.ContainsAttrContext;
+import org.husky.codegenerator.cda.antlr.Hl7ItsParser.DataTypeAttrContext;
+import org.husky.codegenerator.cda.antlr.Hl7ItsParser.DisplayNameAttrContext;
+import org.husky.codegenerator.cda.antlr.Hl7ItsParser.FlexibilityAttrContext;
+import org.husky.codegenerator.cda.antlr.Hl7ItsParser.IdAttrContext;
+import org.husky.codegenerator.cda.antlr.Hl7ItsParser.MaxOccursAttrContext;
+import org.husky.codegenerator.cda.antlr.Hl7ItsParser.MinOccursAttrContext;
+import org.husky.codegenerator.cda.antlr.Hl7ItsParser.NameAttrContext;
+import org.husky.codegenerator.cda.antlr.Hl7ItsParser.RefAttrContext;
+import org.husky.codegenerator.cda.antlr.Hl7ItsParser.ValueAttrContext;
+import org.husky.codegenerator.cda.antlr.Hl7ItsParser.ValueSetAttrContext;
 import org.husky.codegenerator.cda.antlr.Hl7ItsParserBaseListener;
 import org.husky.codegenerator.cda.config.ContentProfileConfig;
 import org.husky.codegenerator.cda.config.ContentProfilePackageConfig;
@@ -43,13 +74,13 @@ import org.husky.codegenerator.cda.model.CdaElement;
 import org.husky.codegenerator.cda.model.CdaTemplate;
 import org.husky.codegenerator.cda.rest.ArtDecorRestClient;
 import org.husky.codegenerator.cda.xslt.Hl7Its2EhcTransformer;
-import org.husky.codegenerator.java.JavadocUtils;
 import org.husky.codegenerator.java.JavaCodeGenerator;
+import org.husky.codegenerator.java.JavadocUtils;
 import org.husky.codegenerator.valuesets.UpdateValueSets;
 import org.husky.codegenerator.valuesets.ValueSetUtil;
-import org.husky.common.model.Code;
 import org.husky.common.basetypes.CodeBaseType;
 import org.husky.common.hl7cdar2.ObjectFactory;
+import org.husky.common.model.Code;
 import org.husky.common.utils.Util;
 import org.husky.valueset.api.ValueSetManager;
 import org.husky.valueset.config.ValueSetConfig;
@@ -61,24 +92,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
-import javax.annotation.processing.Generated;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.*;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.time.LocalDate;
-import java.util.*;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.comments.Comment;
+import com.github.javaparser.ast.comments.JavadocComment;
+import com.github.javaparser.ast.comments.LineComment;
+import com.github.javaparser.ast.expr.Name;
+import com.github.javaparser.ast.expr.NormalAnnotationExpr;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.Statement;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.javadoc.Javadoc;
 
-import static com.github.javaparser.ast.Modifier.*;
+import net.sf.saxon.s9api.SaxonApiException;
 
 /**
  * <div class="en">This is the main class of the ART-DECOR to Java Code Generator. It orchestrates
@@ -1319,7 +1351,11 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                 String enPartU = toUpperFirstChar(name);
                 compilationUnit.addImport("org.husky.common.hl7cdar2.En" + enPartU);
                 body.addStatement("En" + enPartU + " retVal = new En" + enPartU + "();");
-            } else
+			} else if (cdaElement.getDataType().startsWith("org.husky.common.hl7cdar2.")) {
+				method.setType(dataType);
+				compilationUnit.addImport(cdaElement.getDataType());
+				body.addStatement(cdaElement.getDataType() + " retVal = new " + cdaElement.getDataType() + "();");
+			} else
                 throw new RuntimeException(
                         name + " is neither an accessible field nor an accessible getter");
         } else {
@@ -1515,16 +1551,21 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                                     } catch (ClassNotFoundException
                                             | NoSuchFieldException
                                             | SecurityException e) {
-                                        throw new RuntimeException(
-                                                "Unhandled exception while getting Datatype for "
-                                                        + attrName
-                                                        + "("
-                                                        + cdaElement.getFullXmlName()
-                                                        + ")");
+										/*
+										 * e.printStackTrace(); throw new RuntimeException(
+										 * "Unhandled exception while getting Datatype for " + attrName + "(" +
+										 * cdaElement.getFullXmlName() + ")");
+										 */
                                     }
 
                                     boolean isEnum = false;
-                                    if (dataType != null) isEnum = (!"java.lang.String".contentEquals(dataType));
+									if (dataType != null) {
+										if ("java.lang.Boolean".equalsIgnoreCase(dataType)) {
+											cdaAttribute.setValue(cdaAttribute.getValue().toUpperCase());
+										} else {
+											isEnum = (!"java.lang.String".contentEquals(dataType));
+										}
+									}
                                     if (isEnum) {
                                         String enumName = memberType.getName();
                                         statement =
@@ -1590,7 +1631,13 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                                     }
                                 }
                             }
-                            if (statement != null) addBodyStatement(constructor, statement);
+							try {
+								if (statement != null)
+									addBodyStatement(constructor, statement);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+
                         }
                     }
                     if (cdaAttribute.getValueSetId() != null) {
@@ -1655,9 +1702,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                             String myCodeSystemName = code.getCodeSystemName();
                             String myDisplayName = code.getDisplayName();
 
-                            if ("CS".equals(fieldDataClass.getName()))
-                                codeComplete = (myCode != null);
-                            else codeComplete = ((myCode != null) && (myCodeSystem != null));
+							if (fieldDataClass != null && fieldDataClass.getName() != null) {
+								if (fieldDataClass.getName().endsWith(".CS"))
+									codeComplete = (myCode != null);
+								else
+									codeComplete = ((myCode != null) && (myCodeSystem != null));
+							}
 
                             statement = fieldName + ".add(";
 
@@ -1674,8 +1724,14 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                             codeStatement += ".build())";
 
                             statement += codeStatement + ");";
+                            
+                            try {
+                            	addBodyStatement(constructor, statement);
+                            } catch(Exception ex) {
+								ex.printStackTrace();
+                            }
 
-                            addBodyStatement(constructor, statement);
+                            
                         }
 
                         // This an optimization only. Remember that vocab
@@ -1728,7 +1784,13 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                         method.setJavadocComment(comment);
                         method.setType("List<Code>");
                         BlockStmt body = method.createBody();
-                        body.addStatement("return " + fieldName + ";");
+
+						try {
+							body.addStatement("return " + fieldName + ";");
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+
                     }
                 }
             }
@@ -2677,7 +2739,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
             throw new RuntimeException("id and name are null for template " + ctx.getText().substring(0, 500) + "...");
         }
         if (id == null) {
-            throw new RuntimeException("id is null for template " + name);
+			id = "no id";
+			// throw new RuntimeException("id is null for template " + name);
         }
         if (name == null) {
             throw new RuntimeException("name is null for template " + id);
@@ -3366,7 +3429,16 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                     if (cdaElement.getDataType().endsWith(".ENXP")) {
                         String enPartU = toUpperFirstChar(attrName);
                         body.addStatement("retVal.get" + enPartU + "().add(" + attrName + ");");
-                    } else
+					} else if (cdaElement.getDataType().startsWith("org.husky.common.hl7cdar2.")) {
+						if ("classCode".equalsIgnoreCase(attrName) || "typeCode".equalsIgnoreCase(attrName)
+								|| "inversionInd".equalsIgnoreCase(attrName)) {
+
+						} else {
+							String enPartU = toUpperFirstChar(attrName);
+							body.addStatement("retVal.get" + enPartU + "().add(" + attrName + ");");
+						}
+
+					} else
                         throw new RuntimeException(
                                 name + " is neither an accessible field nor an accessible getter");
                 } else {
