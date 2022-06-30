@@ -63,7 +63,7 @@ public class CdaChEmedCodeGenerator {
             printUsage();
             return;
         }
-        final var cdaSourceDirString = javaSourceDirString + "/husky-emed/husky-emed-cda/";
+        final var cdaSourceDirString = javaSourceDirString + "/husky-emed/husky-emed-ch-cda/";
         final File cdaSourceDir = new File(cdaSourceDirString);
         if (!cdaSourceDir.exists()) {
             LOG.error("Java source directory does not exist ({})", cdaSourceDirString);

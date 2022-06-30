@@ -26,18 +26,18 @@ import net.sf.saxon.s9api.XsltTransformer;
  *
  * <div class="en">This class acts as XSL transformer of all templates
  * downloaded by the ArtDecorRestClient. It performs XML stylesheet
- * transformations (XSLT) based on Hl7Its2Ehc.xsl.</div>
+ * transformations (XSLT) based on Hl7Its2Husky.xsl.</div>
  *
  * <div class="de">Diese Klasse fungiert als XSL-Transformer aller vom
  * ArtDecorRestClient heruntergeladenen Templates. Er führt
- * XML-Stylesheet-Transformationen (XSLT) basierend auf Hl7Its2Ehc.xsl
+ * XML-Stylesheet-Transformationen (XSLT) basierend auf Hl7Its2Husky.xsl
  * durch.</div>
  *
  */
-public class Hl7Its2EhcTransformer {
+public class Hl7Its2HuskyTransformer {
 
     /** The log. */
-    protected static final Logger log = LoggerFactory.getLogger(Hl7Its2EhcTransformer.class);
+    protected static final Logger log = LoggerFactory.getLogger(Hl7Its2HuskyTransformer.class);
 
     /**
      * <div class="en">Performs one XSL transformation. The inputFile will be
@@ -61,7 +61,7 @@ public class Hl7Its2EhcTransformer {
         final XsltCompiler compiler = processor.newXsltCompiler();
 
         final XsltExecutable xsl = compiler.compile(new StreamSource(
-                new File(System.getProperty("user.dir") + "/src/main/resources/stylesheets/Hl7Its2EhcCdaGen.xsl")
+                new File(System.getProperty("user.dir") + "/src/main/resources/stylesheets/Hl7Its2HuskyCdaGen.xsl")
         ));
         final XsltTransformer transformer = xsl.load();
 

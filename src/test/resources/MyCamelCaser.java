@@ -51,7 +51,7 @@ public class MyCamelCaser extends Blah {
     /**
      * This is a sample method (function returning a value).
      */
-    public boolean myMethod(String myString, ContentProfileConfig myEhcType, int myIntParam) {
+    public boolean myMethod(String myString, ContentProfileConfig myHuskyType, int myIntParam) {
         return true;
     }
 }

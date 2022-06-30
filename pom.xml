@@ -17,6 +17,7 @@
 		<maven.compiler.target>17</maven.compiler.target>
 
 		<husky.version>2.0-ALPHA</husky.version>
+		<antlr.version>4.10.1</antlr.version>
 	</properties>
 
 	<parent>
@@ -68,20 +69,20 @@
 		<!-- Logs -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-jdk14</artifactId>
-			<version>1.7.32</version>
+			<artifactId>slf4j-reload4j</artifactId>
+			<version>1.7.36</version>
 		</dependency>
 
 		<!-- stuff used by code generator, only -->
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr4-runtime</artifactId>
-			<version>4.9.3</version>
+			<version>${antlr.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.javaparser</groupId>
 			<artifactId>javaparser-symbol-solver-core</artifactId>
-			<version>3.23.1</version>
+			<version>3.24.2</version>
 		</dependency>
 
 		<!-- test stuff -->
@@ -98,7 +99,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.3.0</version>
                 <executions>
                     <execution>
                         <id>add-source</id>
@@ -117,7 +118,7 @@
             <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-maven-plugin</artifactId>
-                <version>4.9.3</version>
+				<version>${antlr.version}</version>
                 <configuration>
                     <outputDirectory>${project.build.directory}/generated-sources/antlr4/org/husky/codegenerator/cda/antlr/</outputDirectory>
                     <sourceDirectory>${basedir}/src/main/resources/antlr4</sourceDirectory>

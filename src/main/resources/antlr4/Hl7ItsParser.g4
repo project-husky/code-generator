@@ -12,6 +12,7 @@
  * 2019.07.26: Tony Schaller, medshare GmbH: Adding flexibility attribute to element and new vocabulary element
  * 2019.08.22: Tony Schaller, medshare GmbH: Adding codeSystem attribute to vocabulary element
  * 2019.09.05: Tony Schaller, medshare GmbH: Adding codeSystemName and displayName attributes to vocabulary element
+ * 2022.04.15: Quentin Ligier: Adding ref attribute to template element.
  * 
  * ******************************************************************************
  */
@@ -26,7 +27,7 @@ options { tokenVocab=Hl7ItsLexer; }
 
 prolog : XMLDeclOpen attr* SPECIAL_CLOSE SEA_WS?;
 
-template : prolog? '<' TEMPLATE attr* displayNameAttr? attr* idAttr? attr* nameAttr? attr* '>' content '<' '/' TEMPLATE '>' ;
+template : prolog? '<' TEMPLATE attr* displayNameAttr? attr* idAttr? attr* nameAttr? attr* refAttr? '>' content '<' '/' TEMPLATE '>' ;
 
 desc : '<' DESC attr* '>' content '<' '/' DESC '>' ;
 

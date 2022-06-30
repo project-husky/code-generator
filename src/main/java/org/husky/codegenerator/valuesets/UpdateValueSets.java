@@ -225,7 +225,9 @@ public class UpdateValueSets {
                 final String fullyQualifiedClassName = valueSetConfig.getClassName();
 
                 // delete existing class file
-                Files.delete(getSourceFileName(baseJavaFolder, fullyQualifiedClassName).toPath());
+                if (Files.exists(getSourceFileName(baseJavaFolder, fullyQualifiedClassName).toPath())) {
+                    Files.delete(getSourceFileName(baseJavaFolder, fullyQualifiedClassName).toPath());
+                }
 
                 // create the class file
                 createEnumClassFromTemplate(baseJavaFolder, fullyQualifiedClassName);

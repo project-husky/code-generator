@@ -22,41 +22,61 @@ description: CDA-CH-EMED ValueSets
 status: ACTIVE
 valueSetConfigList:
   # DocumentEntry.confidentialityCode and ParticipationFunction is updated by SwissEprValueSetPackageConfig-*.yaml
-  - className: org.husky.emed.enums.ActivePharmaceuticalIngredient
-    projectFolder: husky-emed/husky-emed-common
+  - className: org.husky.emed.ch.enums.ActivePharmaceuticalIngredient
+    projectFolder: husky-emed/husky-emed-ch-common
     sourceFormatType: JSON
     sourceSystemType: ARTDECOR_FHIR
     sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-pharm-&language=en-US&version=&id=2.16.756.5.30.1.1.11.82&format=json
-  - className: org.husky.emed.enums.ActSubstanceAdminSubstitutionCode
-    projectFolder: husky-emed/husky-emed-common
+  - className: org.husky.emed.ch.enums.ActSubstanceAdminSubstitutionCode
+    projectFolder: husky-emed/husky-emed-ch-common
     sourceFormatType: JSON
     sourceSystemType: ARTDECOR_FHIR
     sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-pharm-&language=en-US&version=&id=2.16.756.5.30.1.1.11.81&format=json
-  - className: org.husky.emed.enums.ChEmedTimingEvent
-    projectFolder: husky-emed/husky-emed-common
+  - className: org.husky.emed.ch.enums.ChEmedTimingEvent
+    projectFolder: husky-emed/husky-emed-ch-common
     sourceFormatType: JSON
     sourceSystemType: ARTDECOR_FHIR
     sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-pharm-&language=en-US&version=&id=2.16.756.5.30.1.127.77.4.11.2&format=json
-  - className: org.husky.emed.enums.DispenseSupplyType
-    projectFolder: husky-emed/husky-emed-common
+  - className: org.husky.emed.ch.enums.DispenseSupplyType
+    projectFolder: husky-emed/husky-emed-ch-common
     sourceFormatType: JSON
     sourceSystemType: ARTDECOR_FHIR
     sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-pharm-&language=en-US&version=&id=2.16.756.5.30.1.127.77.4.11.7&format=json
-  - className: org.husky.emed.enums.PharmaceuticalDoseFormEdqm
-    projectFolder: husky-emed/husky-emed-common
+  - className: org.husky.emed.ch.enums.PharmaceuticalDoseFormEdqm
+    projectFolder: husky-emed/husky-emed-ch-common
     sourceFormatType: JSON
     sourceSystemType: ARTDECOR_FHIR
     sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-pharm-&language=en-US&version=&id=2.16.756.5.30.1.1.11.3&format=json
-  - className: org.husky.emed.enums.RouteOfAdministrationEdqm
-    projectFolder: husky-emed/husky-emed-common
+  - className: org.husky.emed.ch.enums.RouteOfAdministrationEdqm
+    projectFolder: husky-emed/husky-emed-ch-common
     sourceFormatType: JSON
     sourceSystemType: ARTDECOR_FHIR
     sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-pharm-&language=en-US&version=&id=2.16.756.5.30.1.1.11.2&format=json
-  - className: org.husky.emed.enums.UnitCode
-    projectFolder: husky-emed/husky-emed-common
+  - className: org.husky.emed.ch.enums.UnitCode
+    projectFolder: husky-emed/husky-emed-ch-common
     sourceFormatType: JSON
     sourceSystemType: ARTDECOR_FHIR
     sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-pharm-&language=en-US&version=&id=2.16.756.5.30.1.1.11.83&format=json
+  - className: org.husky.emed.ch.enums.RegularUnitCodeAmbu
+    projectFolder: husky-emed/husky-emed-ch-common
+    sourceFormatType: JSON
+    sourceSystemType: ARTDECOR_FHIR
+    sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=cdachemed-&language=en-US&version=&id=2.16.756.5.30.1.127.77.12.11.3&format=json
+  - className: org.husky.emed.ch.enums.TimingEventAmbu
+    projectFolder: husky-emed/husky-emed-ch-common
+    sourceFormatType: JSON
+    sourceSystemType: ARTDECOR_FHIR
+    sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=cdachemed-&language=en-US&version=&id=2.16.756.5.30.1.127.77.12.11.2&format=json
+  - className: org.husky.emed.ch.enums.TimeUnitCodeAmbu
+    projectFolder: husky-emed/husky-emed-ch-common
+    sourceFormatType: JSON
+    sourceSystemType: ARTDECOR_FHIR
+    sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=cdachemed-&language=en-US&version=&id=2.16.756.5.30.1.127.77.12.11.4&format=json
+  - className: org.husky.emed.ch.enums.RouteOfAdministrationAmbu
+    projectFolder: husky-emed/husky-emed-ch-common
+    sourceFormatType: JSON
+    sourceSystemType: ARTDECOR_FHIR
+    sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=cdachemed-&language=en-US&version=&id=2.16.756.5.30.1.127.77.12.11.1&format=json
 version:
   label: Current
   validFrom: 2021-04-01T00:00:00+01:00

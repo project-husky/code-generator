@@ -110,7 +110,7 @@ public class JavaCodeGeneratorTest {
 		method.addParameter(parameter);
 
 		parameter = new Parameter();
-		parameter.setName("myEhcType");
+		parameter.setName("myHuskyType");
 		parameter.setType(ContentProfileConfig.class);
 		method.addParameter(parameter);
 
