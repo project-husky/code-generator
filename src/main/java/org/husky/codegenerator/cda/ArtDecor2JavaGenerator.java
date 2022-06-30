@@ -1550,11 +1550,9 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                                     } catch (ClassNotFoundException
                                             | NoSuchFieldException
                                             | SecurityException e) {
-										/*
-										 * e.printStackTrace(); throw new RuntimeException(
-										 * "Unhandled exception while getting Datatype for " + attrName + "(" +
-										 * cdaElement.getFullXmlName() + ")");
-										 */
+										LOG.error("{}{}{}", cdaElement.getDataType(), attrName, e.getMessage(), e);
+										throw new RuntimeException("Unhandled exception while getting Datatype for "
+												+ attrName + "(" + cdaElement.getFullXmlName() + ")");
                                     }
 
                                     boolean isEnum = false;
@@ -1634,7 +1632,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 								if (statement != null)
 									addBodyStatement(constructor, statement);
 							} catch (Exception e) {
-								e.printStackTrace();
+								LOG.error(e.getMessage(), e);
 							}
 
                         }
@@ -2739,7 +2737,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
         }
         if (id == null) {
 			id = "no id";
-			// throw new RuntimeException("id is null for template " + name);
+			LOG.error("id is null for template {}", name);
         }
         if (name == null) {
             throw new RuntimeException("name is null for template " + id);
