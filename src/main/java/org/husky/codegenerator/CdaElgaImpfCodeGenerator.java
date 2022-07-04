@@ -16,16 +16,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Entry point of the CDA-EMS code generator.
+ * Entry point of the CDA-ELGA-IMPF code generator.
  *
+ * @author Quentin Ligier
  * @author Anna Jungwirth
  */
 public class CdaElgaImpfCodeGenerator {
 
     /**
-	 * CDA-EMS package config, v2020
+	 * CDA-ELGA-IMPF package config, v2020
 	 */
-	private static final String CDACHEMED_PACKAGE_CONFIG = "src/main/resources/cda/ContentProfilePackageConfigCdaElgaImpfV2022.yml";
+	private static final String CDAELGAIMPF_PACKAGE_CONFIG = "src/main/resources/cda/ContentProfilePackageConfigCdaElgaImpfV2022.yml";
 
     /**
      * The logger.
@@ -68,7 +69,7 @@ public class CdaElgaImpfCodeGenerator {
             return;
         }
 
-        final File packageConfig = new File(CDACHEMED_PACKAGE_CONFIG);
+        final File packageConfig = new File(CDAELGAIMPF_PACKAGE_CONFIG);
         if (!packageConfig.exists() || !packageConfig.isFile()) {
             LOG.error("The package config file doesn't exist ({})", packageConfig.getAbsolutePath());
 			printUsage(javaSourceDirString);
@@ -82,7 +83,7 @@ public class CdaElgaImpfCodeGenerator {
      */
 	private static void printUsage(String javaSourceDir) {
         LOG.info("Usage:");
-		LOG.info("CdaAtEmsCodeGenerator <javaSourceDir>");
+		LOG.info("CdaElgaImpfCodeGenerator <javaSourceDir>");
         LOG.info("  javaSourceDir: This parameter must be the path to the Husky project " +
 				"directory: {}", javaSourceDir);
     }

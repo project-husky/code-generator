@@ -18,14 +18,15 @@ import org.slf4j.LoggerFactory;
 /**
  * Entry point of the CDA-ELGA code generator.
  *
+ * @author Quentin Ligier
  * @author Anna Jungwirth
  */
 public class CdaElgaPatientSummaryCodeGenerator {
 
     /**
-	 * CDA-EMS package config, v2020
+	 * CDA-ELGA package config, v2020
 	 */
-	private static final String CDACHEMED_PACKAGE_CONFIG = "src/main/resources/cda/ContentProfilePackageConfigCdaElgaPatientSummaryV2016.yml";
+	private static final String CDAELGAPATSUMMARY_PACKAGE_CONFIG = "src/main/resources/cda/ContentProfilePackageConfigCdaElgaPatientSummaryV2016.yml";
 
     /**
      * The logger.
@@ -68,7 +69,7 @@ public class CdaElgaPatientSummaryCodeGenerator {
             return;
         }
 
-        final File packageConfig = new File(CDACHEMED_PACKAGE_CONFIG);
+        final File packageConfig = new File(CDAELGAPATSUMMARY_PACKAGE_CONFIG);
         if (!packageConfig.exists() || !packageConfig.isFile()) {
             LOG.error("The package config file doesn't exist ({})", packageConfig.getAbsolutePath());
 			printUsage(javaSourceDirString);
@@ -82,7 +83,7 @@ public class CdaElgaPatientSummaryCodeGenerator {
      */
 	private static void printUsage(String javaSourceDir) {
         LOG.info("Usage:");
-		LOG.info("CdaAtEmsCodeGenerator <javaSourceDir>");
+		LOG.info("CdaElgaPatientSummaryCodeGenerator <javaSourceDir>");
         LOG.info("  javaSourceDir: This parameter must be the path to the Husky project " +
 				"directory: {}", javaSourceDir);
     }

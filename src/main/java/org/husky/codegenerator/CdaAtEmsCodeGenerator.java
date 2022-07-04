@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Entry point of the CDA-EMS code generator.
  *
+ * @author Quentin Ligier
  * @author Anna Jungwirth
  */
 public class CdaAtEmsCodeGenerator {
@@ -25,7 +26,7 @@ public class CdaAtEmsCodeGenerator {
     /**
 	 * CDA-EMS package config, v2020
 	 */
-	private static final String CDACHEMED_PACKAGE_CONFIG = "src/main/resources/cda/ContentProfilePackageConfigCdaAtEmsV2020.yml";
+	private static final String CDAEMS_PACKAGE_CONFIG = "src/main/resources/cda/ContentProfilePackageConfigCdaAtEmsV2020.yml";
 
     /**
      * The logger.
@@ -68,7 +69,7 @@ public class CdaAtEmsCodeGenerator {
             return;
         }
 
-        final File packageConfig = new File(CDACHEMED_PACKAGE_CONFIG);
+        final File packageConfig = new File(CDAEMS_PACKAGE_CONFIG);
         if (!packageConfig.exists() || !packageConfig.isFile()) {
             LOG.error("The package config file doesn't exist ({})", packageConfig.getAbsolutePath());
 			printUsage(javaSourceDirString);
