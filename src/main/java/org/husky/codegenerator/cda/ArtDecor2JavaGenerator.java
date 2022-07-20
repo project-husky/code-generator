@@ -9,6 +9,7 @@
  */
 package org.husky.codegenerator.cda;
 
+import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.Parameter;
@@ -302,7 +303,13 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
      */
     private static void addBodyStatement(final ConstructorDeclaration constructor, final String statement) {
         final BlockStmt body = constructor.getBody();
-        body.addStatement(statement);
+        try {
+            body.addStatement(statement);
+        } catch (final ParseProblemException exception) {
+            LOG.error("Unable to parse the statement", exception);
+            LOG.error("Statement was: {}", statement);
+        }
+
     }
 
     /**
@@ -1617,11 +1624,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                                 "vocab" + toUpperFirstChar(elementName) + toUpperFirstChar(cdaAttribute.getName());
                         compilationUnit.addImport("org.husky.common.model.Code");
                         compilationUnit.addImport("org.husky.common.basetypes.CodeBaseType");
-                        compilationUnit.addImport("java.util.ArrayList");
-                        compilationUnit.addImport("java.util.List");
-                        FieldDeclaration field = myClass.addPrivateField("List<Code>", fieldName);
-                        field.getVariable(0).setInitializer("new ArrayList<>()");
-                        field.setFinal(true);
 
                         String dataType = null;
                         try {
@@ -1646,88 +1648,107 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
                         boolean isList = isClassCollection(fieldDataClass);
                         boolean codeComplete = false;
-                        String codeStatement = "";
-
+                        final var singleCode = cdaAttribute.getCodeList().size() == 1;
                         for (Code code : cdaAttribute.getCodeList()) {
                             String myCode = code.getCode();
                             String myCodeSystem = code.getCodeSystem();
                             String myCodeSystemName = code.getCodeSystemName();
                             String myDisplayName = code.getDisplayName();
+                            final var codeStatement = new StringBuilder();
 
                             if ("CS".equals(fieldDataClass.getName()))
                                 codeComplete = (myCode != null);
-                            else codeComplete = ((myCode != null) && (myCodeSystem != null));
+                            else
+                                codeComplete = ((myCode != null) && (myCodeSystem != null));
 
-                            statement = fieldName + ".add(";
+                            codeStatement.append("new Code(CodeBaseType.builder()");
+                            if (myCode != null){
+                                codeStatement.append(".withCode(\"");
+                                codeStatement.append(myCode);
+                                codeStatement.append("\")");
+                            }
+                            if (myCodeSystem != null) {
+                                codeStatement.append(".withCodeSystem(\"");
+                                codeStatement.append(myCodeSystem);
+                                codeStatement.append("\")");
+                            }
+                            if (myCodeSystemName != null) {
+                                codeStatement.append(".withCodeSystemName(\"");
+                                codeStatement.append(myCodeSystemName);
+                                codeStatement.append("\")");
+                            }
+                            if (myDisplayName != null) {
+                                codeStatement.append(".withDisplayName(\"");
+                                codeStatement.append(myDisplayName);
+                                codeStatement.append("\")");
+                            }
+                            codeStatement.append(".build())");
 
-                            codeStatement = "new Code(CodeBaseType.builder()";
-
-                            if (myCode != null) codeStatement += ".withCode(\"" + myCode + "\")";
-                            if (myCodeSystem != null)
-                                codeStatement += ".withCodeSystem(\"" + myCodeSystem + "\")";
-                            if (myCodeSystemName != null)
-                                codeStatement += ".withCodeSystemName(\"" + myCodeSystemName + "\")";
-                            if (myDisplayName != null)
-                                codeStatement += ".withDisplayName(\"" + myDisplayName + "\")";
-
-                            codeStatement += ".build())";
-
-                            statement += codeStatement + ");";
-
-                            addBodyStatement(constructor, statement);
-                        }
-
-                        // This an optimization only. Remember that vocab
-                        // elements are to define a vocabulary and not a fixed
-                        // code.
-                        // Though there are ART-DECOR models that define one
-                        // only vocab element in order to suggest a fixed code.
-                        // Therefore we optimize, here with the following rules:
-                        // 1. If the vocabulary contains only one entry, we can
-                        // imagine that this serves as a fixed value.
-                        // 2. In any case, this entry is only used as a fixed
-                        // value if the code is complete (one can for example
-                        // just declare the code systems id without given codes
-                        // and in this case, the code is not treated as a fixed
-                        // value).
-                        //
-                        // Note: If you change anything here, make sure all
-                        // previous CDA documents still validate (e.g.
-                        // CDA-CH-EMED Prescription and MedicationList).
-                        if ((cdaAttribute.getCodeList().size() == 1) && codeComplete) {
-                            String temp;
-                            String shortDatatype;
-                            if (isList) {
-                                shortDatatype =
-                                        JavaCodeGenerator.toPascalCase(
-                                                dataType.substring(dataType.length() - 2));
-                                if ("translation".equals(elementName)) shortDatatype = "Cd";
-                                temp = "(" + codeStatement + ").getHl7CdaR2" + shortDatatype + "()";
-                                statement = "super.get" + toUpperFirstChar(elementName) + "().add(" + temp + ");";
-                            } else {
-                                shortDatatype =
-                                        JavaCodeGenerator.toPascalCase(
-                                                fieldDataClass
-                                                        .getName()
-                                                        .substring(
-                                                                fieldDataClass.getName().length() - 2
-                                                        ));
-                                temp = "(" + codeStatement + ").getHl7CdaR2" + shortDatatype + "()";
-                                statement = elementName + " = " + temp + ";";
+                            // This an optimization only. Remember that vocab
+                            // elements are to define a vocabulary and not a fixed
+                            // code.
+                            // Though there are ART-DECOR models that define one
+                            // only vocab element in order to suggest a fixed code.
+                            // Therefore we optimize, here with the following rules:
+                            // 1. If the vocabulary contains only one entry, we can
+                            // imagine that this serves as a fixed value.
+                            // 2. In any case, this entry is only used as a fixed
+                            // value if the code is complete (one can for example
+                            // just declare the code systems id without given codes
+                            // and in this case, the code is not treated as a fixed
+                            // value).
+                            //
+                            // Note: If you change anything here, make sure all
+                            // previous CDA documents still validate (e.g.
+                            // CDA-CH-EMED Prescription and MedicationList).
+                            if (singleCode && codeComplete) {
+                                String temp;
+                                String shortDatatype;
+                                if (isList) {
+                                    shortDatatype =
+                                            JavaCodeGenerator.toPascalCase(
+                                                    dataType.substring(dataType.length() - 2));
+                                    if ("translation".equals(elementName)) shortDatatype = "Cd";
+                                    temp = "(" + codeStatement + ").getHl7CdaR2" + shortDatatype + "()";
+                                    statement = "super.get" + toUpperFirstChar(elementName) + "().add(" + temp + ");";
+                                } else {
+                                    shortDatatype =
+                                            JavaCodeGenerator.toPascalCase(
+                                                    fieldDataClass
+                                                            .getName()
+                                                            .substring(
+                                                                    fieldDataClass.getName().length() - 2
+                                                            ));
+                                    temp = "(" + codeStatement + ").getHl7CdaR2" + shortDatatype + "()";
+                                    statement = elementName + " = " + temp + ";";
+                                }
+                            }
+                            // If there's multiple codes, or a single code that was not automatically assigned, let's
+                            // create the vocabulary list
+                            else {
+                                statement = fieldName + ".add(";
+                                statement += codeStatement + ");";
                             }
                             addBodyStatement(constructor, statement);
                         }
+                        if (!singleCode || !codeComplete) {
+                            compilationUnit.addImport("java.util.ArrayList");
+                            compilationUnit.addImport("java.util.List");
+                            FieldDeclaration field = myClass.addPrivateField("List<Code>", fieldName);
+                            field.getVariable(0).setInitializer(String.format("new ArrayList<>(%d)", cdaAttribute.getCodeList().size()));
+                            field.setFinal(true);
 
-                        MethodDeclaration method =
-                                myClass.addMethod(
-                                        "get" + JavaCodeGenerator.toPascalCase(fieldName),
-                                        publicModifier().getKeyword());
+                            MethodDeclaration method =
+                                    myClass.addMethod(
+                                            "get" + JavaCodeGenerator.toPascalCase(fieldName),
+                                            publicModifier().getKeyword());
 
-                        String comment = "Returns a list of vocab codes as defined in the ART-DECOR model";
-                        method.setJavadocComment(comment);
-                        method.setType("List<Code>");
-                        BlockStmt body = method.createBody();
-                        body.addStatement("return " + fieldName + ";");
+                            String comment = "Returns a list of vocab codes as defined in the ART-DECOR model";
+                            method.setJavadocComment(comment);
+                            method.setType("List<Code>");
+                            BlockStmt body = method.createBody();
+                            body.addStatement("return " + fieldName + ";");
+                        }
                     }
                 }
             }
