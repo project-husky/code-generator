@@ -72,6 +72,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.*;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -2067,23 +2068,38 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
             }
 
             StringBuilder javadoc = new StringBuilder();
-            javadoc.append(String.format("%s\n", cdaTemplate.getName()));
-            javadoc.append("<p>\n");
+            javadoc.append(cdaTemplate.getName());
+            javadoc.append("\n<p>\n");
             if (cdaTemplate.getDescription() != null) {
-                javadoc.append(String.format("Template description: %s<br>\n",
-                        JavadocUtils.cleanArtDecorHtml(cdaTemplate.getDescription())));
+                javadoc.append("Template description: ");
+                javadoc.append(JavadocUtils.cleanArtDecorHtml(cdaTemplate.getDescription()));
+                javadoc.append("<br>\n");
             }
             if (cdaElement.getDescription() != null) {
-                javadoc.append(String.format("Element description: %s<br>\n",
-                        JavadocUtils.cleanArtDecorHtml(cdaElement.getDescription())));
+                javadoc.append("Element description: ");
+                javadoc.append(JavadocUtils.cleanArtDecorHtml(cdaElement.getDescription()));
+                javadoc.append("<br>\n");
             }
             javadoc.append("<p>\n");
-            javadoc.append(String.format("Identifier: %s<br>\n", cdaTemplate.getId()));
-            javadoc.append(String.format("Effective date: %s<br>\n", cdaTemplate.getEffectiveDate()));
+            javadoc.append("Identifier: ");
+            javadoc.append(cdaTemplate.getId());
+            javadoc.append("<br>\n");
+            javadoc.append("Effective date: ");
+            javadoc.append(cdaTemplate.getEffectiveDate());
+            javadoc.append("<br>\n");
             if (cdaTemplate.getVersionLabel() != null) {
-                javadoc.append(String.format("Version: %s<br>\n", cdaTemplate.getVersionLabel()));
+                javadoc.append("Version: ");
+                javadoc.append(cdaTemplate.getVersionLabel());
+                javadoc.append("<br>\n");
             }
-            javadoc.append(String.format("Status: %s\n", cdaTemplate.getStatus()));
+            javadoc.append("Status: ");
+            javadoc.append(cdaTemplate.getStatus());
+            javadoc.append("\n<p>\n");
+            javadoc.append("Generated from the ArtDecor <a href=\"");
+            javadoc.append(cdaTemplate.getTemplateUrl());
+            javadoc.append("\">");
+            javadoc.append(cdaTemplate.getName());
+            javadoc.append("</a> page.");
 
             myClass.setJavadocComment(javadoc.toString());
             String inheritanceOf = cdaTemplate.getDataType();
@@ -2720,6 +2736,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                     currentCdaTemplate.setEffectiveDate(value.replace("T", " "));
                 } else if ("versionLabel".equals(attrContext.Name().getText())) {
                     currentCdaTemplate.setVersionLabel(value);
+                } else if ("ident".equals(attrContext.Name().getText())) {
+                    currentCdaTemplate.setProject(value);
                 }
             }
         }
