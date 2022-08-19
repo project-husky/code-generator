@@ -9,6 +9,8 @@
  */
 package org.husky.codegenerator.cda.model;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +48,9 @@ public class CdaTemplate {
 
     /** The effective date. */
     private String effectiveDate;
+
+    /** The template project. */
+    private String project;
 
     /** The template status. */
     private String status;
@@ -248,4 +253,20 @@ public class CdaTemplate {
         this.status = status;
     }
 
+    public String getProject() {
+        return this.project;
+    }
+
+    public void setProject(final String project) {
+        this.project = project;
+    }
+
+    public String getTemplateUrl() {
+        return "https://art-decor.org/art-decor/decor-templates--" +
+                this.project +
+                "?id=" +
+                this.id +
+                "&amp;effectiveTime=" +
+                URLEncoder.encode(this.effectiveDate, StandardCharsets.UTF_8);
+    }
 }
