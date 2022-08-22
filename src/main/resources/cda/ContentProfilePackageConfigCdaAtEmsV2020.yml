@@ -9,6 +9,6 @@ contentProfileConfigList:
     epims-: https://art-decor.org/decor/services/
     at-cda-bbr-: https://art-decor.org/decor/services/
     elgabbr-: https://art-decor.org/decor/services/
-  targetDir: husky/husky-cda/husky-ems
-  targetNamespace: org.husky.cda.ems.generated.artdecor
+  targetDir: husky/husky-cda/husky-elga
+  targetNamespace: org.husky.cda.elga.generated.artdecor.ems
 description: Epidemiologisches Meldesystem - version of February, 2020

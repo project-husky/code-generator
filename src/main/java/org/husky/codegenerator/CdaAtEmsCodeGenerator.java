@@ -57,7 +57,7 @@ public class CdaAtEmsCodeGenerator {
 			printUsage(javaSourceDirString);
             return;
         }
-		final var cdaSourceDirString = javaSourceDirString + "/husky-cda/husky-ems/";
+		final var cdaSourceDirString = javaSourceDirString + "/husky-cda/husky-elga/";
         final File cdaSourceDir = new File(cdaSourceDirString);
         if (!cdaSourceDir.exists()) {
             LOG.error("Java source directory does not exist ({})", cdaSourceDirString);

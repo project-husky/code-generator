@@ -1261,22 +1261,45 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                 if (retVal.startsWith("IVL_TS")) {
                     retVal = "IVLTS";
                 }
+				if (retVal.startsWith("PIVL_TS")) {
+					retVal = "PIVLTS";
+				}
                 if (retVal.startsWith("TS.")) {
                     retVal = "TS";
                 }
                 if (retVal.startsWith("SXPR_TS")) {
                     retVal = "SXPRTS";
                 }
-                if (retVal.startsWith("SD.TEXT")) {
+				if (retVal.startsWith("SD.TEXT") || retVal.startsWith("ED")) {
                     retVal = "ED";
                     if (containingClassName != null)
                         if (containingClassName.endsWith("Section")) {
                             retVal = "StrucDocText";
                         }
                 }
+
                 if (retVal.startsWith("INT.NONNEG")) {
                     retVal = "INT";
                 }
+				if (retVal.startsWith("CS.LANG")) {
+					retVal = "CS";
+				}
+
+				if (retVal.startsWith("IVL_INT")) {
+					retVal = "IVLINT";
+				}
+
+				if (retVal.startsWith("RTO_QTY_QTY")) {
+					retVal = "RTOQTYQTY";
+				}
+
+				if (retVal.startsWith("RTO_PQ_PQ")) {
+					retVal = "RTOPQPQ";
+				}
+
+				if (retVal.startsWith("TEL.AT")) {
+					retVal = "TEL";
+				}
 
                 if (!templateIndex.containsKey(dataType) && !retVal.contains(".")) {
                     retVal = "org.husky.common.hl7cdar2." + retVal;
@@ -1623,15 +1646,14 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                                                 addBodyStatement(constructor, statement);
                                             }
                                             statement = null;
-                                        } else
-                                            statement =
-                                                    "super.set"
-                                                            + toUpperFirstChar(attrName)
-                                                            + "("
-                                                            + "\""
-                                                            + cdaAttribute.getValue()
-                                                            + "\""
-                                                            + ");";
+										} else if ("java.lang.Boolean".equalsIgnoreCase(dataType)) {
+											statement = "super.set" + toUpperFirstChar(attrName) + "("
+													+ cdaAttribute.getValue().toLowerCase() + ");";
+										} else {
+											statement = "super.set" + toUpperFirstChar(attrName) + "(" + "\""
+													+ cdaAttribute.getValue() + "\"" + ");";
+										}
+
                                     }
                                 }
                             }
@@ -1701,10 +1723,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                             String myDisplayName = code.getDisplayName();
                             final var codeStatement = new StringBuilder();
 
-                            if ("CS".equals(fieldDataClass.getName()))
-                                codeComplete = (myCode != null);
-                            else
-                                codeComplete = ((myCode != null) && (myCodeSystem != null));
+							if (fieldDataClass != null && fieldDataClass.getName() != null) {
+								if (fieldDataClass.getName().endsWith(".CS"))
+									codeComplete = (myCode != null);
+								else
+									codeComplete = ((myCode != null) && (myCodeSystem != null));
+							}
 
                             codeStatement.append("new Code(CodeBaseType.builder()");
                             if (myCode != null){
@@ -2756,9 +2780,10 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
         if (id == null && name == null) {
             throw new RuntimeException("id and name are null for template " + ctx.getText().substring(0, 500) + "...");
         }
-        if (id == null) {
+		if (id == null) {
 			id = "no id";
 			LOG.error("id is null for template {}", name);
+			throw new RuntimeException("id is null for template " + name);
         }
         if (name == null) {
             throw new RuntimeException("name is null for template " + id);
@@ -3180,12 +3205,12 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
         }
         for (String key : dataTypeIndex.keySet()) {
             String value = dataTypeIndex.get(key);
-            if (key.startsWith(cdaElementName)
+			if (key.startsWith(cdaElementName)
                     || key.startsWith("all.InfrastructureRoot." + cdaElementName)) {
                 if (parentDataType.startsWith("org.husky.common.hl7cdar2")) {
-                    if (parentDataType.equals(value)) {
+					if (parentDataType.equals(value)) {
                         candidates.add(value);
-                    }
+					}
                 } else candidates.add(value);
             }
         }
@@ -3464,8 +3489,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                 } else {
                     if ("nullFlavor".equals(attrName)) {
                         compilationUnit.addImport("java.util.ArrayList");
-                        body.addStatement("retVal.nullFlavor = new ArrayList<String>();");
-                        body.addStatement("retVal.nullFlavor.add(nullFlavor);");
+						body.addStatement("retVal.getNullFlavor().add(nullFlavor);");
                     } else if (isClassCollection(memberType)) {
                         String temp =
                                 cdaAttribute
