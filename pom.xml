@@ -1,6 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.husky.codegenerator</groupId>
+	<groupId>org.projecthusky.codegenerator</groupId>
 	<artifactId>husky-codegenerator</artifactId>
 	<version>2.0-ALPHA</version>
 	<packaging>jar</packaging>
@@ -21,7 +21,7 @@
 	</properties>
 
 	<parent>
-		<groupId>org.husky</groupId>
+		<groupId>org.projecthusky</groupId>
 		<artifactId>husky-api</artifactId>
 		<version>2.0-ALPHA</version>
 	</parent>
@@ -35,12 +35,12 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.husky.common</groupId>
+			<groupId>org.projecthusky.common</groupId>
 			<artifactId>husky-common-gen</artifactId>
 			<version>${husky.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.husky.communication</groupId>
+			<groupId>org.projecthusky.communication</groupId>
 			<artifactId>husky-valueset-gen</artifactId>
 			<version>${husky.version}</version>
 		</dependency>
@@ -120,7 +120,7 @@
                 <artifactId>antlr4-maven-plugin</artifactId>
 				<version>${antlr.version}</version>
                 <configuration>
-                    <outputDirectory>${project.build.directory}/generated-sources/antlr4/org/husky/codegenerator/cda/antlr/</outputDirectory>
+                    <outputDirectory>target/generated-sources/antlr4/org/projecthusky/codegenerator/cda/antlr/</outputDirectory>
                     <sourceDirectory>${basedir}/src/main/resources/antlr4</sourceDirectory>
                 </configuration>
                 <executions>

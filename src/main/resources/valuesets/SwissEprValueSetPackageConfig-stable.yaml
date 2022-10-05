@@ -22,123 +22,123 @@ description: Swiss EPR ValueSets
 status: ACTIVE
 valueSetConfigList:
 # husky-common/husky-common-ch
-- className: org.husky.common.ch.enums.stable.AuthorRole
+- className: org.projecthusky.common.ch.enums.stable.AuthorRole
   projectFolder: husky-common/husky-common-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=&id=2.16.756.5.30.1.127.3.10.1.1.3&effectiveDate=2021-04-01T08%3A55%3A32&format=json
-- className: org.husky.common.ch.enums.stable.ConfidentialityCode
+- className: org.projecthusky.common.ch.enums.stable.ConfidentialityCode
   projectFolder: husky-common/husky-common-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=&id=2.16.756.5.30.1.127.3.10.1.5&effectiveDate=2021-04-01T17%3A05%3A35&format=json
-- className: org.husky.common.ch.enums.stable.DocumentLanguage
+- className: org.projecthusky.common.ch.enums.stable.DocumentLanguage
   projectFolder: husky-common/husky-common-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=&id=2.16.756.5.30.1.127.3.10.1.13&effectiveDate=2021-04-01T17%3A03%3A00&format=json
-- className: org.husky.common.ch.enums.stable.AuthorSpeciality
+- className: org.projecthusky.common.ch.enums.stable.AuthorSpeciality
   projectFolder: husky-common/husky-common-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=&id=2.16.756.5.30.1.127.3.10.1.1.4&effectiveDate=2021-04-01T10%3A38%3A06&format=json
-- className: org.husky.common.ch.enums.stable.HcpProfession
+- className: org.projecthusky.common.ch.enums.stable.HcpProfession
   projectFolder: husky-common/husky-common-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=&id=2.16.756.5.30.1.127.3.10.8.1&effectiveDate=2020-04-23T12%3A36%3A23&format=json
-- className: org.husky.common.ch.enums.stable.HcpSpecialisation
+- className: org.projecthusky.common.ch.enums.stable.HcpSpecialisation
   projectFolder: husky-common/husky-common-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=&id=2.16.756.5.30.1.127.3.10.8.2&effectiveDate=2020-05-18T19%3A54%3A17&format=json
-- className: org.husky.common.ch.enums.stable.HcpProfessionSpecialisationMap
+- className: org.projecthusky.common.ch.enums.stable.HcpProfessionSpecialisationMap
   projectFolder: husky-common/husky-common-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=&id=2.16.756.5.30.1.127.3.10.8.3&effectiveDate=2020-05-18T20%3A00%3A07&format=json
 # husky-communication/husky-communication-ch
-- className: org.husky.communication.ch.enums.stable.FormatCode
+- className: org.projecthusky.communication.ch.enums.stable.FormatCode
   projectFolder: husky-communication/husky-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=&id=2.16.756.5.30.1.127.3.10.1.9&effectiveDate=2021-04-01T17%3A06%3A52&format=json
-- className: org.husky.communication.ch.enums.stable.HealthcareFacilityTypeCode
+- className: org.projecthusky.communication.ch.enums.stable.HealthcareFacilityTypeCode
   projectFolder: husky-communication/husky-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=&id=2.16.756.5.30.1.127.3.10.1.11&effectiveDate=2021-04-01T16%3A16%3A46&format=json
-- className: org.husky.communication.ch.enums.stable.MimeType
+- className: org.projecthusky.communication.ch.enums.stable.MimeType
   projectFolder: husky-communication/husky-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=&id=2.16.756.5.30.1.127.3.10.1.16&effectiveDate=2021-04-01T17%3A07%3A34&format=json
-- className: org.husky.communication.ch.enums.stable.PracticeSettingCode
+- className: org.projecthusky.communication.ch.enums.stable.PracticeSettingCode
   projectFolder: husky-communication/husky-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=&id=2.16.756.5.30.1.127.3.10.1.18&effectiveDate=2021-04-01T16%3A19%3A35&format=json
-- className: org.husky.communication.ch.enums.stable.TypeCode
+- className: org.projecthusky.communication.ch.enums.stable.TypeCode
   projectFolder: husky-communication/husky-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=&id=2.16.756.5.30.1.127.3.10.1.27&effectiveDate=2021-04-01T16%3A49%3A20&format=json
-- className: org.husky.communication.ch.enums.stable.SourcePatientInfo
+- className: org.projecthusky.communication.ch.enums.stable.SourcePatientInfo
   projectFolder: husky-communication/husky-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=&id=2.16.840.1.113883.4.642.3.1&effectiveDate=2021-04-01T17%3A04%3A31&format=json
-- className: org.husky.communication.ch.enums.stable.ClassCode
+- className: org.projecthusky.communication.ch.enums.stable.ClassCode
   projectFolder: husky-communication/husky-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=&id=2.16.756.5.30.1.127.3.10.1.3&effectiveDate=2021-04-01T16%3A32%3A17&format=json
-- className: org.husky.communication.ch.enums.stable.ClassTypeCodeMapping
+- className: org.projecthusky.communication.ch.enums.stable.ClassTypeCodeMapping
   projectFolder: husky-communication/husky-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=&id=2.16.756.5.30.1.127.3.10.1.30&effectiveDate=2021-04-01T16%3A58%3A54&format=json
-- className: org.husky.communication.ch.enums.stable.EventCodeList
+- className: org.projecthusky.communication.ch.enums.stable.EventCodeList
   projectFolder: husky-communication/husky-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=&id=2.16.756.5.30.1.127.3.10.1.8&effectiveDate=2021-04-01T17%3A00%3A07&format=json
-- className: org.husky.communication.ch.enums.stable.ContentTypeCode
+- className: org.projecthusky.communication.ch.enums.stable.ContentTypeCode
   projectFolder: husky-communication/husky-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=&id=2.16.756.5.30.1.127.3.10.1.40&effectiveDate=2021-04-01T17%3A08%3A39&format=json
-- className: org.husky.communication.ch.enums.stable.SubmissionSetAuthorRole
+- className: org.projecthusky.communication.ch.enums.stable.SubmissionSetAuthorRole
   projectFolder: husky-communication/husky-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=&id=2.16.756.5.30.1.127.3.10.1.41&effectiveDate=2021-04-01T17%3A12%3A38&format=json
-- className: org.husky.communication.ch.enums.stable.OriginalProviderRole
+- className: org.projecthusky.communication.ch.enums.stable.OriginalProviderRole
   projectFolder: husky-communication/husky-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=&id=2.16.756.5.30.1.127.3.10.1.42&effectiveDate=2021-04-01T17%3A23%3A37&format=json
-- className: org.husky.communication.ch.enums.stable.AgentRole
+- className: org.projecthusky.communication.ch.enums.stable.AgentRole
   projectFolder: husky-communication/husky-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=&id=2.16.756.5.30.1.127.3.10.13.1&effectiveDate=2019-11-03T14%3A34%3A39&format=json
-- className: org.husky.communication.ch.enums.stable.AuditTrailConsumptionEventType
+- className: org.projecthusky.communication.ch.enums.stable.AuditTrailConsumptionEventType
   projectFolder: husky-communication/husky-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=&id=2.16.756.5.30.1.127.3.10.13.2&effectiveDate=2019-12-11T09%3A03%3A36&format=json
-- className: org.husky.communication.ch.enums.stable.Role
+- className: org.projecthusky.communication.ch.enums.stable.Role
   projectFolder: husky-communication/husky-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=&id=2.16.756.5.30.1.127.3.10.15.1&effectiveDate=2019-12-11T17%3A01%3A59&format=json
-- className: org.husky.communication.ch.enums.stable.PurposeOfUse
+- className: org.projecthusky.communication.ch.enums.stable.PurposeOfUse
   projectFolder: husky-communication/husky-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=&id=2.16.756.5.30.1.127.3.10.15.2&effectiveDate=2020-02-26T17%3A24%3A29&format=json
-- className: org.husky.communication.ch.enums.stable.DeletionStatus
+- className: org.projecthusky.communication.ch.enums.stable.DeletionStatus
   projectFolder: husky-communication/husky-communication-ch
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR

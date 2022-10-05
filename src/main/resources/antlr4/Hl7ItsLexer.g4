@@ -19,7 +19,7 @@
 lexer grammar Hl7ItsLexer;
 
 @header {
-package org.husky.codegenerator.cda.antlr;
+package org.projecthusky.codegenerator.cda.antlr;
 }
 
 // Default "mode": Everything OUTSIDE of a tag
