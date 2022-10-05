@@ -2067,16 +2067,16 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
             StringBuilder javadoc = new StringBuilder();
             javadoc.append(cdaTemplate.getName());
-            javadoc.append("\n<p>\n");
+            javadoc.append("\n");
             if (cdaTemplate.getDescription() != null) {
+                javadoc.append("<p>\n");
                 javadoc.append("Template description: ");
                 javadoc.append(JavadocUtils.cleanArtDecorHtml(cdaTemplate.getDescription()));
-                javadoc.append("<br>\n");
             }
             if (cdaElement.getDescription() != null) {
+                javadoc.append("<p>\n");
                 javadoc.append("Element description: ");
                 javadoc.append(JavadocUtils.cleanArtDecorHtml(cdaElement.getDescription()));
-                javadoc.append("<br>\n");
             }
             javadoc.append("<p>\n");
             javadoc.append("Identifier: ");
