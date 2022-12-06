@@ -1,0 +1,11 @@
+description: Swiss FHIR eMed
+status: ACTIVE
+valueSetConfigList:
+  - className: org.projecthusky.fhir.emed.ch.common.enums.SubstanceAdministrationSubstitutionCode
+    projectFolder: husky-fhir/husky-fhir-emed-ch/husky-fhir-emed-ch-common
+    sourceFormatType: JSON
+    sourceSystemType: FHIR
+    sourceUrl: https://terminology.hl7.org/4.0.0/CodeSystem-v3-substanceAdminSubstitution.json
+version:
+  label: 202210
+  validFrom: 2023-04-15T00:00:00+02:00
