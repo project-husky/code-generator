@@ -2866,6 +2866,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                         valueSet = valueSetManager.downloadValueSet(valueSetConfig);
                     } catch (final ParserConfigurationException
                             | SAXException
+                            | IOException
                             | InitializationException e) {
                         LOG.error("valueSet ({}) cannot be downloaded: {}", valueSetId, e.getMessage());
                         throw new RuntimeException("valueSet (" + valueSetId + ") cannot be downloaded: " + e.getMessage());
