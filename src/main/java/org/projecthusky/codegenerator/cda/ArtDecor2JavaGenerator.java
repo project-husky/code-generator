@@ -1365,7 +1365,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                 String enPartU = toUpperFirstChar(name);
                 compilationUnit.addImport("org.projecthusky.common.hl7cdar2.En" + enPartU);
                 body.addStatement("En" + enPartU + " retVal = new En" + enPartU + "();");
-			} else if (cdaElement.getDataType().startsWith("org.husky.common.hl7cdar2.")) {
+			} else if (cdaElement.getDataType().startsWith("org.projecthusky.common.hl7cdar2.")) {
 				method.setType(dataType);
 				compilationUnit.addImport(cdaElement.getDataType());
 				body.addStatement(cdaElement.getDataType() + " retVal = new " + cdaElement.getDataType() + "();");
@@ -3459,7 +3459,7 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                     if (cdaElement.getDataType().endsWith(".ENXP")) {
                         String enPartU = toUpperFirstChar(attrName);
                         body.addStatement("retVal.get" + enPartU + "().add(" + attrName + ");");
-					} else if (cdaElement.getDataType().startsWith("org.husky.common.hl7cdar2.")) {
+					} else if (cdaElement.getDataType().startsWith("org.projecthusky.common.hl7cdar2.")) {
 						if ("classCode".equalsIgnoreCase(attrName) || "typeCode".equalsIgnoreCase(attrName)
 								|| "inversionInd".equalsIgnoreCase(attrName)) {
 
