@@ -1,0 +1,16 @@
+contentProfileConfigList:
+- artDecorBaseUrl: https://art-decor.org/decor/services/
+  artDecorDocTemplateMap:
+    1.2.40.0.34.6.0.11.0.2: '2022-01-25T12:15:38' 
+    1.2.40.0.34.6.0.11.0.4: '2022-01-25T12:13:30'
+  artDecorMainBaseUrl: https://art-decor.org/decor/services/
+  artDecorMainPrefix: elgaimpf-
+  artDecorProjectMap:
+    elgaimpf-: https://art-decor.org/decor/services/
+    at-cda-bbr-: https://art-decor.org/decor/services/
+    elgabbr-: https://art-decor.org/decor/services/
+    ad2bbr-: https://art-decor.org/decor/services/
+    ad1bbr-: https://art-decor.org/decor/services/
+  targetDir: husky/husky-cda/husky-elga
+  targetNamespace: org.projecthusky.cda.elga.generated.artdecor
+description: ELGA e-Impfpass - version of January, 2022
