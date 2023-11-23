@@ -23,22 +23,22 @@
 description: Basic ART-DECOR ValueSets
 status: ACTIVE
 valueSetConfigList:
-- className: org.husky.common.enums.NullFlavor
+- className: org.projecthusky.common.enums.NullFlavor
   projectFolder: husky-common/husky-common-gen
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=cdachlrep-&language=en-US&version=&id=2.16.840.1.113883.1.11.10609&effectiveDate=2014-03-26T00%3A00%3A00&format=json
-- className: org.husky.common.enums.AdministrativeGender
+- className: org.projecthusky.common.enums.AdministrativeGender
   projectFolder: husky-common/husky-common-gen
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=eusht-&language=en-US&version=&id=2.16.840.1.113883.1.11.1&effectiveDate=2014-03-26T00%3A00%3A00&format=json
-- className: org.husky.common.enums.PostalAddressUse
+- className: org.projecthusky.common.enums.PostalAddressUse
   projectFolder: husky-common/husky-common-gen
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR
   sourceUrl: http://art-decor.org/decor/services/RetrieveValueSet?prefix=ccda-&language=en-US&version=&id=2.16.840.1.113883.1.11.10637&effectiveDate=2013-01-31T00%3A00%3A00&format=json
-- className: org.husky.common.enums.EntityNameUse
+- className: org.projecthusky.common.enums.EntityNameUse
   projectFolder: husky-common/husky-common-gen
   sourceFormatType: JSON
   sourceSystemType: ARTDECOR_FHIR

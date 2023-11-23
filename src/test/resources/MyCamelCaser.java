@@ -7,11 +7,11 @@
  * on the basis of the eHealth Connector opensource project from June 28, 2021,
  * whereas medshare GmbH is the initial and main contributor/author of the eHealth Connector.
  */
-package org.husky.codegenerator.cda;
+package org.projecthusky.codegenerator.cda;
 
 import com.sun.xml.bind.v2.*;
 import java.util.Comparator;
-import org.husky.codegenerator.cda.java.JavaCodeGenerator;
+import org.projecthusky.codegenerator.cda.java.JavaCodeGenerator;
 
 /**
  * This is a sample Class

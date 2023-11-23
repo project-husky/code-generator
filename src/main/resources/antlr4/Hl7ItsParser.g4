@@ -20,7 +20,7 @@
 parser grammar Hl7ItsParser;
 
 @header {
-package org.husky.codegenerator.cda.antlr;
+package org.projecthusky.codegenerator.cda.antlr;
 }
 
 options { tokenVocab=Hl7ItsLexer; }
