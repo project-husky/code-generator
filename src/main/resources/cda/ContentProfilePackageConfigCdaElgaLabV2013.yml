@@ -8,5 +8,5 @@ contentProfileConfigList:
     elga-: https://art-decor.org/decor/services/
     elgabbr-: https://art-decor.org/decor/services/
   targetDir: husky/husky-cda/husky-elga
-  targetNamespace: org.husky.cda.elga.generated.artdecor.base
+  targetNamespace: org.projecthusky.cda.elga.generated.artdecor.base
 description: ELGA laboratory report - version of November, 2013

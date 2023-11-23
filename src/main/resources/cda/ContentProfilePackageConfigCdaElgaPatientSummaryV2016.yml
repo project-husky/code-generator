@@ -11,5 +11,5 @@ contentProfileConfigList:
     at-cda-bbr-: https://art-decor.org/decor/services/
     ccd1-: https://art-decor.org/decor/services/
   targetDir: husky/husky-cda/husky-elga
-  targetNamespace: org.husky.cda.elga.generated.artdecor.ps
+  targetNamespace: org.projecthusky.cda.elga.generated.artdecor.ps
 description: ELGA Patient Summary - version of August, 2016

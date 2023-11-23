@@ -12,5 +12,5 @@ contentProfileConfigList:
     ad2bbr-: https://art-decor.org/decor/services/
     ad1bbr-: https://art-decor.org/decor/services/
   targetDir: husky/husky-cda/husky-elga
-  targetNamespace: org.husky.cda.elga.generated.artdecor
+  targetNamespace: org.projecthusky.cda.elga.generated.artdecor
 description: ELGA e-Impfpass - version of January, 2022
