@@ -15,6 +15,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -28,11 +29,13 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicHeader;
 import org.projecthusky.common.utils.xml.XmlFactories;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,56 +57,7 @@ public class ArtDecorRestClient {
      */
     protected static final Logger log = LoggerFactory.getLogger(ArtDecorRestClient.class);
 
-    /**
-     * Downloads the ART-DECOR project index for the given
-     * project prefix.
-     *
-     * @param baseUrl        the base url
-     * @param artDecorPrefix the prefix
-     * @return the ART-DECOR project index
-     * @throws MalformedURLException
-     * @throws IOException           Signals that an I/O exception has occurred.
-     */
-    public static InputStream getArtDecorProjectIndex(final URL baseUrl, final String artDecorPrefix)
-            throws MalformedURLException, IOException {
-        return getArtDecorXml(new URL(
-                baseUrl.toString() + "ProjectIndex?prefix=" + artDecorPrefix + "&format=xml"));
-    }
-
-    /**
-     * Downloads the XML from the given ART-DECOR url.
-     *
-     * @param url the url
-     * @return the ART-DECOR xml
-     * @throws ClientProtocolException the client protocol exception
-     * @throws IOException             Signals that an I/O exception has occurred.
-     */
-    public static InputStream getArtDecorXml(final URL url) throws ClientProtocolException, IOException {
-        InputStream retVal = null;
-
-        // create HTTP Client
-        HttpClient httpClient = HttpClientBuilder.create().build();
-
-        // Create new getRequest with below mentioned URL
-        HttpGet getRequest = new HttpGet(url.toString());
-
-        // Add additional header to getRequest which accepts application/xml
-        // data
-        getRequest.addHeader("accept", "application/xml");
-
-        // Execute your request and catch response
-        HttpResponse response = httpClient.execute(getRequest);
-
-        // Check for HTTP response code: 200 = success
-        if (response.getStatusLine().getStatusCode() != 200) {
-            throw new RuntimeException(
-                    "Failed : HTTP error code : " + response.getStatusLine().getStatusCode());
-        }
-
-        // Get-Capture Complete application/xml body response
-        retVal = response.getEntity().getContent();
-        return retVal;
-    }
+    private final HttpClient httpClient;
 
     /**
      * The base dir.
@@ -134,6 +88,9 @@ public class ArtDecorRestClient {
      */
     public ArtDecorRestClient(final Map<String, String> artDecorProjectMap,
                               String baseDir) {
+        this.httpClient = HttpClientBuilder.create()
+                .setDefaultHeaders(List.of(new BasicHeader(HttpHeaders.USER_AGENT, "Husky/1.0")))
+                .build();
 
         if (baseDir == null)
             throw new RuntimeException(
@@ -171,6 +128,55 @@ public class ArtDecorRestClient {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    /**
+     * Downloads the XML from the given ART-DECOR url.
+     *
+     * @param url the url
+     * @return the ART-DECOR xml
+     * @throws ClientProtocolException the client protocol exception
+     * @throws IOException             Signals that an I/O exception has occurred.
+     */
+    public InputStream getArtDecorXml(final URL url) throws ClientProtocolException, IOException {
+        InputStream retVal = null;
+
+        // Create new getRequest with below mentioned URL
+        HttpGet getRequest = new HttpGet(url.toString());
+
+        // Add additional header to getRequest which accepts application/xml
+        // data
+        getRequest.addHeader("Accept", "application/xml");
+
+        // Execute your request and catch response
+        HttpResponse response = this.httpClient.execute(getRequest);
+
+        // Check for HTTP response code: 200 = success
+        if (response.getStatusLine().getStatusCode() != 200) {
+            throw new RuntimeException(
+                    "Failed : HTTP error code : " + response.getStatusLine().getStatusCode());
+        }
+
+        // Get-Capture Complete application/xml body response
+        retVal = new ByteArrayInputStream(response.getEntity().getContent().readAllBytes());
+        getRequest.releaseConnection();
+        return retVal;
+    }
+
+    /**
+     * Downloads the ART-DECOR project index for the given
+     * project prefix.
+     *
+     * @param baseUrl        the base url
+     * @param artDecorPrefix the prefix
+     * @return the ART-DECOR project index
+     * @throws MalformedURLException
+     * @throws IOException           Signals that an I/O exception has occurred.
+     */
+    public InputStream getArtDecorProjectIndex(final URL baseUrl, final String artDecorPrefix)
+            throws MalformedURLException, IOException {
+        return this.getArtDecorXml(new URL(
+                baseUrl.toString() + "ProjectIndex?prefix=" + artDecorPrefix + "&format=xml"));
     }
 
     /**
@@ -296,7 +302,7 @@ public class ArtDecorRestClient {
             throw new RuntimeException("No ART-DECOR base url found for template " + templateId
                     + " (prefix: " + prefix + "). Please complete the project map.");
         log.debug(prefix + " : " + templateId);
-        return getArtDecorXml(
+        return this.getArtDecorXml(
                 new URL(baseUrl + "RetrieveTemplate?prefix=" + prefix + "&id="
                         + templateId + "&effectiveDate=" + effectiveDate + "&format=xmlnowrapper"));
     }

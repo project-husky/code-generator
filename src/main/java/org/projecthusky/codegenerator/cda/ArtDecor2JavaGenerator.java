@@ -32,6 +32,13 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicHeader;
 import org.projecthusky.codegenerator.cda.antlr.Hl7ItsLexer;
 import org.projecthusky.codegenerator.cda.antlr.Hl7ItsParser;
 import org.projecthusky.codegenerator.cda.antlr.Hl7ItsParserBaseListener;
@@ -42,6 +49,7 @@ import org.projecthusky.codegenerator.cda.model.CdaAttribute;
 import org.projecthusky.codegenerator.cda.model.CdaElement;
 import org.projecthusky.codegenerator.cda.model.CdaTemplate;
 import org.projecthusky.codegenerator.cda.rest.ArtDecorRestClient;
+import org.projecthusky.codegenerator.cda.rest.ValueSetRestClient;
 import org.projecthusky.codegenerator.cda.xslt.Hl7Its2HuskyTransformer;
 import org.projecthusky.codegenerator.java.JavadocUtils;
 import org.projecthusky.codegenerator.java.JavaCodeGenerator;
@@ -54,7 +62,6 @@ import org.projecthusky.valueset.api.ValueSetManager;
 import org.projecthusky.valueset.config.ValueSetConfig;
 import org.projecthusky.valueset.enums.SourceFormatType;
 import org.projecthusky.valueset.enums.SourceSystemType;
-import org.projecthusky.valueset.exceptions.InitializationException;
 import org.projecthusky.valueset.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -210,6 +217,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
      * The value set index (used in the ANTLR4 parser).
      */
     private final Map<String, String> valueSetIndex;
+
+    private final ValueSetRestClient valueSetRestClient = new ValueSetRestClient();
 
     /**
      * <div class="en">Constructor for the ART-DECOR to Java Generator.</div>
@@ -2853,7 +2862,6 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                             throw new RuntimeException(
                                     "flexibility (" + flexibility + ") cannot be URL encoded: " + e.getMessage());
                         }
-                    ValueSetManager valueSetManager = new ValueSetManager();
                     ValueSetConfig valueSetConfig =
                             ValueSetConfig.builder()
                                     .withProjectFolder(this.dstFilePath)
@@ -2863,11 +2871,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                                     .build();
                     ValueSet valueSet = null;
                     try {
-                        valueSet = valueSetManager.downloadValueSet(valueSetConfig);
-                    } catch (final ParserConfigurationException
-                            | SAXException
-                            | IOException
-                            | InitializationException e) {
+                        valueSet = this.valueSetRestClient.fetchValueSet(valueSetConfig);
+                    } catch (final Exception e) {
                         LOG.error("valueSet ({}) cannot be downloaded: {}", valueSetId, e.getMessage());
                         throw new RuntimeException("valueSet (" + valueSetId + ") cannot be downloaded: " + e.getMessage());
                     }

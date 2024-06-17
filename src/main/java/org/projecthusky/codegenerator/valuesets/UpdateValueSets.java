@@ -20,6 +20,7 @@ import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.type.Type;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.projecthusky.codegenerator.cda.rest.ValueSetRestClient;
 import org.projecthusky.codegenerator.java.JavadocUtils;
 import org.projecthusky.codegenerator.java.JavaCodeGenerator;
 import org.projecthusky.common.basetypes.CodeBaseType;
@@ -88,6 +89,8 @@ public class UpdateValueSets {
      * Package name in the template that will be replaced with the actual generated enum name.
      */
     private static final String TEMPLATE_PACKAGE_NAME_TO_REPLACE = "TemplatePackageNameToReplace";
+
+    private final ValueSetRestClient valueSetRestClient = new ValueSetRestClient();
 
     /**
      * Adds all concepts of the value set definition as enum elements to the given enum type.
@@ -212,13 +215,13 @@ public class UpdateValueSets {
             final ValueSetPackageManager valueSetPackageManager = new ValueSetPackageManager();
             final ValueSetPackageConfig valueSetPackageConfig =
                     valueSetPackageManager.loadValueSetPackageConfig(packageConfig.getAbsolutePath());
+            final var valueSetRestClient = new ValueSetRestClient();
 
-            final ValueSetManager valueSetManager = new ValueSetManager();
             for (ValueSetConfig valueSetConfig : valueSetPackageConfig.getValueSetConfigList()) {
                 LOG.debug("Processing enum: {}", valueSetConfig.getClassName());
 
                 LOG.debug("Downloading value set from {}", valueSetConfig.getSourceUrl());
-                final ValueSet valueSet = valueSetManager.downloadValueSet(valueSetConfig);
+                final ValueSet valueSet = valueSetRestClient.fetchValueSet(valueSetConfig);
 
                 LOG.debug("Creating Java class file");
                 final String baseJavaFolder = javaSourceDir.getAbsolutePath() + "/" + valueSetConfig.getProjectFolder();
