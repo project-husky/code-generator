@@ -79,7 +79,7 @@ public class SwissEprCodeGenerator {
             printUsage();
         }
 
-        UpdateValueSets.updateValueSets(javaSourceDir, packageConfig);
+        UpdateValueSets.updateValueSets(javaSourceDir, packageConfig, false);
     }
 
     /**

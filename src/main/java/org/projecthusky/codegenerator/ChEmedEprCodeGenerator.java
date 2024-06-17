@@ -88,7 +88,7 @@ public class CdaChEmedCodeGenerator {
         }
 
         ArtDecor2JavaGenerator.generate(cdaSourceDir, packageConfig);
-        UpdateValueSets.updateValueSets(javaSourceDir, packageConfig2);
+        UpdateValueSets.updateValueSets(javaSourceDir, packageConfig2, true);
     }
 
     /**

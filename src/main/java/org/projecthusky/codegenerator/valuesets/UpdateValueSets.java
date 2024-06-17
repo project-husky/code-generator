@@ -207,7 +207,8 @@ public class UpdateValueSets {
      * @param packageConfig The package config file.
      */
     public static void updateValueSets(final File javaSourceDir,
-                                       final File packageConfig) {
+                                       final File packageConfig,
+                                       final boolean forFhirConsumption) {
         LOG.info("Java source dir: {}", javaSourceDir.getAbsolutePath());
         LOG.info("Package config : {}", packageConfig.getAbsolutePath());
 
@@ -232,6 +233,10 @@ public class UpdateValueSets {
                     Files.delete(getSourceFileName(baseJavaFolder, fullyQualifiedClassName).toPath());
                 }
 
+                if (forFhirConsumption) {
+                    replaceOidsWithSystems(valueSet);
+                }
+
                 // create the class file
                 createEnumClassFromTemplate(baseJavaFolder, fullyQualifiedClassName);
                 updateEnumClass(valueSet.getIdentificator().getRoot(), valueSet.getName(), baseJavaFolder,
@@ -240,6 +245,25 @@ public class UpdateValueSets {
             LOG.info("Processed {} enums.", valueSetPackageConfig.getValueSetConfigList().size());
         } catch (final Exception e) {
             LOG.error("Uncaught exception: ", e);
+        }
+    }
+
+    /**
+     * Replaces OIDs from the IHE world with systems URIs from the FHIR world.
+     */
+    private static void replaceOidsWithSystems(final ValueSet valueSet) {
+        for (final ValueSetEntry entry : valueSet.getValueSetEntryList()) {
+            switch (entry.getCodeBaseType().getCodeSystem()) {
+                case "2.16.840.1.113883.6.8":
+                    entry.getCodeBaseType().setCodeSystem("http://unitsofmeasure.org");
+                    break;
+                case "2.16.840.1.113883.6.96":
+                    entry.getCodeBaseType().setCodeSystem("http://snomed.info/sct");
+                    break;
+                case "2.16.840.1.113883.4.642.4.76":
+                    entry.getCodeBaseType().setCodeSystem("http://fhir.ch/ig/ch-emed/CodeSystem/event-timing");
+                    break;
+            }
         }
     }
 

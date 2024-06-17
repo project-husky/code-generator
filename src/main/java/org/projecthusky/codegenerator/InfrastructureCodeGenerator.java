@@ -77,7 +77,7 @@ public class InfrastructureCodeGenerator {
             printUsage();
         }
 
-        UpdateValueSets.updateValueSets(javaSourceDir, packageConfig);
+        UpdateValueSets.updateValueSets(javaSourceDir, packageConfig, false);
     }
 
     /**

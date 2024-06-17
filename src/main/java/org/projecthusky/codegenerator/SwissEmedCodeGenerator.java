@@ -66,7 +66,7 @@ public class SwissEmedCodeGenerator {
             printUsage();
         }
 
-        UpdateValueSets.updateValueSets(javaSourceDir, packageConfig);
+        UpdateValueSets.updateValueSets(javaSourceDir, packageConfig, true);
     }
 
     /**
