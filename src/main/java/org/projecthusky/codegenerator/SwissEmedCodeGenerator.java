@@ -30,7 +30,7 @@ public class SwissEmedCodeGenerator {
      * @param args Command line arguments. A single value is expected.
      */
     public static void main(final String[] args) {
-        LOG.info("Update CDA-CH-EMED classes and enums");
+        LOG.info("Update CH-EMED-EPR enums");
 
         if (args.length != 1) {
             printUsage();
