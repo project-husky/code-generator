@@ -77,9 +77,14 @@ public class UpdateValueSets {
             .parseClassOrInterfaceType("String");
 
     /**
-     * Relative path where to find the Java template text file.
+     * Relative path where to find the Java template text file for regular enums.
      */
     private static final String TEMPLATE_FILE_LOCATION = "format/template.java.txt";
+
+    /**
+     * Relative path where to find the Java template text file for FHIR enums.
+     */
+    private static final String FHIR_TEMPLATE_FILE_LOCATION = "format/template_fhir.java.txt";
 
     /**
      * Class name in the template that will be replaced with the actual generated enum name.
@@ -89,8 +94,6 @@ public class UpdateValueSets {
      * Package name in the template that will be replaced with the actual generated enum name.
      */
     private static final String TEMPLATE_PACKAGE_NAME_TO_REPLACE = "TemplatePackageNameToReplace";
-
-    private final ValueSetRestClient valueSetRestClient = new ValueSetRestClient();
 
     /**
      * Adds all concepts of the value set definition as enum elements to the given enum type.
@@ -179,14 +182,16 @@ public class UpdateValueSets {
      * @param baseJavaFolder          The base Java source folder (relative to the root of the project hierarchy) where
      *                                the Java package structure begins.
      * @param fullyQualifiedClassName the fully qualified class name
+     * @param forFhirConsumption      Whether the enum is for FHIR consumption.
      * @throws IOException When reading or writing the Java source file fails.
      */
     public static void createEnumClassFromTemplate(final String baseJavaFolder,
-                                                   final String fullyQualifiedClassName) throws IOException {
+                                                   final String fullyQualifiedClassName,
+                                                   final boolean forFhirConsumption) throws IOException {
         final String className = fullyQualifiedClassName.substring(fullyQualifiedClassName.lastIndexOf('.') + 1);
         final String packageName = fullyQualifiedClassName.substring(0, fullyQualifiedClassName.lastIndexOf('.'));
 
-        final String templateString = getTemplate()
+        final String templateString = getTemplate(forFhirConsumption)
                 .replace(TEMPLATE_NAME_TO_REPLACE, className)
                 .replace(TEMPLATE_PACKAGE_NAME_TO_REPLACE, packageName);
 
@@ -203,8 +208,9 @@ public class UpdateValueSets {
     /**
      * The main entry for the value set generator.
      *
-     * @param javaSourceDir The Java source directory.
-     * @param packageConfig The package config file.
+     * @param javaSourceDir      The Java source directory.
+     * @param packageConfig      The package config file.
+     * @param forFhirConsumption Whether the enum is for FHIR consumption.
      */
     public static void updateValueSets(final File javaSourceDir,
                                        final File packageConfig,
@@ -238,9 +244,9 @@ public class UpdateValueSets {
                 }
 
                 // create the class file
-                createEnumClassFromTemplate(baseJavaFolder, fullyQualifiedClassName);
+                createEnumClassFromTemplate(baseJavaFolder, fullyQualifiedClassName, forFhirConsumption);
                 updateEnumClass(valueSet.getIdentificator().getRoot(), valueSet.getName(), baseJavaFolder,
-                        valueSetConfig.getClassName(), valueSet);
+                        valueSetConfig.getClassName(), valueSet, forFhirConsumption);
             }
             LOG.info("Processed {} enums.", valueSetPackageConfig.getValueSetConfigList().size());
         } catch (final Exception e) {
@@ -321,6 +327,7 @@ public class UpdateValueSets {
      *                       package structure begins.
      * @param className      The fully qualified Java class name of the enum to update.
      * @param valueSet       the value set
+     * @param forFhirConsumption Whether the enum is for FHIR consumption.
      * @return the Java class file
      * @throws IOException           When reading or writing the Java source file fails.
      * @throws IllegalStateException If the class does not declare an Enum type.
@@ -330,7 +337,8 @@ public class UpdateValueSets {
                                        final String valueSetName,
                                        final String baseJavaFolder,
                                        final String className,
-                                       final ValueSet valueSet) throws IOException, IllegalStateException {
+                                       final ValueSet valueSet,
+                                       final boolean forFhirConsumption) throws IOException, IllegalStateException {
         final var javaParser = new JavaParser();
         final Optional<CompilationUnit> javaSource = javaParser
                 .parse(getSourceFileName(baseJavaFolder, className)).getResult();
@@ -345,6 +353,9 @@ public class UpdateValueSets {
             // clear content and add all enum elements
             removeEverything(enumType);
             enumType.addImplementedType(ValueSetEnumInterface.class);
+            if (forFhirConsumption) {
+                enumType.addImplementedType("FhirValueSetEnumInterface");
+            }
             enumType.addModifier(publicModifier().getKeyword());
             addEnumElements(enumType, valueSet);
 
@@ -367,7 +378,7 @@ public class UpdateValueSets {
             enumType.setJavadocComment(javadoc.toString());
 
             // add all members from template file
-            final String templateString = getTemplate()
+            final String templateString = getTemplate(forFhirConsumption)
                     .replace(TEMPLATE_NAME_TO_REPLACE, enumType.getNameAsString());
             final Optional<CompilationUnit> templateSource = javaParser.parse(templateString).getResult();
             if (templateSource.isEmpty()) {
@@ -424,9 +435,19 @@ public class UpdateValueSets {
     /**
      * Returns the enum template file content.
      *
+     * @param forFhirConsumption Whether the enum is for FHIR consumption.
      * @throws IOException if the file is not readable.
      */
-    private static String getTemplate() throws IOException {
+    private static String getTemplate(final boolean forFhirConsumption) throws IOException {
+        if (forFhirConsumption) {
+            return IOUtils.toString(
+                    Objects.requireNonNull(
+                            UpdateValueSets.class.getClassLoader().getResourceAsStream(FHIR_TEMPLATE_FILE_LOCATION),
+                            "The template file is not found in " + FHIR_TEMPLATE_FILE_LOCATION
+                    ),
+                    StandardCharsets.UTF_8
+            );
+        }
         return IOUtils.toString(
                 Objects.requireNonNull(
                         UpdateValueSets.class.getClassLoader().getResourceAsStream(TEMPLATE_FILE_LOCATION),

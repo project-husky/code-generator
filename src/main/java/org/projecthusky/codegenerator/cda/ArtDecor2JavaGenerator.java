@@ -2892,13 +2892,15 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
 
                             // create the class file
                             try {
-                                UpdateValueSets.createEnumClassFromTemplate(baseJavaFolder, fullyQualifiedclassName);
+                                UpdateValueSets.createEnumClassFromTemplate(baseJavaFolder, fullyQualifiedclassName,
+                                                                            false);
                                 UpdateValueSets.updateEnumClass(
                                         valueSet.getIdentificator().getRoot(),
                                         valueSet.getName(),
                                         baseJavaFolder,
                                         valueSetConfig.getClassName(),
-                                        valueSet);
+                                        valueSet,
+                                        false);
                             } catch (IOException e) {
                                 throw new RuntimeException(
                                         "valueSet ("
