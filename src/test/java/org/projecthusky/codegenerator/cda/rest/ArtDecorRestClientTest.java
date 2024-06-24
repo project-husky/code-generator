@@ -39,9 +39,15 @@ public class ArtDecorRestClientTest {
 	// test annotation enabled!
 	// @Test
 	public void projectIndexTest() throws ClientProtocolException, IOException {
+		String dir = Util.getTempDirectory() + "/test/";
+
+		HashMap<String, String> artDecorProjectMap = new HashMap<String, String>();
+		artDecorProjectMap.put("cdachlrep-", "https://art-decor.org/decor/services/");
+
+		ArtDecorRestClient artDecorRestClient = new ArtDecorRestClient(artDecorProjectMap, dir);
 
 		String content = "";
-		InputStream is = ArtDecorRestClient.getArtDecorProjectIndex(
+		InputStream is = artDecorRestClient.getArtDecorProjectIndex(
 				new URL("https://art-decor.org/decor/services/"), "cdachlrep-");
 		content = IOUtils.toString(is, StandardCharsets.UTF_8);
 
