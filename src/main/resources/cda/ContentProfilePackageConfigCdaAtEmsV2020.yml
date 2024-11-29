@@ -1,0 +1,14 @@
+contentProfileConfigList:
+- artDecorBaseUrl: https://art-decor.org/decor/services/
+  artDecorDocTemplateMap:
+    1.2.40.0.34.11.6.0.1: '2020-02-25T14:46:58' 
+    1.2.40.0.34.11.6.0.2: '2020-02-20T08:35:37'
+  artDecorMainBaseUrl: https://art-decor.org/decor/services/
+  artDecorMainPrefix: epims-
+  artDecorProjectMap:
+    epims-: https://art-decor.org/decor/services/
+    at-cda-bbr-: https://art-decor.org/decor/services/
+    elgabbr-: https://art-decor.org/decor/services/
+  targetDir: husky/husky-cda/husky-elga
+  targetNamespace: org.projecthusky.cda.elga.generated.artdecor.ems
+description: Epidemiologisches Meldesystem - version of February, 2020
