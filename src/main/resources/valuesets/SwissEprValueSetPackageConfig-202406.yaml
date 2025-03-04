@@ -63,7 +63,7 @@ valueSetConfigList:
     projectFolder: husky-communication/husky-communication-ch
     sourceFormatType: JSON
     sourceSystemType: ARTDECOR_FHIR
-    sourceUrl: https://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2024-06-21T09%3A57%3A19&id=2.16.756.5.30.1.127.3.10.1.9&effectiveDate=2022-11-30T14%3A44%3A24&format=json
+    sourceUrl: https://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2024-11-20T10%3A22%3A12&id=2.16.756.5.30.1.127.3.10.1.9&effectiveDate=2024-11-19T16%3A26%3A40&format=json
   - className: org.projecthusky.communication.ch.enums.r202406.HealthcareFacilityTypeCode
     projectFolder: husky-communication/husky-communication-ch
     sourceFormatType: JSON
@@ -145,5 +145,5 @@ valueSetConfigList:
     sourceSystemType: ARTDECOR_FHIR
     sourceUrl: https://art-decor.org/decor/services/RetrieveValueSet?prefix=ch-epr-&language=en-US&version=2024-06-21T09%3A57%3A19&id=2.16.756.5.30.1.127.3.10.15.3&effectiveDate=2023-05-31T20%3A04%3A28&format=json
 version:
-  label: 202406.00-stable
-  validFrom: 2024-06-07T00:00:00+02:00
+  label: 202406.02-stable
+  validFrom: 2024-11-20T10:22:12
