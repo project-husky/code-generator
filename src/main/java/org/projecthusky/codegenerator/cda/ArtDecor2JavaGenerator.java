@@ -2753,8 +2753,11 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
         String id = null;
 
         Hl7ItsParser.IdAttrContext idAttrCtx = ctx.idAttr();
+        Hl7ItsParser.RefAttrContext refAttrCtx = ctx.refAttr();
         if (idAttrCtx != null) {
             id = idAttrCtx.AttrValue().getText().replace("\"", "");
+        } else if (refAttrCtx != null) {
+            id =  refAttrCtx.AttrValue().getText().replace("\"", "");
         }
 
         Hl7ItsParser.NameAttrContext nameAttrCtx = ctx.nameAttr();
@@ -2894,6 +2897,8 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                 if (!skipValueSetGeneration && !valueSetIndex.containsKey(valueSetId)) {
                     LOG.debug("- downloading ValueSet {}...", valueSetId);
 
+// https://art-decor.org/decor/services/RetrieveValueSet?id=1.2.40.0.34.10.10&effectiveDate=2022-12-02T10:15:03&prefix=elgaimpf-&version=2025-10-24T13:19:12&format=json&language=*&ui=en-US
+// https://art-decor.org/decor/services/RetrieveValueSet?prefix=elgaimpf-&id=1.2.40.0.34.10.10&format=json
                     String sourceUrl =
                             artDecorBaseUrl.toString()
                                     + "RetrieveValueSet?prefix="
@@ -2910,6 +2915,19 @@ public class ArtDecor2JavaGenerator extends Hl7ItsParserBaseListener {
                             throw new RuntimeException(
                                     "flexibility (" + flexibility + ") cannot be URL encoded: " + e.getMessage());
                         }
+
+                    // alle mit prefix elgaimp- bekommen &version=2025-10-24T13:19:12 dazu!!!
+
+//                    if (valueSetId.equals("1.2.40.0.34.10.10")) {
+//                        sourceUrl += "&version=2025-10-24T13:19:12";
+//                    } else if (valueSetId.equals("1.2.40.0.34.6.0.10.8")) {
+//                        sourceUrl += "&version=2025-10-24T13:19:12";
+//                    } else if (valueSetId.equals("1.2.40.0.34.10.4")) {
+//                        sourceUrl += "&version=2025-10-24T13:19:12";
+//                    }
+                    if (artDecorPrefix.equals("elgaimpf-")) {
+                        sourceUrl += "&version=2025-10-24T13:19:12";
+                    }
                     ValueSetManager valueSetManager = new ValueSetManager();
                     ValueSetConfig valueSetConfig =
                             ValueSetConfig.builder()

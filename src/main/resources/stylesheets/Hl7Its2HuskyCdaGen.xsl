@@ -34,14 +34,14 @@ History:
 		<xsl:copy-of select="." />
 	</xsl:template>
 
-	<xsl:template match="element()" priority="-1">
-		<xsl:copy>
-			<xsl:apply-templates select="@*[not(@style)]">
-				<xsl:sort select="name()"/>
-			</xsl:apply-templates>
-			<xsl:apply-templates/>
-		</xsl:copy>
-	</xsl:template>
+<xsl:template match="element()[not(self::li|self::p|self::ul|self::desc|self::b|self::strong)]" priority="-1">
+    <xsl:copy>
+        <xsl:apply-templates select="@*[not(@style)]">
+            <xsl:sort select="name()"/>
+        </xsl:apply-templates>
+        <xsl:apply-templates/>
+    </xsl:copy>
+</xsl:template>
 	
 	<xsl:template match="@*|comment()|processing-instruction()">
 		<xsl:copy/>
@@ -62,13 +62,14 @@ History:
 	This is preparation for Javadoc, only.
 	****************************************************************************
 	-->
-	<xsl:template match="desc">
-		<xsl:if test="@language='en-US' and node()">
-			<desc>
-				<xsl:apply-templates select="@*|node()" />
-			</desc>
-		</xsl:if>
-	</xsl:template>
+<xsl:template match="desc">
+    <xsl:if test="@language='en-US' and node()">
+        <desc>
+            <xsl:apply-templates select="@*" />
+            <xsl:apply-templates select="node()" />
+        </desc>
+    </xsl:if>
+</xsl:template>
 
 	<xsl:template match="b">
 		<strong>
@@ -77,17 +78,19 @@ History:
 	</xsl:template>
 
 	<xsl:template match="p">
-		<xsl:apply-templates select="@*|node()" />
+		<xsl:apply-templates select="@*" />
+		<xsl:apply-templates select="node()" />
 		<br />
 	</xsl:template>
 
-	<xsl:template match="li">
-		- <xsl:apply-templates select="@*|node()" />
-		<br />
-	</xsl:template>
-	<xsl:template match="ul">
-		<xsl:apply-templates select="@*|node()" />
-	</xsl:template>
+<xsl:template match="li">
+    <xsl:text>&#10;- </xsl:text> <xsl:apply-templates select="node()"/>
+    <br />
+</xsl:template>
+<xsl:template match="ul">
+    <xsl:apply-templates select="@*" />
+    <xsl:apply-templates select="node()" />
+</xsl:template>
 
 
 	<xsl:template match="*/text()[normalize-space()]">
@@ -96,4 +99,5 @@ History:
 
 	<xsl:template match="*/text()[not(normalize-space())]" />
 
+<xsl:template match="@*[contains(local-name(), 'dummy')]" />
 </xsl:stylesheet>
