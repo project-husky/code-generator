@@ -28,13 +28,15 @@ History:
 	may overwrite this default behavior.
 	****************************************************************************
 	-->
+	<xsl:template match="@style" />
+	
 	<xsl:template match="@*|node()[./node()]" priority="-2">
 		<xsl:copy-of select="." />
 	</xsl:template>
 
 	<xsl:template match="element()" priority="-1">
 		<xsl:copy>
-			<xsl:apply-templates select="@*">
+			<xsl:apply-templates select="@*[not(@style)]">
 				<xsl:sort select="name()"/>
 			</xsl:apply-templates>
 			<xsl:apply-templates/>
@@ -42,7 +44,7 @@ History:
 	</xsl:template>
 	
 	<xsl:template match="@*|comment()|processing-instruction()">
-		<xsl:copy />
+		<xsl:copy/>
 	</xsl:template>
 
 	<!--

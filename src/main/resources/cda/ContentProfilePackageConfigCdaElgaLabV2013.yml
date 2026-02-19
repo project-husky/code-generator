@@ -1,0 +1,12 @@
+contentProfileConfigList:
+- artDecorBaseUrl: https://art-decor.org/decor/services/
+  artDecorDocTemplateMap:
+    1.2.40.0.34.11.10003: '2013-11-07T00:00:00'
+  artDecorMainBaseUrl: https://art-decor.org/decor/services/
+  artDecorMainPrefix: elga-
+  artDecorProjectMap:
+    elga-: https://art-decor.org/decor/services/
+    elgabbr-: https://art-decor.org/decor/services/
+  targetDir: husky/husky-cda/husky-elga
+  targetNamespace: org.projecthusky.cda.elga.generated.artdecor.base
+description: ELGA laboratory report - version of November, 2013

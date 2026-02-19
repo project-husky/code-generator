@@ -9,7 +9,10 @@
  */
 package org.projecthusky.codegenerator.cda.rest;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -304,7 +307,7 @@ public class ArtDecorRestClient {
         log.debug(prefix + " : " + templateId);
         return this.getArtDecorXml(
                 new URL(baseUrl + "RetrieveTemplate?prefix=" + prefix + "&id="
-                        + templateId + "&effectiveDate=" + effectiveDate + "&format=xmlnowrapper"));
+						+ templateId + "&effectiveDate=" + effectiveDate + "&format=xmlnowrapper"));
     }
 
     /**
